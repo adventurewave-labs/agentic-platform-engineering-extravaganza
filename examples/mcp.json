@@ -1,0 +1,44 @@
+{
+  "//": [
+    "Northwind platform MCP server — drop-in config for any MCP client.",
+    "",
+    "The identity you connect as decides which tools you receive. Try each of",
+    "the four and watch tools/list change:",
+    "",
+    "  platform-agent   12 of 14 tools — can propose, cannot approve",
+    "  drift-agent       5 of 14 tools — read-mostly, no cluster mutation at all",
+    "  cost-reviewer     3 of 14 tools — strictly read-only",
+    "  release-manager  14 of 14 tools — a human in the owning group",
+    "",
+    "Same server, same code path, different world. The filter runs before the",
+    "model sees the list, so an agent cannot be talked into a tool it does not",
+    "have; the capability is absent, not forbidden.",
+    "",
+    "CLI equivalents:",
+    "  claude mcp add northwind -- python3 src/platform_mcp.py",
+    "  claude mcp add --transport http northwind http://127.0.0.1:8099/mcp"
+  ],
+
+  "mcpServers": {
+    "northwind-platform": {
+      "command": "python3",
+      "args": ["src/platform_mcp.py"],
+      "env": {
+        "NORTHWIND_IDENTITY": "platform-agent"
+      }
+    },
+
+    "northwind-platform-readonly": {
+      "command": "python3",
+      "args": ["src/platform_mcp.py"],
+      "env": {
+        "NORTHWIND_IDENTITY": "cost-reviewer"
+      }
+    },
+
+    "northwind-platform-http": {
+      "type": "http",
+      "url": "http://127.0.0.1:8099/mcp"
+    }
+  }
+}
