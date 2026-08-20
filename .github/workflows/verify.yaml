@@ -87,3 +87,20 @@ jobs:
             exit 1
           fi
           echo "the playground data still matches the policy bundle"
+
+      # build_site.py refuses to render when the English in the template and the
+      # English recorded in site/i18n.es.json disagree, so this step is also the
+      # check that the two languages still make the same claims.
+      - name: The two languages still say the same thing
+        run: |
+          # index.html embeds the acceptance timings, and the verify step above
+          # just rewrote them with this runner's wall clock. Restore the committed
+          # report first so the only thing this step can fail on is real drift.
+          git checkout -- outputs/verify-report.json
+          python3 src/build_site.py
+          if ! git diff --quiet -- index.html; then
+            echo "::error::index.html is stale against its template. Run 'make site-build'."
+            git --no-pager diff --stat -- index.html
+            exit 1
+          fi
+          echo "en + es agree, and index.html is current"
