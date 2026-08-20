@@ -1,0 +1,110 @@
+{
+  "service": "payments-ledger",
+  "totalMonthlyCostUsd": 580.8,
+  "environments": {
+    "staging": {
+      "service": "payments-ledger",
+      "environment": "staging",
+      "costCenter": "CC-4471",
+      "monthlyBudgetUsd": 400.0,
+      "totalMonthlyCostUsd": 221.65,
+      "previousMonthlyCostUsd": 0.0,
+      "currency": "USD",
+      "resources": [
+        {
+          "name": "payments-ledger-compute",
+          "type": "kubernetes_workload",
+          "monthlyCostUsd": 32.85,
+          "params": {
+            "replicas": 2,
+            "cpu": "500m",
+            "memory": "512Mi",
+            "costCenter": "CC-4471"
+          }
+        },
+        {
+          "name": "payments-ledger-postgres",
+          "type": "platform_sqlinstance",
+          "monthlyCostUsd": 167.0,
+          "params": {
+            "instanceClass": "db.t4g.medium",
+            "storageGb": 500,
+            "backupRetentionDays": 30,
+            "multiAz": false,
+            "region": "eu-west-1",
+            "costCenter": "CC-4471"
+          }
+        },
+        {
+          "name": "payments-ledger-ingress",
+          "type": "load_balancer",
+          "monthlyCostUsd": 18.5,
+          "params": {
+            "costCenter": "CC-4471"
+          }
+        },
+        {
+          "name": "payments-ledger-observability",
+          "type": "log_ingestion",
+          "monthlyCostUsd": 3.3,
+          "params": {
+            "estimatedGb": 6.0,
+            "costCenter": "CC-4471"
+          }
+        }
+      ]
+    },
+    "prod": {
+      "service": "payments-ledger",
+      "environment": "prod",
+      "costCenter": "CC-4471",
+      "monthlyBudgetUsd": 400.0,
+      "totalMonthlyCostUsd": 359.15,
+      "previousMonthlyCostUsd": 0.0,
+      "currency": "USD",
+      "resources": [
+        {
+          "name": "payments-ledger-compute",
+          "type": "kubernetes_workload",
+          "monthlyCostUsd": 98.55,
+          "params": {
+            "replicas": 6,
+            "cpu": "500m",
+            "memory": "512Mi",
+            "costCenter": "CC-4471"
+          }
+        },
+        {
+          "name": "payments-ledger-postgres",
+          "type": "platform_sqlinstance",
+          "monthlyCostUsd": 219.0,
+          "params": {
+            "instanceClass": "db.t4g.medium",
+            "storageGb": 500,
+            "backupRetentionDays": 30,
+            "multiAz": true,
+            "region": "eu-west-1",
+            "costCenter": "CC-4471"
+          }
+        },
+        {
+          "name": "payments-ledger-ingress",
+          "type": "load_balancer",
+          "monthlyCostUsd": 18.5,
+          "params": {
+            "costCenter": "CC-4471"
+          }
+        },
+        {
+          "name": "payments-ledger-observability",
+          "type": "log_ingestion",
+          "monthlyCostUsd": 23.1,
+          "params": {
+            "estimatedGb": 42.0,
+            "costCenter": "CC-4471"
+          }
+        }
+      ]
+    }
+  }
+}

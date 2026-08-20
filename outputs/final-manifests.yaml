@@ -1,0 +1,322 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: payments-ledger
+  labels:
+    app.kubernetes.io/name: payments-ledger
+    app.kubernetes.io/part-of: payments-platform
+    app.kubernetes.io/managed-by: northwind-platform
+    backstage.io/component: payments-ledger
+    northwind.io/owner: payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+  namespace: payments-prod
+automountServiceAccountToken: false
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payments-ledger-default-deny
+  labels:
+    app.kubernetes.io/name: payments-ledger
+    app.kubernetes.io/part-of: payments-platform
+    app.kubernetes.io/managed-by: northwind-platform
+    backstage.io/component: payments-ledger
+    northwind.io/owner: payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+  namespace: payments-prod
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: payments-ledger
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          northwind.io/tier: edge
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: payments-platform
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          northwind.io/tier: data
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: payments-ledger
+  labels:
+    app.kubernetes.io/name: payments-ledger
+    app.kubernetes.io/part-of: payments-platform
+    app.kubernetes.io/managed-by: northwind-platform
+    backstage.io/component: payments-ledger
+    northwind.io/owner: payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+  namespace: payments-prod
+spec:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payments-ledger
+---
+apiVersion: platform.northwind.io/v1alpha1
+kind: SQLInstance
+metadata:
+  annotations:
+    k8s.score.dev/resource-guid: 6b7dbc6f-1b90-faba-e51d-03539eacd311
+    k8s.score.dev/resource-uid: postgres.default#payments-ledger.db
+    k8s.score.dev/source-workload: payments-ledger
+    northwind.io/provisioner: template://northwind/postgres-crossplane
+  labels:
+    app.kubernetes.io/managed-by: northwind-platform
+    app.kubernetes.io/name: payments-ledger
+    backstage.io/component: payments-ledger
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/data-residency: eu
+    northwind.io/environment: prod
+    northwind.io/owner: payments
+    app.kubernetes.io/part-of: payments-platform
+  name: nw-payments-ledger-prod
+  namespace: payments-prod
+spec:
+  crossplane:
+    compositionRef:
+      name: sqlinstance.postgres.northwind.io
+  parameters:
+    backupRetentionDays: 30
+    costCenter: CC-4471
+    databaseName: payments_ledger
+    engine: postgres
+    engineVersion: '17.4'
+    instanceClass: db.t4g.medium
+    masterUsername: nw_payments_ledger
+    multiAz: true
+    passwordSecretRef:
+      key: password
+      name: nw-db-6b7dbc6f-1b90-faba-e51d-03539eacd311
+    publiclyAccessible: false
+    region: eu-west-1
+    storageEncrypted: true
+    storageGb: 500
+---
+apiVersion: v1
+data:
+  password: UExBQ0VIT0xERVItaXNzdWVkLWJ5LXZhdWx0LWF0LXN5bmM=
+kind: Secret
+metadata:
+  annotations:
+    k8s.score.dev/resource-guid: 6b7dbc6f-1b90-faba-e51d-03539eacd311
+    k8s.score.dev/resource-uid: postgres.default#payments-ledger.db
+    k8s.score.dev/source-workload: payments-ledger
+    northwind.io/rotate-every: 90d
+    northwind.io/secret-source: placeholder; replace this template block with an ExternalSecret
+      pointing at your secret manager
+  labels:
+    app.kubernetes.io/managed-by: northwind-platform
+    northwind.io/data-classification: pci
+    app.kubernetes.io/name: payments-ledger
+    app.kubernetes.io/part-of: payments-platform
+    backstage.io/component: payments-ledger
+    northwind.io/owner: payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+  name: nw-db-6b7dbc6f-1b90-faba-e51d-03539eacd311
+  namespace: payments-prod
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    k8s.score.dev/workload-name: payments-ledger
+  labels:
+    app.kubernetes.io/instance: payments-ledger-42871fb5b4
+    app.kubernetes.io/managed-by: northwind-platform
+    app.kubernetes.io/name: payments-ledger
+    app.kubernetes.io/part-of: payments-platform
+    backstage.io/component: payments-ledger
+    northwind.io/owner: payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+  name: payments-ledger
+  namespace: payments-prod
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/instance: payments-ledger-42871fb5b4
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    k8s.score.dev/workload-name: payments-ledger
+    northwind.io/network-policy: payments-ledger-default-deny
+    northwind.io/golden-path: golden-path-service-postgres
+    argocd.argoproj.io/sync-wave: '1'
+  labels:
+    app.kubernetes.io/instance: payments-ledger-42871fb5b4
+    app.kubernetes.io/managed-by: northwind-platform
+    app.kubernetes.io/name: payments-ledger
+    app.kubernetes.io/part-of: payments-platform
+    backstage.io/component: payments-ledger
+    northwind.io/owner: payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+  name: payments-ledger
+  namespace: payments-prod
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: payments-ledger-42871fb5b4
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        k8s.score.dev/workload-name: payments-ledger
+        northwind.io/cost-center: CC-4471
+        northwind.io/data-classification: pci
+        northwind.io/data-residency: eu
+        northwind.io/environment: prod
+        northwind.io/owner: group:default/payments
+        northwind.io/audit-sink: loki://platform/payments
+      labels:
+        app.kubernetes.io/instance: payments-ledger-42871fb5b4
+        app.kubernetes.io/managed-by: northwind-platform
+        app.kubernetes.io/name: payments-ledger
+        app.kubernetes.io/part-of: payments-platform
+        backstage.io/component: payments-ledger
+        northwind.io/owner: payments
+        northwind.io/cost-center: CC-4471
+        northwind.io/data-classification: pci
+        northwind.io/environment: prod
+        northwind.io/data-residency: eu
+    spec:
+      containers:
+      - env:
+        - name: DB_HOST
+          value: nw-payments-ledger-prod.db.northwind.internal
+        - name: DB_NAME
+          value: payments_ledger
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: nw-db-6b7dbc6f-1b90-faba-e51d-03539eacd311
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_USER
+          value: nw_payments_ledger
+        - name: ENVIRONMENT
+          value: prod
+        - name: PORT
+          value: '8080'
+        image: ghcr.io/northwind-retail/payments-ledger:1.0.0
+        name: app
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          privileged: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+      automountServiceAccountToken: false
+      serviceAccountName: payments-ledger
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: payments-ledger
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: payments-ledger
+  replicas: 6
+status: {}

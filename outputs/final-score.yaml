@@ -1,0 +1,51 @@
+apiVersion: score.dev/v1b1
+metadata:
+  name: payments-ledger
+  annotations:
+    northwind.io/owner: group:default/payments
+    northwind.io/cost-center: CC-4471
+    northwind.io/data-classification: pci
+    northwind.io/environment: prod
+    northwind.io/data-residency: eu
+containers:
+  app:
+    image: ghcr.io/northwind-retail/payments-ledger:1.0.0
+    variables:
+      PORT: '8080'
+      ENVIRONMENT: prod
+      DB_HOST: ${resources.db.host}
+      DB_PORT: ${resources.db.port}
+      DB_NAME: ${resources.db.name}
+      DB_USER: ${resources.db.username}
+      DB_PASSWORD: ${resources.db.password}
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+service:
+  ports:
+    http:
+      port: 8080
+      targetPort: 8080
+resources:
+  db:
+    type: postgres
+    params:
+      instanceClass: db.t4g.medium
+      storageGb: 500
+      region: eu-west-1
+      encrypted: true
+      backupRetentionDays: 30
+      multiAz: true
+      classification: pci
+      residency: eu
+      costCenter: CC-4471
+      owner: group:default/payments
+      environment: prod
+  route:
+    type: dns
+    params:
+      environment: prod

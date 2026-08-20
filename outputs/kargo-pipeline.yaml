@@ -1,0 +1,95 @@
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: payments-ledger
+  namespace: payments
+spec:
+  subscriptions:
+  - image:
+      repoURL: ghcr.io/northwind-retail/payments-ledger
+      imageSelectionStrategy: SemVer
+      discoveryLimit: 5
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: payments-ledger-staging
+  namespace: payments
+spec:
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: payments-ledger
+    sources:
+      direct: true
+  promotionTemplate:
+    spec:
+      steps:
+      - uses: git-clone
+        config:
+          repoURL: https://github.com/northwind-retail/payments-ledger.git
+          checkout:
+          - branch: main
+            path: ./src
+      - uses: kustomize-set-image
+        config:
+          path: ./src/deploy/staging
+          images:
+          - image: ghcr.io/northwind-retail/payments-ledger
+      - uses: git-commit
+        config:
+          path: ./src
+          message: promote to staging
+      - uses: git-push
+        config:
+          path: ./src
+      - uses: argocd-update
+        config:
+          apps:
+          - name: payments-ledger-staging
+            sources:
+            - repoURL: https://github.com/northwind-retail/payments-ledger.git
+              desiredCommitFromStep: commit
+  verification:
+    analysisTemplates:
+    - name: northwind-slo-gate
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: payments-ledger-prod
+  namespace: payments
+  annotations:
+    kargo.akuity.io/authorized-stage: payments:payments-ledger-staging
+    northwind.io/requires-human-approval: 'true'
+spec:
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: payments-ledger
+    sources:
+      stages:
+      - payments-ledger-staging
+  promotionTemplate:
+    spec:
+      steps:
+      - uses: git-clone
+        config:
+          repoURL: https://github.com/northwind-retail/payments-ledger.git
+          checkout:
+          - branch: main
+            path: ./src
+      - uses: kustomize-set-image
+        config:
+          path: ./src/deploy/prod
+          images:
+          - image: ghcr.io/northwind-retail/payments-ledger
+      - uses: git-open-pr
+        config:
+          repoURL: https://github.com/northwind-retail/payments-ledger.git
+          sourceBranch: kargo/promote-payments-ledger-prod
+          targetBranch: main
+  verification:
+    analysisTemplates:
+    - name: northwind-slo-gate

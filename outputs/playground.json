@@ -1,0 +1,1374 @@
+{
+  "request": "service called payments-ledger PCI EU high volume postgres staging and prod",
+  "stages": [
+    {
+      "key": "raw",
+      "label": "What the model handed back",
+      "detail": "No platform. A plausible, runnable, non-compliant Deployment.",
+      "denyCount": 42,
+      "byPolicy": {
+        "KL-latest-tag": 2,
+        "KL-no-read-only-root-fs": 2,
+        "KL-run-as-non-root": 2,
+        "KL-unset-cpu-requirements": 2,
+        "KL-unset-memory-requirements": 2,
+        "NW-K8S-001": 2,
+        "NW-K8S-002": 6,
+        "NW-K8S-003": 10,
+        "NW-K8S-004": 6,
+        "NW-K8S-005": 4,
+        "NW-K8S-006": 2,
+        "NW-K8S-008": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": image \"payments-ledger:latest\" is not immutably pinned",
+          "fix": "pin to a semver tag or @sha256 digest in score.yaml containers.payments-ledger.image"
+        },
+        {
+          "id": "NW-K8S-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": image \"postgres:latest\" is not immutably pinned",
+          "fix": "pin to a semver tag or @sha256 digest in score.yaml containers.postgres.image"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no CPU limit",
+          "fix": "set containers.payments-ledger.resources.limits.cpu in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no memory limit",
+          "fix": "set containers.payments-ledger.resources.limits.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no memory request",
+          "fix": "set containers.payments-ledger.resources.requests.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no CPU limit",
+          "fix": "set containers.postgres.resources.limits.cpu in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no memory limit",
+          "fix": "set containers.postgres.resources.limits.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no memory request",
+          "fix": "set containers.postgres.resources.requests.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"app.kubernetes.io/name\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"backstage.io/component\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"northwind.io/cost-center\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"northwind.io/data-classification\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"northwind.io/owner\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"app.kubernetes.io/name\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"backstage.io/component\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"northwind.io/cost-center\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"northwind.io/data-classification\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"northwind.io/owner\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-008",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": image \"payments-ledger:latest\" is not from an approved registry",
+          "fix": "build via the golden-path CI workflow, which publishes to ghcr.io/northwind-retail"
+        },
+        {
+          "id": "NW-K8S-008",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": image \"postgres:latest\" is not from an approved registry",
+          "fix": "build via the golden-path CI workflow, which publishes to ghcr.io/northwind-retail"
+        },
+        {
+          "id": "KL-latest-tag",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: The container \"payments-ledger\" is using an invalid container image, \"payments-ledger:latest\". Please use images that are not blocked by the `BlockList` criteria : [\".*:(latest)$\" \"^[^:]*$\" \"(.*/[^:]+)$\"]",
+          "fix": ""
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-cpu-requirements",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-memory-requirements",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-latest-tag",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: The container \"postgres\" is using an invalid container image, \"postgres:latest\". Please use images that are not blocked by the `BlockList` criteria : [\".*:(latest)$\" \"^[^:]*$\" \"(.*/[^:]+)$\"]",
+          "fix": ""
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-cpu-requirements",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-memory-requirements",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0",
+          "fix": ""
+        }
+      ]
+    },
+    {
+      "key": "registry",
+      "label": "Pin the image, use the approved registry",
+      "detail": "NW-K8S-001, NW-K8S-008 \u2014 immutable tag from ghcr.io/northwind-retail.",
+      "denyCount": 36,
+      "byPolicy": {
+        "KL-no-read-only-root-fs": 2,
+        "KL-run-as-non-root": 2,
+        "KL-unset-cpu-requirements": 2,
+        "KL-unset-memory-requirements": 2,
+        "NW-K8S-002": 6,
+        "NW-K8S-003": 10,
+        "NW-K8S-004": 6,
+        "NW-K8S-005": 4,
+        "NW-K8S-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no CPU limit",
+          "fix": "set containers.payments-ledger.resources.limits.cpu in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no memory limit",
+          "fix": "set containers.payments-ledger.resources.limits.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no memory request",
+          "fix": "set containers.payments-ledger.resources.requests.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no CPU limit",
+          "fix": "set containers.postgres.resources.limits.cpu in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no memory limit",
+          "fix": "set containers.postgres.resources.limits.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no memory request",
+          "fix": "set containers.postgres.resources.requests.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"app.kubernetes.io/name\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"backstage.io/component\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"northwind.io/cost-center\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"northwind.io/data-classification\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: missing required label \"northwind.io/owner\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"app.kubernetes.io/name\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"backstage.io/component\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"northwind.io/cost-center\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"northwind.io/data-classification\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-003",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: missing required label \"northwind.io/owner\"",
+          "fix": "the golden-path scaffolder injects this from catalog-info.yaml; re-run scaffolder.execute with the owning Group set"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-cpu-requirements",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-memory-requirements",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-cpu-requirements",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-memory-requirements",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0",
+          "fix": ""
+        }
+      ]
+    },
+    {
+      "key": "labels",
+      "label": "Attach ownership and cost attribution",
+      "detail": "NW-K8S-003 \u2014 who owns this, which cost centre pays, what classification.",
+      "denyCount": 33,
+      "byPolicy": {
+        "KL-no-read-only-root-fs": 2,
+        "KL-run-as-non-root": 2,
+        "KL-unset-cpu-requirements": 2,
+        "KL-unset-memory-requirements": 2,
+        "NW-K8S-002": 6,
+        "NW-K8S-004": 6,
+        "NW-K8S-005": 4,
+        "NW-K8S-006": 2,
+        "NW-K8S-007": 1,
+        "NW-PCI-001": 2,
+        "NW-PCI-005": 2,
+        "NW-PCI-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no CPU limit",
+          "fix": "set containers.payments-ledger.resources.limits.cpu in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no memory limit",
+          "fix": "set containers.payments-ledger.resources.limits.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no memory request",
+          "fix": "set containers.payments-ledger.resources.requests.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no CPU limit",
+          "fix": "set containers.postgres.resources.limits.cpu in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no memory limit",
+          "fix": "set containers.postgres.resources.limits.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-002",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no memory request",
+          "fix": "set containers.postgres.resources.requests.memory in score.yaml"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-007",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: prod workload has fewer than 2 replicas",
+          "fix": "a single replica cannot survive a node drain; set replicas>=2"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-cpu-requirements",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-memory-requirements",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-cpu-requirements",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0",
+          "fix": ""
+        },
+        {
+          "id": "KL-unset-memory-requirements",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0",
+          "fix": ""
+        }
+      ]
+    },
+    {
+      "key": "resources",
+      "label": "Declare a resource envelope",
+      "detail": "NW-K8S-002 \u2014 requests and limits on every container.",
+      "denyCount": 23,
+      "byPolicy": {
+        "KL-no-read-only-root-fs": 2,
+        "KL-run-as-non-root": 2,
+        "NW-K8S-004": 6,
+        "NW-K8S-005": 4,
+        "NW-K8S-006": 2,
+        "NW-K8S-007": 1,
+        "NW-PCI-001": 2,
+        "NW-PCI-005": 2,
+        "NW-PCI-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities",
+          "fix": "set securityContext.capabilities.drop=[\"ALL\"]"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem",
+          "fix": "set readOnlyRootFilesystem=true and mount an emptyDir for scratch"
+        },
+        {
+          "id": "NW-K8S-004",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: pod may run as root",
+          "fix": "set securityContext.runAsNonRoot=true (golden-path default; someone overrode it)"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-007",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: prod workload has fewer than 2 replicas",
+          "fix": "a single replica cannot survive a node drain; set replicas>=2"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot",
+          "fix": ""
+        },
+        {
+          "id": "KL-no-read-only-root-fs",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system",
+          "fix": ""
+        },
+        {
+          "id": "KL-run-as-non-root",
+          "tool": "kube-linter",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot",
+          "fix": ""
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Harden the pod security context",
+      "detail": "NW-K8S-004 \u2014 non-root, no privilege escalation, read-only rootfs, drop ALL.",
+      "denyCount": 13,
+      "byPolicy": {
+        "NW-K8S-005": 4,
+        "NW-K8S-006": 2,
+        "NW-K8S-007": 1,
+        "NW-PCI-001": 2,
+        "NW-PCI-005": 2,
+        "NW-PCI-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe",
+          "fix": "add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe",
+          "fix": "Argo Rollouts cannot verify a canary without one; add a probe on the service port"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-007",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: prod workload has fewer than 2 replicas",
+          "fix": "a single replica cannot survive a node drain; set replicas>=2"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        }
+      ]
+    },
+    {
+      "key": "probes",
+      "label": "Add health probes",
+      "detail": "NW-K8S-005 \u2014 without these, Argo Rollouts cannot verify a canary.",
+      "denyCount": 9,
+      "byPolicy": {
+        "NW-K8S-006": 2,
+        "NW-K8S-007": 1,
+        "NW-PCI-001": 2,
+        "NW-PCI-005": 2,
+        "NW-PCI-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger container \"payments-ledger\"",
+          "message": "Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db container \"postgres\"",
+          "message": "StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential",
+          "fix": "reference it via resources.<name> in score.yaml so the platform injects a secretKeyRef"
+        },
+        {
+          "id": "NW-K8S-007",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: prod workload has fewer than 2 replicas",
+          "fix": "a single replica cannot survive a node drain; set replicas>=2"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        }
+      ]
+    },
+    {
+      "key": "secrets",
+      "label": "Move credentials to a Secret reference",
+      "detail": "NW-K8S-006 \u2014 no literal passwords in the pod spec.",
+      "denyCount": 7,
+      "byPolicy": {
+        "NW-K8S-007": 1,
+        "NW-PCI-001": 2,
+        "NW-PCI-005": 2,
+        "NW-PCI-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-K8S-007",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: prod workload has fewer than 2 replicas",
+          "fix": "a single replica cannot survive a node drain; set replicas>=2"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        }
+      ]
+    },
+    {
+      "key": "availability",
+      "label": "Meet the production availability floor",
+      "detail": "NW-K8S-007 \u2014 more than one replica, spread across zones.",
+      "denyCount": 7,
+      "byPolicy": {
+        "KL-no-anti-affinity": 1,
+        "NW-PCI-001": 2,
+        "NW-PCI-005": 2,
+        "NW-PCI-006": 2
+      },
+      "findings": [
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-001",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy",
+          "fix": "emit a default-deny NetworkPolicy plus explicit egress to the database and set annotation northwind.io/network-policy"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-005",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: no audit sink configured",
+          "fix": "set pod annotation northwind.io/audit-sink (the golden path wires this to the platform's Loki tenant)"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "NW-PCI-006",
+          "tool": "conftest",
+          "subject": "StatefulSet/payments-ledger-db",
+          "message": "StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod",
+          "fix": "set spec.template.spec.automountServiceAccountToken=false"
+        },
+        {
+          "id": "KL-no-anti-affinity",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: object has 3 replicas but does not specify inter pod anti-affinity",
+          "fix": ""
+        }
+      ]
+    },
+    {
+      "key": "pci",
+      "label": "Apply the PCI control set",
+      "detail": "NW-PCI-001/005/006 \u2014 default-deny NetworkPolicy, audit sink, no SA token.",
+      "denyCount": 1,
+      "byPolicy": {
+        "KL-no-anti-affinity": 1
+      },
+      "findings": [
+        {
+          "id": "KL-no-anti-affinity",
+          "tool": "kube-linter",
+          "subject": "Deployment/payments-ledger",
+          "message": "Deployment/payments-ledger: object has 3 replicas but does not specify inter pod anti-affinity",
+          "fix": ""
+        }
+      ]
+    }
+  ],
+  "goldenPath": {
+    "denyCount": 0,
+    "iterations": 3,
+    "manifestKinds": [
+      "Deployment",
+      "NetworkPolicy",
+      "PodDisruptionBudget",
+      "SQLInstance",
+      "Secret",
+      "Service",
+      "ServiceAccount"
+    ],
+    "objectCount": 7,
+    "monthlyCostUsd": 359.15
+  },
+  "toolVersions": {
+    "conftest": "Conftest: 0.69.0",
+    "kube-linter": "0.8.3",
+    "score-k8s": "score-k8s 0.16.0 (go1.26.4 - linux/amd64)"
+  }
+}

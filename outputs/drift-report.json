@@ -1,0 +1,59 @@
+{
+  "service": "payments-ledger",
+  "environment": "prod",
+  "observed": true,
+  "syncStatus": "OutOfSync",
+  "lastReconciled": "2026-07-23T11:04:19Z",
+  "driftCount": 4,
+  "highestSeverity": "critical",
+  "drift": [
+    {
+      "field": "backupRetentionDays",
+      "desired": 30,
+      "observed": 7,
+      "severity": "critical",
+      "changedBy": "terraform-legacy-pipeline",
+      "changedAt": "2026-08-02T19:41:02Z",
+      "via": "out-of-band Terraform apply from the pre-platform pipeline",
+      "impact": "PCI backup floor breached; 23 days of recovery window silently lost",
+      "remediation": "restore spec.parameters.backupRetentionDays to 30 on the SQLInstance",
+      "policyId": "NW-PCI-003"
+    },
+    {
+      "field": "networkPolicy",
+      "desired": "payments-ledger-default-deny",
+      "observed": null,
+      "severity": "critical",
+      "changedBy": "unknown",
+      "changedAt": "unknown (first absent in the 2026-08-05 sweep)",
+      "via": "namespace was recreated without reapplying the policy",
+      "impact": "PCI workload has been reachable from every namespace in the cluster for 15 days",
+      "remediation": "reapply the default-deny NetworkPolicy from deploy/prod/manifests.yaml",
+      "policyId": "NW-PCI-001"
+    },
+    {
+      "field": "replicas",
+      "desired": 6,
+      "observed": 18,
+      "severity": "high",
+      "changedBy": "k.mensah",
+      "changedAt": "2026-07-29T02:14:33Z",
+      "via": "kubectl scale --replicas=18 (direct, out of band)",
+      "impact": "12 unplanned replicas at $16.43/mo each \u2014 $197/mo, never reconciled back",
+      "remediation": "set spec.replicas back to 6 in deploy/prod, or raise the desired count in git if 18 is genuinely correct now",
+      "policyId": "NW-FIN-001"
+    },
+    {
+      "field": "automountServiceAccountToken",
+      "desired": false,
+      "observed": true,
+      "severity": "high",
+      "changedBy": "unknown",
+      "changedAt": "unknown",
+      "via": "namespace recreation restored the default",
+      "impact": "service-account token is mounted into a PCI pod",
+      "remediation": "set spec.template.spec.automountServiceAccountToken=false",
+      "policyId": "NW-PCI-006"
+    }
+  ]
+}

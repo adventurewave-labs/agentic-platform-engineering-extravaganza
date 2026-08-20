@@ -1,0 +1,57 @@
+{
+  "ticketDays": 11.0,
+  "handoffsBefore": 6,
+  "vibeDenyCount": 42,
+  "vibeByPolicy": {
+    "KL-latest-tag": 2,
+    "KL-no-read-only-root-fs": 2,
+    "KL-run-as-non-root": 2,
+    "KL-unset-cpu-requirements": 2,
+    "KL-unset-memory-requirements": 2,
+    "NW-K8S-001": 2,
+    "NW-K8S-002": 6,
+    "NW-K8S-003": 10,
+    "NW-K8S-004": 6,
+    "NW-K8S-005": 4,
+    "NW-K8S-006": 2,
+    "NW-K8S-008": 2
+  },
+  "goldenPathIterations": 3,
+  "costBefore": 960.82,
+  "costAfter": 359.15,
+  "driftFields": 4,
+  "agentClusterMutations": 0,
+  "objectCount": 7,
+  "toolVersions": {
+    "conftest": "Conftest: 0.69.0",
+    "score-k8s": "score-k8s 0.16.0 (go1.26.4 - linux/amd64)",
+    "kube-linter": "0.8.3"
+  },
+  "finalRequest": {
+    "classification": "pci",
+    "cost_center": "CC-4471",
+    "cpu": "500m",
+    "cpu_request": "100m",
+    "database": true,
+    "db_backup_retention_days": 30,
+    "db_encrypted": true,
+    "db_instance_class": "db.t4g.medium",
+    "db_multi_az": true,
+    "db_region": "eu-west-1",
+    "db_storage_gb": 500,
+    "description": "We need a new service called payments-ledger for storing card settlement records. It is PCI scope, EU data residency, high volume at peak, needs a Postgres database, staging and prod.",
+    "environments": [
+      "staging",
+      "prod"
+    ],
+    "image_tag": "1.0.0",
+    "memory": "512Mi",
+    "memory_request": "256Mi",
+    "monthly_budget_usd": 400.0,
+    "name": "payments-ledger",
+    "owner": "group:default/payments",
+    "port": 8080,
+    "replicas": 6,
+    "residency": "eu"
+  }
+}
