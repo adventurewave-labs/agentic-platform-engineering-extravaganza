@@ -1,0 +1,56 @@
+# Restore the executable bit on the shell entry points.
+#
+# Git tracks a file's exec bit, but plenty of paths into a repository do not
+# carry it: a zip download, a Windows clone with core.filemode off, or a file
+# added through GitHub's web upload — which is how this repository was first
+# populated. The result is a clone where `./run.sh` fails with "permission
+# denied", which is a confusing first impression for something whose whole
+# pitch is that it runs cleanly.
+#
+# This runs once, fixes the mode in git, and then does nothing forever after.
+
+name: permissions
+
+on:
+  push:
+    paths:
+      - "run.sh"
+      - "bin/setup.sh"
+      - ".devcontainer/post-create.sh"
+      - ".github/workflows/permissions.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  chmod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set the executable bit where it belongs
+        run: |
+          set -euo pipefail
+          changed=0
+          for f in run.sh bin/setup.sh .devcontainer/post-create.sh; do
+            [ -f "$f" ] || continue
+            mode="$(git ls-files --stage -- "$f" | awk '{print $1}')"
+            if [ "$mode" != "100755" ]; then
+              echo "fixing $f (was $mode)"
+              git update-index --chmod=+x -- "$f"
+              changed=1
+            else
+              echo "$f already executable"
+            fi
+          done
+          if [ "$changed" = "0" ]; then
+            echo "nothing to do"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: restore the executable bit on the shell entry points"
+          git push
