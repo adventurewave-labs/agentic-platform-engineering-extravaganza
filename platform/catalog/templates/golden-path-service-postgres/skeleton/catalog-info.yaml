@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.name }}
+  description: ${{ values.description }}
+  tags:
+    - ${{ values.dataClassification }}
+    - golden-path
+  annotations:
+    northwind.io/data-classification: ${{ values.dataClassification }}
+    northwind.io/data-residency: ${{ values.dataResidency }}
+    northwind.io/cost-center: ${{ values.costCenter }}
+    northwind.io/golden-path: golden-path-service-postgres
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: experimental
+  owner: ${{ values.owner }}
+  system: payments-platform

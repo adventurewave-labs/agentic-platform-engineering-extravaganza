@@ -1,0 +1,52 @@
+# ${{ values.name }} — the entire platform contract.
+#
+# This is the only infrastructure file a product engineer at Northwind opens.
+# What a "postgres" resource actually becomes is decided by the platform team
+# in platform/northwind.provisioners.yaml, not here — which is why this file
+# stays this short even though the rendered result is seven Kubernetes objects
+# and a Crossplane composite.
+apiVersion: score.dev/v1b1
+
+metadata:
+  name: ${{ values.name }}
+  annotations:
+    northwind.io/owner: ${{ values.owner }}
+    northwind.io/cost-center: ${{ values.costCenter }}
+    northwind.io/data-classification: ${{ values.dataClassification }}
+    northwind.io/data-residency: ${{ values.dataResidency }}
+
+containers:
+  app:
+    image: ghcr.io/northwind-retail/${{ values.name }}:0.1.0
+    variables:
+      PORT: "8080"
+      DB_HOST: ${resources.db.host}
+      DB_PORT: ${resources.db.port}
+      DB_NAME: ${resources.db.name}
+      DB_USER: ${resources.db.username}
+      DB_PASSWORD: ${resources.db.password}
+    resources:
+      limits:
+        cpu: ${{ values.cpu }}
+        memory: ${{ values.memory }}
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+service:
+  ports:
+    http:
+      port: 8080
+      targetPort: 8080
+
+resources:
+  db:
+    type: postgres
+    params:
+      storageGb: ${{ values.dbStorageGb }}
+      classification: ${{ values.dataClassification }}
+      residency: ${{ values.dataResidency }}
+      costCenter: ${{ values.costCenter }}
+      owner: ${{ values.owner }}
+  route:
+    type: dns
