@@ -107,6 +107,14 @@ Other entry points:
 make help                      # everything, with descriptions
 ```
 
+The showcase page reads in English and Spanish — the switch is in the nav, it follows
+`navigator.language` on a first visit, and it remembers your choice. Terminal output,
+YAML and shell commands stay in the original on purpose: those are verbatim
+`conftest`, `score-k8s` and `kube-linter` output, and translating them would be the
+one fabricated thing on a page that argues nothing here is fabricated. `make site-build`
+refuses to render when the English and `site/i18n.es.json` have drifted apart, so the
+two languages cannot end up making different claims.
+
 Or with Docker:
 
 ```bash
@@ -489,6 +497,7 @@ iteration count, the cost before and after, and the rendered object count).
 .
 ├── index.html                          the showcase page (single file, no build step)
 ├── site/index.template.html            its source; regenerate with `make site-build`
+├── site/i18n.es.json                   the Spanish half of the page, and the drift guard
 │
 ├── policy/                             ← the part worth stealing first
 │   ├── kubernetes/workload.rego        NW-K8S-001..008

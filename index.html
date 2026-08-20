@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agentic Platform Engineering Extravaganza</title>
-<meta name="description" content="A working, end-to-end demonstration of agentic platform engineering on entirely free and open-source tooling. 42 real policy violations without a platform; 0 with one. Every verdict from a real OPA evaluation.">
+<title data-i18n="t001">Agentic Platform Engineering Extravaganza</title>
+<meta id="metaDesc" name="description" content="A working, end-to-end demonstration of agentic platform engineering on entirely free and open-source tooling. 42 real policy violations without a platform; 0 with one. Every verdict from a real OPA evaluation.">
 <meta property="og:title" content="Agentic Platform Engineering, in production.">
 <meta property="og:description" content="42 real policy violations without a platform. 0 with one. Golden path + Score + Crossplane + OPA + an authz-gated MCP server. Nothing mocked.">
 <meta property="og:type" content="website">
@@ -50,11 +50,21 @@ nav .brand i{color:var(--violet);font-style:normal}
 .navlinks::-webkit-scrollbar{display:none}
 .navlinks a{font-size:13px;color:var(--muted);white-space:nowrap}
 .navlinks a:hover{color:var(--text);text-decoration:none}
-.navbtns{display:flex;gap:8px}
+.navbtns{display:flex;gap:8px;align-items:center}
+.langsw{display:flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden;
+  background:var(--panel)}
+.langsw button{font:600 11.5px/1 var(--mono);letter-spacing:.08em;color:var(--dim);
+  background:transparent;border:0;padding:7px 9px;cursor:pointer}
+.langsw button:hover{color:var(--text)}
+.langsw button[aria-pressed="true"]{color:var(--bg);background:var(--violet)}
 .ghbtn{font-size:12.5px;border:1px solid var(--line2);border-radius:7px;padding:6px 12px;
   color:var(--text);background:var(--panel);white-space:nowrap}
 .ghbtn:hover{border-color:var(--violet);text-decoration:none}
 @media(max-width:820px){.navlinks{display:none}}
+/* The nav row now carries a language switch too. Below this width the
+   Codespaces button is redundant -- the hero CTA is three lines down. */
+@media(max-width:620px){.navbtns .ghbtn:first-of-type{display:none}}
+@media(max-width:400px){nav .brand{font-size:12px}.langsw button{padding:7px}}
 
 .hero{padding:82px 0 56px}
 .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
@@ -193,18 +203,24 @@ footer a{color:var(--muted)}
 <nav><div class="wrap">
   <div class="brand">&#11041; agentic<i>&#183;</i>platform<i>&#183;</i>engineering</div>
   <div class="navlinks">
-    <a href="#demo">Demo</a>
-    <a href="#architecture">Architecture</a>
-    <a href="#policy">Policy gate</a>
-    <a href="#authz">Authorization</a>
-    <a href="#render">Render</a>
-    <a href="#daytwo">Day 2</a>
-    <a href="#components">Components</a>
-    <a href="#verify">Test results</a>
-    <a href="#quickstart">Quickstart</a>
-    <a href="#real">Reproducibility</a>
+    <a data-i18n="t002" href="#demo">Demo</a>
+    <a data-i18n="t003" href="#architecture">Architecture</a>
+    <a data-i18n="t004" href="#policy">Policy gate</a>
+    <a data-i18n="t005" href="#authz">Authorization</a>
+    <a data-i18n="t006" href="#render">Render</a>
+    <a data-i18n="t007" href="#daytwo">Day 2</a>
+    <a data-i18n="t008" href="#components">Components</a>
+    <a data-i18n="t009" href="#verify">Test results</a>
+    <a data-i18n="t010" href="#quickstart">Quickstart</a>
+    <a data-i18n="t011" href="#real">Reproducibility</a>
   </div>
   <div class="navbtns">
+    <!-- The page ships in two languages. Terminal output is deliberately not one
+         of the things that changes -- see site/i18n.es.json for why. -->
+    <div class="langsw" role="group" aria-label="Language / Idioma">
+      <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+      <button type="button" data-lang="es" aria-pressed="false" lang="es">ES</button>
+    </div>
     <a class="ghbtn" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Codespaces</a>
     <a class="ghbtn" href="https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza">GitHub &#8599;</a>
   </div>
@@ -212,14 +228,14 @@ footer a{color:var(--muted)}
 
 <header class="hero"><div class="wrap">
   <div class="tags">
-    <span class="tag on">Real OPA</span>
-    <span class="tag on">Real score-k8s</span>
-    <span class="tag on">Real MCP 2025-06-18</span>
-    <span class="tag v">100% open source</span>
-    <span class="tag">No cluster &#183; No API key</span>
+    <span data-i18n="t012" class="tag on">Real OPA</span>
+    <span data-i18n="t013" class="tag on">Real score-k8s</span>
+    <span data-i18n="t014" class="tag on">Real MCP 2025-06-18</span>
+    <span data-i18n="t015" class="tag v">100% open source</span>
+    <span data-i18n="t016" class="tag">No cluster &#183; No API key</span>
   </div>
-  <h1>Agentic platform engineering, <span class="g">with the platform still in charge</span>.</h1>
-  <p class="lede">
+  <h1 data-i18n="t017">Agentic platform engineering, <span class="g">with the platform still in charge</span>.</h1>
+  <p data-i18n="t018" class="lede">
     A working, end-to-end demonstration built entirely on free, open-source tooling. One request &mdash;
     <em>"a PCI-scope payments service with a Postgres database, EU residency, staging and prod"</em> &mdash;
     routed two ways. Without a platform, a capable model returns Kubernetes manifests that apply
@@ -228,24 +244,24 @@ footer a{color:var(--muted)}
     production approval.
   </p>
   <div class="cta">
-    <a class="btn p" href="#demo">Watch the demo &rarr;</a>
-    <a class="btn" href="#policy">Try the policy gate</a>
-    <a class="btn" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Open in Codespaces</a>
+    <a data-i18n="t019" class="btn p" href="#demo">Watch the demo &rarr;</a>
+    <a data-i18n="t020" class="btn" href="#policy">Try the policy gate</a>
+    <a data-i18n="t021" class="btn" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Open in Codespaces</a>
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="n red">42</div><div class="k">policy violations with no platform in the way</div></div>
-    <div class="stat"><div class="n green">0</div><div class="k">after the golden path, in 3 real iterations</div></div>
-    <div class="stat"><div class="n amber">11 d</div><div class="k">the ticket trail this replaces, across 6 teams</div></div>
-    <div class="stat"><div class="n violet">$602</div><div class="k">per month the FinOps gate caught, on one service</div></div>
-    <div class="stat"><div class="n cyan">0</div><div class="k">cluster mutations any agent is able to perform</div></div>
+    <div class="stat"><div class="n red">42</div><div data-i18n="t022" class="k">policy violations with no platform in the way</div></div>
+    <div class="stat"><div class="n green">0</div><div data-i18n="t023" class="k">after the golden path, in 3 real iterations</div></div>
+    <div class="stat"><div class="n amber">11 d</div><div data-i18n="t024" class="k">the ticket trail this replaces, across 6 teams</div></div>
+    <div class="stat"><div class="n violet">$602</div><div data-i18n="t025" class="k">per month the FinOps gate caught, on one service</div></div>
+    <div class="stat"><div class="n cyan">0</div><div data-i18n="t026" class="k">cluster mutations any agent is able to perform</div></div>
   </div>
 </div></header>
 
 <section id="demo"><div class="wrap">
-  <div class="kicker">90-second cinematic demo</div>
-  <h2>One request, eight acts, nothing pre-recorded.</h2>
-  <p class="sub">
+  <div data-i18n="t027" class="kicker">90-second cinematic demo</div>
+  <h2 data-i18n="t028">One request, eight acts, nothing pre-recorded.</h2>
+  <p data-i18n="t029" class="sub">
     Every policy verdict below came from running the real <code>conftest</code> binary against the
     real Rego in <code>policy/</code>. Every manifest came from the real <code>score-k8s</code>
     binary and the provisioner set in <code>platform/</code>. Run it twice and the numbers are
@@ -254,42 +270,42 @@ footer a{color:var(--muted)}
 
   <figure>
     <img src="gifs/highlight.gif" alt="Terminal recording: 42 policy violations without a platform, converging to zero through the golden path" loading="lazy">
-    <figcaption>Acts II, III, V, VII and the scorecard. The full eight-act run is
+    <figcaption data-i18n="t030">Acts II, III, V, VII and the scorecard. The full eight-act run is
       <a href="gifs/wow.gif">gifs/wow.gif</a>; every cast is in <code>recordings/</code>.</figcaption>
   </figure>
 
   <div class="cards">
-    <div class="card amber"><div class="no">ACT I</div><h3>The ticket trail</h3>
-      <p>One sentence becomes six tickets across six teams. Eleven working days, about four hours
+    <div class="card amber"><div class="no">ACT I</div><h3 data-i18n="t031">The ticket trail</h3>
+      <p data-i18n="t032">One sentence becomes six tickets across six teams. Eleven working days, about four hours
       of which is work. The rest is queue.</p></div>
-    <div class="card amber"><div class="no">ACT II</div><h3>Skip the platform</h3>
-      <p>A capable model writes the YAML from the prompt. It parses, it applies, it would pass a
+    <div class="card amber"><div class="no">ACT II</div><h3 data-i18n="t033">Skip the platform</h3>
+      <p data-i18n="t034">A capable model writes the YAML from the prompt. It parses, it applies, it would pass a
       distracted review. Conftest and kube-linter return 42 denials.</p></div>
-    <div class="card"><div class="no">ACT III</div><h3>The platform API</h3>
-      <p>The agent connects over MCP as a principal and receives 12 of 14 tools. The two it does
+    <div class="card"><div class="no">ACT III</div><h3 data-i18n="t035">The platform API</h3>
+      <p data-i18n="t036">The agent connects over MCP as a principal and receives 12 of 14 tools. The two it does
       not receive are the entire point.</p></div>
-    <div class="card cyan"><div class="no">ACT IV</div><h3>Render</h3>
-      <p>Three lines of Score become a Crossplane composite with encryption, a private endpoint,
+    <div class="card cyan"><div class="no">ACT IV</div><h3 data-i18n="t037">Render</h3>
+      <p data-i18n="t038">Three lines of Score become a Crossplane composite with encryption, a private endpoint,
       sized backups and a cost-centre tag.</p></div>
-    <div class="card pink"><div class="no">ACT V</div><h3>The gate, and the loop</h3>
-      <p>Real OPA denials, each carrying its own remediation. The agent changes the inputs,
+    <div class="card pink"><div class="no">ACT V</div><h3 data-i18n="t039">The gate, and the loop</h3>
+      <p data-i18n="t040">Real OPA denials, each carrying its own remediation. The agent changes the inputs,
       re-renders, re-evaluates. Zero in three iterations.</p></div>
-    <div class="card green"><div class="no">ACT VI</div><h3>Money is policy</h3>
-      <p>$960.82/mo against a $400 envelope. The gate reduced capacity &mdash; never the 30-day PCI
+    <div class="card green"><div class="no">ACT VI</div><h3 data-i18n="t041">Money is policy</h3>
+      <p data-i18n="t042">$960.82/mo against a $400 envelope. The gate reduced capacity &mdash; never the 30-day PCI
       backup window.</p></div>
-    <div class="card"><div class="no">ACT VII</div><h3>Propose, then stop</h3>
-      <p>The agent opens a PR carrying the policy verdict and cost delta, then tries to approve its
+    <div class="card"><div class="no">ACT VII</div><h3 data-i18n="t043">Propose, then stop</h3>
+      <p data-i18n="t044">The agent opens a PR carrying the policy verdict and cost delta, then tries to approve its
       own production promotion. The platform declines.</p></div>
-    <div class="card red"><div class="no">ACT VIII</div><h3>Day two</h3>
-      <p>18 replicas where git says 6. The PCI backup window silently cut. The NetworkPolicy gone
+    <div class="card red"><div class="no">ACT VIII</div><h3 data-i18n="t045">Day two</h3>
+      <p data-i18n="t046">18 replicas where git says 6. The PCI backup window silently cut. The NetworkPolicy gone
       for fifteen days. Attributed, and proposed as a diff.</p></div>
   </div>
 </div></section>
 
 <section id="architecture"><div class="wrap">
-  <div class="kicker">The stack</div>
-  <h2>Intent in, auditable pull request out.</h2>
-  <p class="sub">
+  <div data-i18n="t047" class="kicker">The stack</div>
+  <h2 data-i18n="t048">Intent in, auditable pull request out.</h2>
+  <p data-i18n="t049" class="sub">
     Two front doors onto one golden path: a portal for humans, MCP for agents, the same
     authorization policy behind both. Every box is a real open-source project or a file in this
     repository &mdash; nothing is a placeholder.
@@ -314,41 +330,41 @@ footer a{color:var(--muted)}
         .lnd{stroke:#3d4560;stroke-width:1.4;fill:none;stroke-dasharray:4 4;marker-end:url(#ar)}
       </style>
     </defs>
-    <text x="20" y="26" class="lb">INTENT</text>
+    <text data-i18n="t050" x="20" y="26" class="lb">INTENT</text>
     <rect x="20" y="38" width="150" height="60" class="bx"/>
-    <text x="34" y="62" class="t">Developer</text>
-    <text x="34" y="80" class="st">"a PCI service&#8230;"</text>
+    <text data-i18n="t051" x="34" y="62" class="t">Developer</text>
+    <text data-i18n="t052" x="34" y="80" class="st">"a PCI service&#8230;"</text>
     <rect x="20" y="118" width="150" height="60" class="bx"/>
-    <text x="34" y="142" class="t">Agent</text>
-    <text x="34" y="160" class="st">MCP client</text>
+    <text data-i18n="t053" x="34" y="142" class="t">Agent</text>
+    <text data-i18n="t054" x="34" y="160" class="st">MCP client</text>
     <path class="ln" d="M172,68 L215,68 L215,140 L245,140"/>
     <path class="ln" d="M172,148 L245,148"/>
 
-    <text x="250" y="26" class="lb">PLATFORM API</text>
+    <text data-i18n="t055" x="250" y="26" class="lb">PLATFORM API</text>
     <rect x="248" y="38" width="192" height="230" rx="10" fill="#0c0e14" stroke="url(#gv)" stroke-width="1.4"/>
-    <text x="264" y="62" class="t">Northwind control plane</text>
+    <text data-i18n="t056" x="264" y="62" class="t">Northwind control plane</text>
     <text x="264" y="80" class="st">src/platform_mcp.py</text>
     <rect x="264" y="92" width="160" height="40" class="bx2"/>
-    <text x="276" y="110" class="t" style="font-size:12px">Software catalog</text>
-    <text x="276" y="125" class="st">Backstage-shaped</text>
+    <text data-i18n="t057" x="276" y="110" class="t" style="font-size:12px">Software catalog</text>
+    <text data-i18n="t058" x="276" y="125" class="st">Backstage-shaped</text>
     <rect x="264" y="140" width="160" height="40" class="bx2"/>
-    <text x="276" y="158" class="t" style="font-size:12px">Golden-path scaffolder</text>
-    <text x="276" y="173" class="st">Software Template</text>
+    <text data-i18n="t059" x="276" y="158" class="t" style="font-size:12px">Golden-path scaffolder</text>
+    <text data-i18n="t060" x="276" y="173" class="st">Software Template</text>
     <rect x="264" y="188" width="160" height="44" class="bx2"/>
-    <text x="276" y="206" class="t" style="font-size:12px">Authorization</text>
-    <text x="276" y="221" class="st">12 actions &#183; filtered</text>
+    <text data-i18n="t061" x="276" y="206" class="t" style="font-size:12px">Authorization</text>
+    <text data-i18n="t062" x="276" y="221" class="st">12 actions &#183; filtered</text>
     <text x="264" y="252" class="st" style="fill:#4ade80">MCP 2025-06-18 &#183; stdio + HTTP</text>
     <path class="ln" d="M442,152 L500,152"/>
 
-    <text x="505" y="26" class="lb">RENDER</text>
+    <text data-i18n="t063" x="505" y="26" class="lb">RENDER</text>
     <rect x="503" y="38" width="196" height="106" class="bx"/>
-    <text x="518" y="62" class="t">Score workload spec</text>
+    <text data-i18n="t064" x="518" y="62" class="t">Score workload spec</text>
     <text x="518" y="80" class="st">score.dev/v1b1</text>
     <text x="518" y="100" class="st" style="fill:#2dd4bf">score-k8s generate</text>
-    <text x="518" y="118" class="st">+ northwind provisioner set</text>
-    <text x="518" y="134" class="st">+ platform defaults</text>
+    <text data-i18n="t065" x="518" y="118" class="st">+ northwind provisioner set</text>
+    <text data-i18n="t066" x="518" y="134" class="st">+ platform defaults</text>
     <rect x="503" y="158" width="196" height="110" class="bx"/>
-    <text x="518" y="182" class="t">Rendered objects</text>
+    <text data-i18n="t067" x="518" y="182" class="t">Rendered objects</text>
     <text x="518" y="200" class="st" style="fill:#a78bfa">SQLInstance (Crossplane)</text>
     <text x="518" y="216" class="st">Deployment &#183; Service</text>
     <text x="518" y="232" class="st">NetworkPolicy &#183; PDB</text>
@@ -356,38 +372,38 @@ footer a{color:var(--muted)}
     <path class="ln" d="M591,146 L591,156"/>
     <path class="ln" d="M701,212 L738,212"/>
 
-    <text x="744" y="26" class="lb">GATES</text>
+    <text data-i18n="t068" x="744" y="26" class="lb">GATES</text>
     <rect x="741" y="38" width="150" height="52" class="bx"/>
-    <text x="755" y="60" class="t" style="font-size:12.5px">Score spec</text>
+    <text data-i18n="t069" x="755" y="60" class="t" style="font-size:12.5px">Score spec</text>
     <text x="755" y="77" class="st">NW-SCORE-001..005</text>
     <rect x="741" y="98" width="150" height="52" class="bx"/>
-    <text x="755" y="120" class="t" style="font-size:12.5px">Kubernetes + PCI</text>
+    <text data-i18n="t070" x="755" y="120" class="t" style="font-size:12.5px">Kubernetes + PCI</text>
     <text x="755" y="137" class="st">NW-K8S-* &#183; NW-PCI-*</text>
     <rect x="741" y="158" width="150" height="52" class="bx"/>
-    <text x="755" y="180" class="t" style="font-size:12.5px">FinOps envelope</text>
+    <text data-i18n="t071" x="755" y="180" class="t" style="font-size:12.5px">FinOps envelope</text>
     <text x="755" y="197" class="st">NW-FIN-001..006</text>
     <rect x="741" y="218" width="150" height="52" class="bx"/>
     <text x="755" y="240" class="t" style="font-size:12.5px">kube-linter</text>
-    <text x="755" y="257" class="st">independent check</text>
+    <text data-i18n="t072" x="755" y="257" class="st">independent check</text>
     <text x="741" y="292" class="st" style="fill:#fbbf24">conftest &#183; OPA &#183; Apache-2.0</text>
 
     <path class="lnd" d="M816,300 L816,336 L601,336 L601,274"/>
-    <text x="606" y="360" class="st" style="fill:#f472b6" text-anchor="middle">a denial carries its remediation &#8594; the agent changes the INPUT and re-renders</text>
+    <text data-i18n="t073" x="606" y="360" class="st" style="fill:#f472b6" text-anchor="middle">a denial carries its remediation &#8594; the agent changes the INPUT and re-renders</text>
 
     <path class="ln" d="M893,140 L946,140"/>
-    <text x="952" y="26" class="lb">DELIVERY</text>
+    <text data-i18n="t074" x="952" y="26" class="lb">DELIVERY</text>
     <rect x="949" y="38" width="112" height="52" class="bx"/>
-    <text x="962" y="60" class="t" style="font-size:12.5px">Pull request</text>
-    <text x="962" y="77" class="st">agent-authored</text>
+    <text data-i18n="t075" x="962" y="60" class="t" style="font-size:12.5px">Pull request</text>
+    <text data-i18n="t076" x="962" y="77" class="st">agent-authored</text>
     <rect x="949" y="98" width="112" height="52" class="bx"/>
-    <text x="962" y="120" class="t" style="font-size:12.5px">Human review</text>
-    <text x="962" y="137" class="st" style="fill:#f87171">required</text>
+    <text data-i18n="t077" x="962" y="120" class="t" style="font-size:12.5px">Human review</text>
+    <text data-i18n="t078" x="962" y="137" class="st" style="fill:#f87171">required</text>
     <rect x="949" y="158" width="112" height="52" class="bx"/>
     <text x="962" y="180" class="t" style="font-size:12.5px">Argo CD</text>
-    <text x="962" y="197" class="st">reconcile</text>
+    <text data-i18n="t079" x="962" y="197" class="st">reconcile</text>
     <rect x="949" y="218" width="112" height="52" class="bx"/>
     <text x="962" y="240" class="t" style="font-size:12.5px">Kargo</text>
-    <text x="962" y="257" class="st">staging &#8594; prod</text>
+    <text data-i18n="t080" x="962" y="257" class="st">staging &#8594; prod</text>
     <path class="ln" d="M1005,92 L1005,96"/>
     <path class="ln" d="M1005,152 L1005,156"/>
     <path class="ln" d="M1005,212 L1005,216"/>
@@ -395,21 +411,21 @@ footer a{color:var(--muted)}
   </div>
 
   <div class="callout">
-    <p><strong>The split that makes it work.</strong> Platform defaults eliminate the entire class
+    <p data-i18n="t081"><strong>The split that makes it work.</strong> Platform defaults eliminate the entire class
     of structural mistakes deterministically &mdash; security context, probes, labels,
     service-account tokens. No model judgement is involved and none is wanted. What the platform
     <em>cannot</em> decide for you is judgement: how big, which region, how long to keep backups,
     how much to spend.</p>
-    <p>Those are exactly the calls an agent gets plausibly wrong, and exactly what the policy bundle
+    <p data-i18n="t082">Those are exactly the calls an agent gets plausibly wrong, and exactly what the policy bundle
     is for. Defaults for the deterministic half, policy for the judgement half, and the agent
     operates in between.</p>
   </div>
 </div></section>
 
 <section id="policy"><div class="wrap">
-  <div class="kicker">Open Policy Agent &#183; Conftest 0.69.0 &#183; Apache-2.0</div>
-  <h2>The policy gate, and the agent that closes it.</h2>
-  <p class="sub">
+  <div data-i18n="t083" class="kicker">Open Policy Agent &#183; Conftest 0.69.0 &#183; Apache-2.0</div>
+  <h2 data-i18n="t084">The policy gate, and the agent that closes it.</h2>
+  <p data-i18n="t085" class="sub">
     25 controls across four bundles &mdash; 34 <code>deny</code>/<code>warn</code> rule bodies &mdash;
     all real Rego. Every message carries a policy id and an explicit remediation after
     <code>-&gt;</code>. That second half is what makes the loop agentic rather than merely a linter:
@@ -418,12 +434,12 @@ footer a{color:var(--muted)}
 
   <figure>
     <img src="gifs/policy_gate.gif" alt="Terminal recording of the policy gate: three iterations from denials to zero" loading="lazy">
-    <figcaption>Act V &mdash; three real conftest evaluations, converging to zero.</figcaption>
+    <figcaption data-i18n="t086">Act V &mdash; three real conftest evaluations, converging to zero.</figcaption>
   </figure>
 
   <div class="term">
     <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
-      <span class="t">./run.sh act 5</span><span class="badge-real">REAL OUTPUT</span></div>
+      <span class="t">./run.sh act 5</span><span data-i18n="t087" class="badge-real">REAL OUTPUT</span></div>
     <pre><span class="p">&#9613; ITERATION 1</span>   <span class="c">$960.82/mo vs $400.00 budget</span>
   <span class="c">1.</span> <span class="r">NW-PCI-003</span>  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7
                  is below the 30-day PCI floor
@@ -448,19 +464,19 @@ footer a{color:var(--muted)}
   </div>
 
   <ul class="why">
-    <li><b>It fixes causes, never symptoms.</b> Every remediation edits a Score parameter and the
+    <li data-i18n="t088"><b>It fixes causes, never symptoms.</b> Every remediation edits a Score parameter and the
     artefact is regenerated. Patch the rendered output instead and the finding returns silently on
     the next render &mdash; that is how automated remediation becomes worse than none.</li>
-    <li><b>Compliance outranks cost.</b> The budget gate reduced capacity and left the 30-day PCI
+    <li data-i18n="t089"><b>Compliance outranks cost.</b> The budget gate reduced capacity and left the 30-day PCI
     backup window alone. It went the other way, 7 days to 30, in the same run.</li>
-    <li><b>It stops when it cannot map a denial to an input.</b> No guessing, no silencing &mdash;
+    <li data-i18n="t090"><b>It stops when it cannot map a denial to an input.</b> No guessing, no silencing &mdash;
     the finding escalates to a human, which is the correct outcome rather than a bug.</li>
-    <li><b>The engine is the real one.</b> The same <code>conftest</code> you would run in your own
+    <li data-i18n="t091"><b>The engine is the real one.</b> The same <code>conftest</code> you would run in your own
     CI, at a pinned version, over Rego you can read in <code>policy/</code>.</li>
   </ul>
 
-  <h3 style="margin-top:46px">Build the platform one control at a time</h3>
-  <p class="sub">
+  <h3 data-i18n="t092" style="margin-top:46px">Build the platform one control at a time</h3>
+  <p data-i18n="t093" class="sub">
     Start from what the model handed back and switch on the guardrails a platform team would encode
     once. Each verdict list is a genuine <code>conftest</code> + <code>kube-linter</code> run
     captured at build time by <code>src/build_playground.py</code> &mdash; the page replays recorded
@@ -480,7 +496,7 @@ footer a{color:var(--muted)}
   </div>
 
   <div class="callout g">
-    <p><strong>Switch every control on and one finding survives:</strong>
+    <p data-i18n="t094"><strong>Switch every control on and one finding survives:</strong>
     <code class="mono">no-anti-affinity</code> &mdash; replicas that could all land on one node. It
     is the least memorable item on the list, which is exactly why hand-hardening leaves it behind
     and a rendered golden path does not. That is the case for rendering rather than reviewing.</p>
@@ -488,9 +504,9 @@ footer a{color:var(--muted)}
 </div></section>
 
 <section id="authz"><div class="wrap">
-  <div class="kicker">The idea worth stealing</div>
-  <h2>A prompt is a request. An absent tool is a fact.</h2>
-  <p class="sub">
+  <div data-i18n="t095" class="kicker">The idea worth stealing</div>
+  <h2 data-i18n="t096">A prompt is a request. An absent tool is a fact.</h2>
+  <p data-i18n="t097" class="sub">
     Every tool this platform exposes declares a permission, and <code>tools/list</code> is filtered
     by the calling identity <em>before the model ever sees it</em>. An agent without
     <code>delivery:approve</code> is not instructed to avoid approving production. It is never told
@@ -499,13 +515,13 @@ footer a{color:var(--muted)}
 
   <figure>
     <img src="gifs/authz.gif" alt="Terminal recording of the MCP tool list being filtered by identity" loading="lazy">
-    <figcaption>Act III &mdash; the same server, two identities, two different worlds.</figcaption>
+    <figcaption data-i18n="t098">Act III &mdash; the same server, two identities, two different worlds.</figcaption>
   </figure>
 
   <div class="grid2" style="margin-top:28px">
     <div class="term">
       <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
-        <span class="t">./run.sh tools platform-agent</span><span class="badge-real">REAL OUTPUT</span></div>
+        <span class="t">./run.sh tools platform-agent</span><span data-i18n="t099" class="badge-real">REAL OUTPUT</span></div>
       <pre><span class="c">identity: agent:platform-agent  (12/14 tools visible)</span>
 
     catalog.get_entity                 <span class="c">catalog:read</span>
@@ -559,23 +575,23 @@ footer a{color:var(--muted)}
 
   <div class="grid2" style="margin-top:18px">
     <div class="panel">
-      <h3>Two layers, deliberately</h3>
+      <h3 data-i18n="t100">Two layers, deliberately</h3>
       <ul class="why">
-        <li><b>Identity &#8594; actions.</b> Twelve platform actions granted per principal, in
+        <li data-i18n="t101"><b>Identity &#8594; actions.</b> Twelve platform actions granted per principal, in
         <code>src/catalog.py</code>. <code>platform-agent</code> holds <code>delivery:propose</code>
         and never <code>delivery:approve</code>.</li>
-        <li><b><code>AiResource.spec.allowedTools</code>.</b> A git-tracked, owned, reviewable
+        <li data-i18n="t102"><b><code>AiResource.spec.allowedTools</code>.</b> A git-tracked, owned, reviewable
         catalog entity that narrows an agent further. An agent's blast radius is a YAML file a
         human reviews and an auditor can diff.</li>
       </ul>
     </div>
     <div class="panel">
-      <h3>Four identities, four different worlds</h3>
+      <h3 data-i18n="t103">Four identities, four different worlds</h3>
       <pre style="margin-top:14px">./run.sh tools platform-agent    <span class="c"># 12/14</span>
 ./run.sh tools drift-agent       <span class="c">#  5/14</span>
 ./run.sh tools cost-reviewer     <span class="c">#  3/14</span>
 ./run.sh tools release-manager   <span class="c"># 14/14</span></pre>
-      <p class="sub" style="font-size:14px;margin-top:14px">
+      <p data-i18n="t104" class="sub" style="font-size:14px;margin-top:14px">
         Borrowed from <a href="https://github.com/openchoreo/openchoreo">OpenChoreo</a> (Apache-2.0,
         CNCF Sandbox), whose control plane routes agent tool calls through the same policy decision
         point as human API access &mdash; as far as I found, the only OSS internal developer
@@ -586,9 +602,9 @@ footer a{color:var(--muted)}
 </div></section>
 
 <section id="render"><div class="wrap">
-  <div class="kicker">Score 0.16.0 &#183; Crossplane v2 &#183; Apache-2.0</div>
-  <h2>Three lines in. A managed, encrypted, tagged database out.</h2>
-  <p class="sub">
+  <div data-i18n="t105" class="kicker">Score 0.16.0 &#183; Crossplane v2 &#183; Apache-2.0</div>
+  <h2 data-i18n="t106">Three lines in. A managed, encrypted, tagged database out.</h2>
+  <p data-i18n="t107" class="sub">
     A developer writes <code>resources: {db: {type: postgres}}</code> and stops thinking. The
     platform team decides, in one file, that "postgres" means a Crossplane composite with
     encryption, a private endpoint, sized backups and a cost-centre tag &mdash; not an unmanaged
@@ -598,13 +614,13 @@ footer a{color:var(--muted)}
 
   <figure>
     <img src="gifs/render.gif" alt="Terminal recording of score.yaml rendered through the Northwind provisioner set" loading="lazy">
-    <figcaption>Act IV &mdash; real <code>score-k8s generate</code>, real provisioner set.</figcaption>
+    <figcaption data-i18n="t108">Act IV &mdash; real <code>score-k8s generate</code>, real provisioner set.</figcaption>
   </figure>
 
   <div class="grid2" style="margin-top:24px">
     <div class="term">
       <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
-        <span class="t">score.yaml &mdash; the entire database request</span></div>
+        <span class="t" data-i18n="t226">score.yaml &mdash; the entire database request</span></div>
       <pre><span class="k">resources</span>:
   <span class="k">db</span>:
     <span class="k">type</span>: <span class="s">postgres</span>
@@ -615,8 +631,8 @@ footer a{color:var(--muted)}
     </div>
     <div class="term">
       <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
-        <span class="t">rendered by platform/northwind.provisioners.yaml</span>
-        <span class="badge-real">REAL RENDER</span></div>
+        <span class="t" data-i18n="t227">rendered by platform/northwind.provisioners.yaml</span>
+        <span data-i18n="t109" class="badge-real">REAL RENDER</span></div>
       <pre><span class="k">apiVersion</span>: platform.northwind.io/v1alpha1
 <span class="k">kind</span>: <span class="b">SQLInstance</span>
 <span class="k">spec</span>:
@@ -635,63 +651,63 @@ footer a{color:var(--muted)}
   </div>
 
   <div class="callout">
-    <p><strong>Plus, without being asked:</strong> hardened securityContext, dropped capabilities,
+    <p data-i18n="t110"><strong>Plus, without being asked:</strong> hardened securityContext, dropped capabilities,
     read-only root filesystem, liveness and readiness probes, topology spread, a
     PodDisruptionBudget, a default-deny NetworkPolicy, no automounted service-account token, and
     ownership and cost-centre labels on every object.</p>
-    <p>Every Act II violation that had exactly one correct answer is now structurally impossible
+    <p data-i18n="t111">Every Act II violation that had exactly one correct answer is now structurally impossible
     &mdash; and no model was consulted about any of it.</p>
   </div>
 </div></section>
 
 <section id="daytwo"><div class="wrap">
-  <div class="kicker">Day two</div>
-  <h2>The part that actually kills platforms.</h2>
-  <p class="sub">
+  <div data-i18n="t112" class="kicker">Day two</div>
+  <h2 data-i18n="t113">The part that actually kills platforms.</h2>
+  <p data-i18n="t114" class="sub">
     Golden paths get a service created. What kills platforms is month four, when the estate has
     quietly diverged from what git says is true and nobody knows which of the two is correct.
   </p>
 
   <figure>
     <img src="gifs/drift.gif" alt="Terminal recording of drift detection with attribution" loading="lazy">
-    <figcaption>Act VIII &mdash; four drifted fields, attributed, with a proposed diff.</figcaption>
+    <figcaption data-i18n="t115">Act VIII &mdash; four drifted fields, attributed, with a proposed diff.</figcaption>
   </figure>
 
   <div class="tbl-wrap">
   <table>
-    <thead><tr><th>Field</th><th>In git</th><th>In cluster</th><th>Who / how</th><th>Impact</th></tr></thead>
+    <thead><tr><th data-i18n="t116">Field</th><th data-i18n="t117">In git</th><th data-i18n="t118">In cluster</th><th data-i18n="t119">Who / how</th><th data-i18n="t120">Impact</th></tr></thead>
     <tbody>
       <tr><td class="mono">replicas</td><td class="mono" style="color:var(--green)">6</td>
         <td class="mono" style="color:var(--red)">18</td>
-        <td>k.mensah &#183; <code>kubectl scale</code> at 02:14</td>
-        <td>12 unplanned replicas &mdash; <b>$197/mo</b>, never reconciled back</td></tr>
+        <td data-i18n="t121">k.mensah &#183; <code>kubectl scale</code> at 02:14</td>
+        <td data-i18n="t122">12 unplanned replicas &mdash; <b>$197/mo</b>, never reconciled back</td></tr>
       <tr><td class="mono">backupRetentionDays</td><td class="mono" style="color:var(--green)">30</td>
         <td class="mono" style="color:var(--red)">7</td>
-        <td>out-of-band Terraform from the pre-platform pipeline</td>
-        <td><span class="pill no">PCI</span> 23 days of recovery window silently lost</td></tr>
+        <td data-i18n="t123">out-of-band Terraform from the pre-platform pipeline</td>
+        <td data-i18n="t124"><span class="pill no">PCI</span> 23 days of recovery window silently lost</td></tr>
       <tr><td class="mono">networkPolicy</td><td class="mono" style="color:var(--green)">default-deny</td>
         <td class="mono" style="color:var(--red)">absent</td>
-        <td>namespace recreated without reapplying it</td>
-        <td><span class="pill no">PCI</span> reachable from every namespace for 15 days</td></tr>
+        <td data-i18n="t125">namespace recreated without reapplying it</td>
+        <td data-i18n="t126"><span class="pill no">PCI</span> reachable from every namespace for 15 days</td></tr>
       <tr><td class="mono">automountServiceAccountToken</td><td class="mono" style="color:var(--green)">false</td>
         <td class="mono" style="color:var(--red)">true</td>
-        <td>namespace recreation restored the default</td>
-        <td>service-account token mounted into a PCI pod</td></tr>
+        <td data-i18n="t127">namespace recreation restored the default</td>
+        <td data-i18n="t128">service-account token mounted into a PCI pod</td></tr>
     </tbody>
   </table>
   </div>
 
   <div class="callout a">
-    <p><strong>The drift agent holds no tool that mutates a cluster.</strong> It could not "just fix
+    <p data-i18n="t129"><strong>The drift agent holds no tool that mutates a cluster.</strong> It could not "just fix
     it" even if you asked. Everything it believes becomes a diff a human merges &mdash; so when it
     is wrong, and it will be, the git history is still the truth.</p>
   </div>
 </div></section>
 
 <section id="components"><div class="wrap">
-  <div class="kicker">Components</div>
-  <h2>Nine pieces, every one replaceable.</h2>
-  <p class="sub">
+  <div data-i18n="t130" class="kicker">Components</div>
+  <h2 data-i18n="t131">Nine pieces, every one replaceable.</h2>
+  <p data-i18n="t132" class="sub">
     Nothing is vendored or reimplemented. <code>./bin/setup.sh</code> fetches official release
     artefacts at pinned versions. Where a project has no agentic story yet, this page says so
     rather than implying one.
@@ -700,51 +716,51 @@ footer a{color:var(--muted)}
   <div class="tbl-wrap">
   <table>
     <thead><tr>
-      <th>Project</th><th>Role here</th><th class="mono">License</th>
-      <th class="mono">Version</th><th>Agentic surface today</th>
+      <th data-i18n="t133">Project</th><th data-i18n="t134">Role here</th><th data-i18n="t135" class="mono">License</th>
+      <th data-i18n="t136" class="mono">Version</th><th data-i18n="t137">Agentic surface today</th>
     </tr></thead>
     <tbody>
       <tr><td><a href="https://github.com/open-policy-agent/conftest">Conftest</a> / <a href="https://github.com/open-policy-agent/opa">OPA</a></td>
-        <td>Evaluates every policy verdict in this demo</td>
+        <td data-i18n="t138">Evaluates every policy verdict in this demo</td>
         <td class="mono">Apache-2.0</td><td class="mono">0.69.0 / 1.19.1</td>
-        <td><span class="pill ok">the gate itself</span></td></tr>
+        <td data-i18n="t139"><span class="pill ok">the gate itself</span></td></tr>
       <tr><td><a href="https://github.com/score-spec/score-k8s">score-k8s</a> / <a href="https://github.com/score-spec/spec">Score</a></td>
-        <td>Developer-facing spec; renders the manifests</td>
+        <td data-i18n="t140">Developer-facing spec; renders the manifests</td>
         <td class="mono">Apache-2.0</td><td class="mono">0.16.0</td>
-        <td><span class="pill warn">small schema'd YAML an LLM gets right</span></td></tr>
+        <td data-i18n="t141"><span class="pill warn">small schema'd YAML an LLM gets right</span></td></tr>
       <tr><td><a href="https://github.com/stackrox/kube-linter">kube-linter</a></td>
-        <td>Independent second opinion on rendered output</td>
+        <td data-i18n="t142">Independent second opinion on rendered output</td>
         <td class="mono">Apache-2.0</td><td class="mono">0.8.3</td>
-        <td><span class="pill ok">verification</span></td></tr>
+        <td data-i18n="t143"><span class="pill ok">verification</span></td></tr>
       <tr><td><a href="https://github.com/crossplane/crossplane">Crossplane v2</a></td>
-        <td>The platform API the provisioner renders into</td>
+        <td data-i18n="t144">The platform API the provisioner renders into</td>
         <td class="mono">Apache-2.0</td><td class="mono">v2.4.0</td>
-        <td><span class="pill no">no official MCP server</span></td></tr>
+        <td data-i18n="t145"><span class="pill no">no official MCP server</span></td></tr>
       <tr><td><a href="https://github.com/backstage/backstage">Backstage</a></td>
-        <td>Catalog + Software Template shape; <code>AiResource</code></td>
+        <td data-i18n="t146">Catalog + Software Template shape; <code>AiResource</code></td>
         <td class="mono">Apache-2.0</td><td class="mono">v1.54.0</td>
-        <td><span class="pill ok">first-party MCP Actions backend</span></td></tr>
+        <td data-i18n="t147"><span class="pill ok">first-party MCP Actions backend</span></td></tr>
       <tr><td><a href="https://github.com/argoproj/argo-cd">Argo CD</a></td>
-        <td>Reconciles the merged change</td>
+        <td data-i18n="t148">Reconciles the merged change</td>
         <td class="mono">Apache-2.0</td><td class="mono">v3.5.1</td>
         <td><span class="pill ok">argoproj-labs/mcp-for-argocd</span></td></tr>
       <tr><td><a href="https://github.com/akuity/kargo">Kargo</a></td>
-        <td>Promotion path staging &#8594; prod, with a human gate</td>
+        <td data-i18n="t149">Promotion path staging &#8594; prod, with a human gate</td>
         <td class="mono">Apache-2.0</td><td class="mono">v1.11.2</td>
-        <td><span class="pill no">MCP proposal closed not-planned</span></td></tr>
+        <td data-i18n="t150"><span class="pill no">MCP proposal closed not-planned</span></td></tr>
       <tr><td><a href="https://github.com/openchoreo/openchoreo">OpenChoreo</a></td>
-        <td>Source of the authz-gated MCP pattern used here</td>
+        <td data-i18n="t151">Source of the authz-gated MCP pattern used here</td>
         <td class="mono">Apache-2.0</td><td class="mono">v1.2.2</td>
-        <td><span class="pill ok">2 MCP servers, 3 in-tree agents</span></td></tr>
+        <td data-i18n="t152"><span class="pill ok">2 MCP servers, 3 in-tree agents</span></td></tr>
       <tr><td><a href="https://github.com/aquasecurity/trivy">Trivy</a> / <a href="https://github.com/opentofu/opentofu">OpenTofu</a></td>
-        <td>Optional scanners and IaC toolchain</td>
+        <td data-i18n="t153">Optional scanners and IaC toolchain</td>
         <td class="mono">Apache-2.0 / MPL-2.0</td><td class="mono">0.74.0 / 1.12.6</td>
-        <td><span class="pill warn">optional</span></td></tr>
+        <td data-i18n="t154"><span class="pill warn">optional</span></td></tr>
     </tbody>
   </table>
   </div>
 
-  <p class="sub" style="font-size:13.5px;margin-top:16px;color:var(--dim)">
+  <p data-i18n="t155" class="sub" style="font-size:13.5px;margin-top:16px;color:var(--dim)">
     Versions verified against upstream release pages in August 2026. Deliberately excluded, with
     reasons in the README: Cyclops and Kusion (both dormant for ~13 months), and Port
     (closed-source core, archived MCP server, AI agents behind a paid tier).
@@ -752,9 +768,9 @@ footer a{color:var(--muted)}
 </div></section>
 
 <section id="verify"><div class="wrap">
-  <div class="kicker">Test results</div>
-  <h2 id="verifyHeading">Acceptance checks</h2>
-  <p class="sub">
+  <div data-i18n="t156" class="kicker">Test results</div>
+  <h2 data-i18n="t157" id="verifyHeading">Acceptance checks</h2>
+  <p data-i18n="t158" class="sub">
     Produced by <code>src/build_report.py</code>, which executes and times each check against the
     real binaries and writes
     <a href="outputs/verify-report.json"><code>outputs/verify-report.json</code></a>. The same suite
@@ -764,7 +780,7 @@ footer a{color:var(--muted)}
 
   <div class="tbl-wrap">
     <table>
-      <thead><tr><th class="mono">#</th><th>Check</th><th>Evidence</th><th>Result</th><th class="num">Duration</th></tr></thead>
+      <thead><tr><th class="mono">#</th><th data-i18n="t159">Check</th><th data-i18n="t160">Evidence</th><th data-i18n="t161">Result</th><th data-i18n="t162" class="num">Duration</th></tr></thead>
       <tbody id="verifyBody"></tbody>
     </table>
   </div>
@@ -772,16 +788,16 @@ footer a{color:var(--muted)}
 </div></section>
 
 <section id="quickstart"><div class="wrap">
-  <div class="kicker">Quickstart</div>
-  <h2>Four ways to run it. None of them need an account.</h2>
-  <p class="sub">
+  <div data-i18n="t163" class="kicker">Quickstart</div>
+  <h2 data-i18n="t164">Four ways to run it. None of them need an account.</h2>
+  <p data-i18n="t165" class="sub">
     No cluster, no cloud credentials, no API key, no LLM. Python 3.10+ and about ninety seconds.
   </p>
 
   <div class="grid2" style="margin-top:28px">
     <div>
-      <h3 style="margin-bottom:12px">1 &#183; GitHub Codespaces</h3>
-      <p class="sub" style="font-size:14px;margin-top:0">
+      <h3 data-i18n="t166" style="margin-bottom:12px">1 &#183; GitHub Codespaces</h3>
+      <p data-i18n="t167" class="sub" style="font-size:14px;margin-top:0">
         The dev container installs the one Python dependency, fetches the pinned binaries and runs
         the acceptance suite before handing you a prompt &mdash; so the first thing you see is
         14/14 passing.
@@ -795,7 +811,7 @@ pip install -r requirements.txt
 ./bin/setup.sh --all      <span class="c"># pinned upstream binaries</span>
 ./run.sh verify           <span class="c"># 14/14</span></pre>
 
-      <h3 style="margin:30px 0 12px">2 &#183; Local</h3>
+      <h3 data-i18n="t168" style="margin:30px 0 12px">2 &#183; Local</h3>
       <pre>git clone https://github.com/adventurewave-labs/\
 agentic-platform-engineering-extravaganza
 cd agentic-platform-engineering-extravaganza
@@ -806,13 +822,13 @@ cd agentic-platform-engineering-extravaganza
     </div>
 
     <div>
-      <h3 style="margin-bottom:12px">3 &#183; Docker</h3>
+      <h3 data-i18n="t169" style="margin-bottom:12px">3 &#183; Docker</h3>
       <pre>docker compose run --rm demo
 docker compose run --rm verify
 docker compose up site   <span class="c"># :8080</span>
 docker compose up mcp    <span class="c"># :8099</span></pre>
 
-      <h3 style="margin:30px 0 12px">4 &#183; Point your own agent at it</h3>
+      <h3 data-i18n="t170" style="margin:30px 0 12px">4 &#183; Point your own agent at it</h3>
       <pre><span class="c"># stdio</span>
 claude mcp add northwind -- \
   python3 src/platform_mcp.py
@@ -821,7 +837,7 @@ claude mcp add northwind -- \
 ./run.sh mcp 8099
 claude mcp add --transport http \
   northwind http://127.0.0.1:8099/mcp</pre>
-      <p class="sub" style="font-size:14px;margin-top:14px">
+      <p data-i18n="t171" class="sub" style="font-size:14px;margin-top:14px">
         Then ask it for a service. It will list the golden paths, read the parameter schema,
         render, evaluate, remediate, and stop at the pull request &mdash; because that is the last
         thing its identity is permitted to do.
@@ -831,49 +847,49 @@ claude mcp add --transport http \
 </div></section>
 
 <section id="real"><div class="wrap">
-  <div class="kicker">Reproducibility</div>
-  <h2>How this was built &mdash; no smoke, no mirrors.</h2>
-  <p class="sub">
+  <div data-i18n="t172" class="kicker">Reproducibility</div>
+  <h2 data-i18n="t173">How this was built &mdash; no smoke, no mirrors.</h2>
+  <p data-i18n="t174" class="sub">
     A demo that overstates itself is worse than no demo. Here is the line, drawn honestly, and the
     command that checks it rather than asking you to take this table's word for it.
   </p>
 
   <div class="tbl-wrap">
   <table>
-    <thead><tr><th>Component</th><th>Status</th><th>Detail</th></tr></thead>
+    <thead><tr><th data-i18n="t175">Component</th><th data-i18n="t176">Status</th><th data-i18n="t177">Detail</th></tr></thead>
     <tbody>
-      <tr><td class="mono">Policy evaluation</td><td><span class="pill ok">real</span></td>
-        <td>The pinned <code>conftest</code> binary over the Rego in <code>policy/</code>. Every number on this page comes from it.</td></tr>
-      <tr><td class="mono">Manifest rendering</td><td><span class="pill ok">real</span></td>
-        <td>The pinned <code>score-k8s</code> binary with the provisioner set in <code>platform/</code>.</td></tr>
-      <tr><td class="mono">kube-linter</td><td><span class="pill ok">real</span></td>
-        <td>An independent linter nobody here tuned. It found four genuine defects in the platform defaults during development &mdash; missing <code>containerPort</code>, no anti-affinity, an unresolvable ServiceAccount reference, an unset <code>unhealthyPodEvictionPolicy</code>. All four were fixed <em>in the platform</em>, not worked around in the demo.</td></tr>
-      <tr><td class="mono">MCP server</td><td><span class="pill ok">real</span></td>
-        <td>MCP 2025-06-18 over stdio and streamable HTTP, stdlib only. Origin-validated against DNS rebinding. Point Claude Code or Cursor at it.</td></tr>
-      <tr><td class="mono">Authorization</td><td><span class="pill ok">real</span></td>
-        <td>Enforced in code at <code>tools/list</code> and <code>tools/call</code>, not by prompt instruction.</td></tr>
-      <tr><td class="mono">GIFs and casts</td><td><span class="pill ok">real</span></td>
-        <td>Rendered from asciinema casts of actual runs via <code>agg</code>. Line timings are synthesised so playback is readable, and the shell prompt shown is added by the cast builder; not one character of tool output is edited. The highlight reel is a selection of acts from one capture &mdash; lines dropped, never rewritten.</td></tr>
-      <tr><td class="mono">The agent's reasoner</td><td><span class="pill warn">deterministic by default</span></td>
-        <td>Denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. <code>--backend llm</code> swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI); the loop is unchanged. That it makes no difference to the outcome is the point.</td></tr>
-      <tr><td class="mono">Intent extraction</td><td><span class="pill warn">regex</span></td>
-        <td>Prose to a structured request. A model does this better on messy input and worse on reproducibility. One function, replaced by <code>--backend</code>.</td></tr>
-      <tr><td class="mono">Cost figures</td><td><span class="pill warn">static rate card</span></td>
-        <td>A checked-in table in <code>src/costing.py</code>, so there is no account requirement. The schema is an Infracost subset &mdash; swap in <code>infracost breakdown --format json</code> and the Rego does not change.</td></tr>
-      <tr><td class="mono">Drift observation</td><td><span class="pill warn">fixture</span></td>
-        <td><code>platform/observed-state.yaml</code>. Detection, attribution and the proposed patch are real code over that shape; in a live estate you would feed it from Argo CD's resource tree.</td></tr>
-      <tr><td class="mono">Kubernetes cluster</td><td><span class="pill no">not present</span></td>
-        <td>Nothing is applied anywhere. The manifests are rendered and evaluated, which is where every claim here lives. They are valid against a real cluster.</td></tr>
-      <tr><td class="mono">Cloud provisioning</td><td><span class="pill no">not present</span></td>
-        <td>The <code>SQLInstance</code> is a real Crossplane-shaped composite; no Composition is installed and no cloud account is touched.</td></tr>
-      <tr><td class="mono">Northwind Retail</td><td><span class="pill no">fictional</span></td>
-        <td>The company, the teams and the ticket numbers. The pain is not.</td></tr>
+      <tr><td data-i18n="t178" class="mono">Policy evaluation</td><td data-i18n="t179"><span class="pill ok">real</span></td>
+        <td data-i18n="t180">The pinned <code>conftest</code> binary over the Rego in <code>policy/</code>. Every number on this page comes from it.</td></tr>
+      <tr><td data-i18n="t181" class="mono">Manifest rendering</td><td data-i18n="t182"><span class="pill ok">real</span></td>
+        <td data-i18n="t183">The pinned <code>score-k8s</code> binary with the provisioner set in <code>platform/</code>.</td></tr>
+      <tr><td class="mono">kube-linter</td><td data-i18n="t184"><span class="pill ok">real</span></td>
+        <td data-i18n="t185">An independent linter nobody here tuned. It found four genuine defects in the platform defaults during development &mdash; missing <code>containerPort</code>, no anti-affinity, an unresolvable ServiceAccount reference, an unset <code>unhealthyPodEvictionPolicy</code>. All four were fixed <em>in the platform</em>, not worked around in the demo.</td></tr>
+      <tr><td data-i18n="t186" class="mono">MCP server</td><td data-i18n="t187"><span class="pill ok">real</span></td>
+        <td data-i18n="t188">MCP 2025-06-18 over stdio and streamable HTTP, stdlib only. Origin-validated against DNS rebinding. Point Claude Code or Cursor at it.</td></tr>
+      <tr><td data-i18n="t189" class="mono">Authorization</td><td data-i18n="t190"><span class="pill ok">real</span></td>
+        <td data-i18n="t191">Enforced in code at <code>tools/list</code> and <code>tools/call</code>, not by prompt instruction.</td></tr>
+      <tr><td data-i18n="t192" class="mono">GIFs and casts</td><td data-i18n="t193"><span class="pill ok">real</span></td>
+        <td data-i18n="t194">Rendered from asciinema casts of actual runs via <code>agg</code>. Line timings are synthesised so playback is readable, and the shell prompt shown is added by the cast builder; not one character of tool output is edited. The highlight reel is a selection of acts from one capture &mdash; lines dropped, never rewritten.</td></tr>
+      <tr><td data-i18n="t195" class="mono">The agent's reasoner</td><td data-i18n="t196"><span class="pill warn">deterministic by default</span></td>
+        <td data-i18n="t197">Denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. <code>--backend llm</code> swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI); the loop is unchanged. That it makes no difference to the outcome is the point.</td></tr>
+      <tr><td data-i18n="t198" class="mono">Intent extraction</td><td data-i18n="t199"><span class="pill warn">regex</span></td>
+        <td data-i18n="t200">Prose to a structured request. A model does this better on messy input and worse on reproducibility. One function, replaced by <code>--backend</code>.</td></tr>
+      <tr><td data-i18n="t201" class="mono">Cost figures</td><td data-i18n="t202"><span class="pill warn">static rate card</span></td>
+        <td data-i18n="t203">A checked-in table in <code>src/costing.py</code>, so there is no account requirement. The schema is an Infracost subset &mdash; swap in <code>infracost breakdown --format json</code> and the Rego does not change.</td></tr>
+      <tr><td data-i18n="t204" class="mono">Drift observation</td><td data-i18n="t205"><span class="pill warn">fixture</span></td>
+        <td data-i18n="t206"><code>platform/observed-state.yaml</code>. Detection, attribution and the proposed patch are real code over that shape; in a live estate you would feed it from Argo CD's resource tree.</td></tr>
+      <tr><td data-i18n="t207" class="mono">Kubernetes cluster</td><td data-i18n="t208"><span class="pill no">not present</span></td>
+        <td data-i18n="t209">Nothing is applied anywhere. The manifests are rendered and evaluated, which is where every claim here lives. They are valid against a real cluster.</td></tr>
+      <tr><td data-i18n="t210" class="mono">Cloud provisioning</td><td data-i18n="t211"><span class="pill no">not present</span></td>
+        <td data-i18n="t212">The <code>SQLInstance</code> is a real Crossplane-shaped composite; no Composition is installed and no cloud account is touched.</td></tr>
+      <tr><td data-i18n="t213" class="mono">Northwind Retail</td><td data-i18n="t214"><span class="pill no">fictional</span></td>
+        <td data-i18n="t215">The company, the teams and the ticket numbers. The pain is not.</td></tr>
     </tbody>
   </table>
   </div>
 
   <div class="callout">
-    <p><strong>Do not trust this table &mdash; run the suite.</strong> <code>./run.sh verify</code>
+    <p data-i18n="t216"><strong>Do not trust this table &mdash; run the suite.</strong> <code>./run.sh verify</code>
     executes all 14 checks against the real binaries in about eight seconds, and GitHub Actions runs
     the same thing on a clean checkout on every push.</p>
   </div>
@@ -882,15 +898,15 @@ claude mcp add --transport http \
 <footer><div class="wrap">
   <div class="foot-grid">
     <div>
-      <h4>Repository</h4>
+      <h4 data-i18n="t217">Repository</h4>
       <ul>
-        <li><a href="https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza">Source on GitHub</a></li>
-        <li><a href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Open in Codespaces</a></li>
+        <li data-i18n="t218"><a href="https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza">Source on GitHub</a></li>
+        <li data-i18n="t219"><a href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Open in Codespaces</a></li>
         <li><a href="https://github.com/adventurewave-labs/agentic-devops-extravaganza">Agentic DevOps Extravaganza</a></li>
       </ul>
     </div>
     <div>
-      <h4>Outputs</h4>
+      <h4 data-i18n="t220">Outputs</h4>
       <ul>
         <li><a href="outputs/verify-report.json">verify-report.json</a></li>
         <li><a href="outputs/run-record.json">run-record.json</a></li>
@@ -900,10 +916,10 @@ claude mcp add --transport http \
       </ul>
     </div>
     <div>
-      <h4>Demos</h4>
+      <h4 data-i18n="t221">Demos</h4>
       <ul>
         <li><a href="gifs/highlight.gif">highlight.gif</a></li>
-        <li><a href="gifs/wow.gif">wow.gif &mdash; the full run</a></li>
+        <li data-i18n="t222"><a href="gifs/wow.gif">wow.gif &mdash; the full run</a></li>
         <li><a href="gifs/policy_gate.gif">policy_gate.gif</a></li>
         <li><a href="gifs/authz.gif">authz.gif</a></li>
         <li><a href="gifs/render.gif">render.gif</a></li>
@@ -911,7 +927,7 @@ claude mcp add --transport http \
       </ul>
     </div>
     <div>
-      <h4>Built on</h4>
+      <h4 data-i18n="t223">Built on</h4>
       <ul>
         <li><a href="https://www.openpolicyagent.org/">Open Policy Agent</a></li>
         <li><a href="https://score.dev/">Score</a></li>
@@ -922,29 +938,60 @@ claude mcp add --transport http \
       </ul>
     </div>
   </div>
-  <p>Northwind Retail is fictional. The policy bundle, the provisioner set, the MCP server and every
+  <p data-i18n="t224">Northwind Retail is fictional. The policy bundle, the provisioner set, the MCP server and every
   verdict on this page are not. MIT licensed; upstream tools keep their own licenses.</p>
-  <p class="stamp">// built with real tools &#183; no mocks &#183; no screenshots &nbsp; 2026.08.20</p>
+  <p data-i18n="t225" class="stamp">// built with real tools &#183; no mocks &#183; no screenshots &nbsp; 2026.08.20</p>
 </div></footer>
 
 <script>
 const PG = {"stages":[{"key":"raw","label":"What the model handed back","detail":"No platform. A plausible, runnable, non-compliant Deployment.","denyCount":42,"findings":[{"id":"NW-K8S-001","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": image \"payments-ledger:latest\" is not immutably pinned"},{"id":"NW-K8S-001","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": image \"postgres:latest\" is not immutably pinned"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory request"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory request"},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-008","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": image \"payments-ledger:latest\" is not from an approved registry"},{"id":"NW-K8S-008","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": image \"postgres:latest\" is not from an approved registry"},{"id":"KL-latest-tag","tool":"kube-linter","message":"Deployment/payments-ledger: The container \"payments-ledger\" is using an invalid container image, \"payments-ledger:latest\". Please use images that are not blocked by the `BlockList` criteria : [\".*:(latest)$\" \"^[^:]*$\" \"(.*/[^:]+)$\"]"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0"},{"id":"KL-latest-tag","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: The container \"postgres\" is using an invalid container image, \"postgres:latest\". Please use images that are not blocked by the `BlockList` criteria : [\".*:(latest)$\" \"^[^:]*$\" \"(.*/[^:]+)$\"]"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0"}]},{"key":"registry","label":"Pin the image, use the approved registry","detail":"NW-K8S-001, NW-K8S-008 \u2014 immutable tag from ghcr.io/northwind-retail.","denyCount":36,"findings":[{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory request"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory request"},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0"}]},{"key":"labels","label":"Attach ownership and cost attribution","detail":"NW-K8S-003 \u2014 who owns this, which cost centre pays, what classification.","denyCount":33,"findings":[{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory request"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory request"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0"}]},{"key":"resources","label":"Declare a resource envelope","detail":"NW-K8S-002 \u2014 requests and limits on every container.","denyCount":23,"findings":[{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"}]},{"key":"security","label":"Harden the pod security context","detail":"NW-K8S-004 \u2014 non-root, no privilege escalation, read-only rootfs, drop ALL.","denyCount":13,"findings":[{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"}]},{"key":"probes","label":"Add health probes","detail":"NW-K8S-005 \u2014 without these, Argo Rollouts cannot verify a canary.","denyCount":9,"findings":[{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"}]},{"key":"secrets","label":"Move credentials to a Secret reference","detail":"NW-K8S-006 \u2014 no literal passwords in the pod spec.","denyCount":7,"findings":[{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"}]},{"key":"availability","label":"Meet the production availability floor","detail":"NW-K8S-007 \u2014 more than one replica, spread across zones.","denyCount":7,"findings":[{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"},{"id":"KL-no-anti-affinity","tool":"kube-linter","message":"Deployment/payments-ledger: object has 3 replicas but does not specify inter pod anti-affinity"}]},{"key":"pci","label":"Apply the PCI control set","detail":"NW-PCI-001/005/006 \u2014 default-deny NetworkPolicy, audit sink, no SA token.","denyCount":1,"findings":[{"id":"KL-no-anti-affinity","tool":"kube-linter","message":"Deployment/payments-ledger: object has 3 replicas but does not specify inter pod anti-affinity"}]}],"goldenPath":{"denyCount":0,"iterations":3,"manifestKinds":["Deployment","NetworkPolicy","PodDisruptionBudget","SQLInstance","Secret","Service","ServiceAccount"],"objectCount":7,"monthlyCostUsd":359.15}};
 const REPORT = {"passed":14,"total":14,"totalMs":5743.8,"toolVersions":{"conftest":"Conftest: 0.69.0","kube-linter":"0.8.3","score-k8s":"score-k8s 0.16.0 (go1.26.4 - linux/amd64)"},"checks":[{"id":"T01","name":"Pinned upstream toolchain present","passed":true,"detail":"conftest 0.69.0, score-k8s 0.16.0, kube-linter 0.8.3","ms":3080.1},{"id":"T02","name":"Policy bundle compiles under OPA","passed":true,"detail":"4 bundles, 34 rule bodies compile under OPA","ms":29.0},{"id":"T03","name":"PCI rules reject a non-compliant database","passed":true,"detail":"4 denials on a deliberately non-compliant database","ms":77.0},{"id":"T04","name":"Unguided manifests are rejected","passed":true,"detail":"42 denials across 12 distinct policies","ms":201.6},{"id":"T05","name":"Golden path converges to zero denials","passed":true,"detail":"0 denials after 3 iterations, $359.15/mo","ms":1190.0},{"id":"T06","name":"Agent fixes inputs, never rendered output","passed":true,"detail":"1 change(s), all to Score inputs: db_backup_retention_days","ms":325.2},{"id":"T07","name":"Independent linter finds nothing","passed":true,"detail":"0 findings on 7 rendered objects","ms":172.5},{"id":"T08","name":"Agent cannot approve production","passed":true,"detail":"12/14 tools listed; approve_promotion withheld and refused","ms":39.7},{"id":"T09","name":"A human in the owning group can","passed":true,"detail":"release-manager holds delivery:approve and the call succeeds","ms":26.7},{"id":"T10","name":"Tool visibility differs per identity","passed":true,"detail":"platform-agent 12/14 \u00b7 drift-agent 5/14 \u00b7 cost-reviewer 3/14 \u00b7 release-manager 14/14","ms":109.5},{"id":"T11","name":"MCP 2025-06-18 protocol conformance","passed":true,"detail":"initialize \u00b7 tools/list \u00b7 tools/call \u00b7 resources/list over stdio","ms":160.3},{"id":"T12","name":"MCP HTTP transport validates Origin","passed":true,"detail":"localhost accepted, foreign origin rejected (DNS-rebinding guard)","ms":0.1},{"id":"T13","name":"Rendering twice is byte-identical","passed":true,"detail":"two independent renders, 322 lines, byte-identical","ms":169.7},{"id":"T14","name":"Committed artefacts reproduce exactly","passed":true,"detail":"committed run record matches (42 denials)","ms":162.4}]};
+const I18N = {"t001":{"es":"Agentic Platform Engineering Extravaganza"},"t002":{"es":"Demo"},"t003":{"es":"Arquitectura"},"t004":{"es":"Pol&iacute;ticas"},"t005":{"es":"Autorizaci&oacute;n"},"t006":{"es":"Render"},"t007":{"es":"D&iacute;a 2"},"t008":{"es":"Componentes"},"t009":{"es":"Resultados"},"t010":{"es":"Inicio"},"t011":{"es":"Reproducibilidad"},"t012":{"es":"OPA real"},"t013":{"es":"score-k8s real"},"t014":{"es":"MCP 2025-06-18 real"},"t015":{"es":"100% c&oacute;digo abierto"},"t016":{"es":"Sin cl&uacute;ster &#183; Sin API key"},"t017":{"es":"Ingenier&iacute;a de plataformas ag&eacute;ntica, <span class=\"g\">con la plataforma todav&iacute;a al mando</span>."},"t018":{"es":"Una demostraci&oacute;n funcional, de punta a punta, construida enteramente sobre herramientas libres y de c&oacute;digo abierto. Una sola solicitud &mdash; <em>\"un servicio de pagos en alcance PCI con base de datos Postgres, residencia en la UE, staging y producci&oacute;n\"</em> &mdash; enrutada por dos caminos. Sin plataforma, un modelo capaz devuelve manifiestos de Kubernetes que aplican sin error y reprueban <strong>42 controles de pol&iacute;tica reales</strong>. Por el camino dorado convergen a <strong>cero en tres iteraciones</strong>, dentro del presupuesto, y la aprobaci&oacute;n de producci&oacute;n sigue en manos de una persona."},"t019":{"es":"Ver la demo &rarr;"},"t020":{"es":"Probar la compuerta"},"t021":{"es":"Abrir en Codespaces"},"t022":{"es":"violaciones de pol&iacute;tica sin una plataforma de por medio"},"t023":{"es":"tras el camino dorado, en 3 iteraciones reales"},"t024":{"es":"el rastro de tickets que esto reemplaza, en 6 equipos"},"t025":{"es":"al mes que atrap&oacute; la compuerta FinOps, en un solo servicio"},"t026":{"es":"mutaciones al cl&uacute;ster que cualquier agente puede ejecutar"},"t027":{"es":"demo cinematogr&aacute;fica de 90 segundos"},"t028":{"es":"Una solicitud, ocho actos, nada pregrabado."},"t029":{"es":"Cada veredicto de pol&iacute;tica que ves abajo sali&oacute; de ejecutar el binario real de <code>conftest</code> contra el Rego real en <code>policy/</code>. Cada manifiesto sali&oacute; del binario real de <code>score-k8s</code> y del conjunto de provisioners en <code>platform/</code>. Ejec&uacute;talo dos veces y los n&uacute;meros son id&eacute;nticos &mdash; eso es lo que un control plane debe darte."},"t030":{"es":"Actos II, III, V, VII y el marcador. La corrida completa de ocho actos est&aacute; en <a href=\"gifs/wow.gif\">gifs/wow.gif</a>; cada cast est&aacute; en <code>recordings/</code>."},"t031":{"es":"El rastro de tickets"},"t032":{"es":"Una frase se convierte en seis tickets repartidos en seis equipos. Once d&iacute;as h&aacute;biles, de los cuales unas cuatro horas son trabajo. El resto es cola."},"t033":{"es":"Saltarse la plataforma"},"t034":{"es":"Un modelo capaz escribe el YAML a partir del prompt. Parsea, aplica y pasar&iacute;a una revisi&oacute;n distra&iacute;da. Conftest y kube-linter devuelven 42 denegaciones."},"t035":{"es":"La API de la plataforma"},"t036":{"es":"El agente se conecta por MCP como principal y recibe 12 de 14 herramientas. Las dos que no recibe son justamente el punto."},"t037":{"es":"Renderizado"},"t038":{"es":"Tres l&iacute;neas de Score se vuelven un composite de Crossplane con cifrado, endpoint privado, respaldos dimensionados y etiqueta de centro de costos."},"t039":{"es":"La compuerta, y el ciclo"},"t040":{"es":"Denegaciones reales de OPA, cada una con su propia remediaci&oacute;n. El agente cambia las entradas, vuelve a renderizar y vuelve a evaluar. Cero en tres iteraciones."},"t041":{"es":"El dinero es pol&iacute;tica"},"t042":{"es":"$960.82/mes contra un sobre de $400. La compuerta redujo capacidad &mdash; nunca la ventana de respaldo PCI de 30 d&iacute;as."},"t043":{"es":"Proponer, y detenerse"},"t044":{"es":"El agente abre un PR que lleva el veredicto de pol&iacute;tica y el delta de costo, y luego intenta aprobar su propia promoci&oacute;n a producci&oacute;n. La plataforma se niega."},"t045":{"es":"D&iacute;a dos"},"t046":{"es":"18 r&eacute;plicas donde git dice 6. La ventana de respaldo PCI recortada en silencio. La NetworkPolicy ausente durante quince d&iacute;as. Atribuido, y propuesto como diff."},"t047":{"es":"El stack"},"t048":{"es":"Entra la intenci&oacute;n, sale un pull request auditable."},"t049":{"es":"Dos puertas de entrada a un mismo camino dorado: un portal para personas, MCP para agentes, y la misma pol&iacute;tica de autorizaci&oacute;n detr&aacute;s de ambas. Cada caja es un proyecto real de c&oacute;digo abierto o un archivo de este repositorio &mdash; ninguna es un marcador de posici&oacute;n."},"t050":{"es":"INTENCI&Oacute;N"},"t051":{"es":"Desarrollador"},"t052":{"es":"\"un servicio PCI&#8230;\""},"t053":{"es":"Agente"},"t054":{"es":"cliente MCP"},"t055":{"es":"API DE PLATAFORMA"},"t056":{"es":"Control plane de Northwind"},"t057":{"es":"Cat&aacute;logo de software"},"t058":{"es":"con forma de Backstage"},"t059":{"es":"Scaffolder del camino"},"t060":{"es":"Software Template"},"t061":{"es":"Autorizaci&oacute;n"},"t062":{"es":"12 acciones filtradas"},"t063":{"es":"RENDERIZADO"},"t064":{"es":"Spec de workload Score"},"t065":{"es":"+ provisioners de northwind"},"t066":{"es":"+ valores por defecto"},"t067":{"es":"Objetos renderizados"},"t068":{"es":"COMPUERTAS"},"t069":{"es":"Spec de Score"},"t070":{"es":"Kubernetes + PCI"},"t071":{"es":"Sobre FinOps"},"t072":{"es":"chequeo externo"},"t073":{"es":"cada denegaci&oacute;n lleva su remediaci&oacute;n &#8594; el agente cambia la ENTRADA y vuelve a renderizar"},"t074":{"es":"ENTREGA"},"t075":{"es":"Pull request"},"t076":{"es":"por el agente"},"t077":{"es":"Revisi&oacute;n humana"},"t078":{"es":"obligatoria"},"t079":{"es":"reconcilia"},"t080":{"es":"staging &#8594; prod"},"t081":{"es":"<strong>La divisi&oacute;n que hace que funcione.</strong> Los valores por defecto de la plataforma eliminan de forma determinista toda una clase de errores estructurales &mdash; security context, probes, etiquetas, tokens de service account. No interviene el criterio de ning&uacute;n modelo, ni se quiere que intervenga. Lo que la plataforma <em>no puede</em> decidir por ti es el criterio: qu&eacute; tan grande, en qu&eacute; regi&oacute;n, cu&aacute;nto conservar los respaldos, cu&aacute;nto gastar."},"t082":{"es":"Esas son exactamente las decisiones que un agente falla de forma plausible, y exactamente para lo que sirve el bundle de pol&iacute;ticas. Defaults para la mitad determinista, pol&iacute;tica para la mitad de criterio, y el agente opera en medio."},"t083":{"es":"Open Policy Agent &#183; Conftest 0.69.0 &#183; Apache-2.0"},"t084":{"es":"La compuerta de pol&iacute;ticas, y el agente que la cierra."},"t085":{"es":"25 controles repartidos en cuatro bundles &mdash; 34 cuerpos de regla <code>deny</code>/<code>warn</code> &mdash; todo Rego real. Cada mensaje lleva un id de pol&iacute;tica y una remediaci&oacute;n expl&iacute;cita despu&eacute;s de <code>-&gt;</code>. Esa segunda mitad es lo que vuelve al ciclo ag&eacute;ntico en lugar de un simple linter: el agente la parsea, cambia un par&aacute;metro de Score y todo el artefacto se regenera."},"t086":{"es":"Acto V &mdash; tres evaluaciones reales de conftest, convergiendo a cero."},"t087":{"es":"SALIDA REAL"},"t088":{"es":"<b>Corrige causas, nunca s&iacute;ntomas.</b> Cada remediaci&oacute;n edita un par&aacute;metro de Score y el artefacto se regenera. Si en cambio parcheas la salida renderizada, el hallazgo vuelve en silencio en el siguiente render &mdash; as&iacute; es como la remediaci&oacute;n automatizada termina siendo peor que ninguna."},"t089":{"es":"<b>El cumplimiento manda sobre el costo.</b> La compuerta de presupuesto redujo capacidad y dej&oacute; intacta la ventana de respaldo PCI de 30 d&iacute;as. De hecho fue al rev&eacute;s: de 7 d&iacute;as a 30, en la misma corrida."},"t090":{"es":"<b>Se detiene cuando no puede mapear una denegaci&oacute;n a una entrada.</b> Sin adivinar, sin silenciar &mdash; el hallazgo escala a una persona, y eso es el resultado correcto, no un bug."},"t091":{"es":"<b>El motor es el de verdad.</b> El mismo <code>conftest</code> que correr&iacute;as en tu propio CI, en una versi&oacute;n fijada, sobre Rego que puedes leer en <code>policy/</code>."},"t092":{"es":"Construye la plataforma un control a la vez"},"t093":{"es":"Parte de lo que devolvi&oacute; el modelo y ve encendiendo las barreras que un equipo de plataforma codificar&iacute;a una sola vez. Cada lista de veredictos es una corrida genuina de <code>conftest</code> + <code>kube-linter</code> capturada en tiempo de build por <code>src/build_playground.py</code> &mdash; la p&aacute;gina reproduce salida grabada, no aproxima Rego en JavaScript."},"t094":{"es":"<strong>Enciende todos los controles y sobrevive un hallazgo:</strong> <code class=\"mono\">no-anti-affinity</code> &mdash; r&eacute;plicas que podr&iacute;an caer todas en un mismo nodo. Es el punto menos memorable de la lista, y por eso mismo el endurecimiento manual lo deja atr&aacute;s y un camino dorado renderizado no. Ese es el argumento a favor de renderizar en lugar de revisar."},"t095":{"es":"La idea que vale la pena robar"},"t096":{"es":"Un prompt es una petici&oacute;n. Una herramienta ausente es un hecho."},"t097":{"es":"Cada herramienta que expone esta plataforma declara un permiso, y <code>tools/list</code> se filtra por la identidad que llama <em>antes de que el modelo la vea</em>. A un agente sin <code>delivery:approve</code> no se le instruye que evite aprobar producci&oacute;n. Simplemente nunca se le dice que esa capacidad existe."},"t098":{"es":"Acto III &mdash; el mismo servidor, dos identidades, dos mundos distintos."},"t099":{"es":"SALIDA REAL"},"t100":{"es":"Dos capas, a prop&oacute;sito"},"t101":{"es":"<b>Identidad &#8594; acciones.</b> Doce acciones de plataforma otorgadas por principal, en <code>src/catalog.py</code>. <code>platform-agent</code> tiene <code>delivery:propose</code> y nunca <code>delivery:approve</code>."},"t102":{"es":"<b><code>AiResource.spec.allowedTools</code>.</b> Una entidad de cat&aacute;logo versionada en git, con due&ntilde;o y revisable, que acota a&uacute;n m&aacute;s al agente. El radio de impacto de un agente es un archivo YAML que una persona revisa y un auditor puede diferenciar."},"t103":{"es":"Cuatro identidades, cuatro mundos distintos"},"t104":{"es":"Tomado de <a href=\"https://github.com/openchoreo/openchoreo\">OpenChoreo</a> (Apache-2.0, CNCF Sandbox), cuyo control plane enruta las llamadas de herramientas de los agentes por el mismo punto de decisi&oacute;n de pol&iacute;ticas que el acceso humano a la API &mdash; hasta donde encontr&eacute;, la &uacute;nica plataforma interna de desarrollo de c&oacute;digo abierto que lo hace."},"t105":{"es":"Score 0.16.0 &#183; Crossplane v2 &#183; Apache-2.0"},"t106":{"es":"Entran tres l&iacute;neas. Sale una base de datos gestionada, cifrada y etiquetada."},"t107":{"es":"Una persona desarrolladora escribe <code>resources: {db: {type: postgres}}</code> y deja de pensar en eso. El equipo de plataforma decide, en un solo archivo, que \"postgres\" significa un composite de Crossplane con cifrado, endpoint privado, respaldos dimensionados y etiqueta de centro de costos &mdash; no un StatefulSet sin gesti&oacute;n corriendo una imagen replicada. Cambia ese archivo y cada servicio del parque recibe la nueva definici&oacute;n en su siguiente render."},"t108":{"es":"Acto IV &mdash; <code>score-k8s generate</code> real, conjunto de provisioners real."},"t109":{"es":"RENDER REAL"},"t110":{"es":"<strong>Adem&aacute;s, sin que nadie lo pida:</strong> securityContext endurecido, capabilities eliminadas, filesystem ra&iacute;z de solo lectura, probes de liveness y readiness, distribuci&oacute;n topol&oacute;gica, un PodDisruptionBudget, una NetworkPolicy de denegaci&oacute;n por defecto, sin token de service account automontado, y etiquetas de propiedad y centro de costos en cada objeto."},"t111":{"es":"Cada violaci&oacute;n del Acto II que ten&iacute;a exactamente una respuesta correcta ahora es estructuralmente imposible &mdash; y no se consult&oacute; a ning&uacute;n modelo sobre nada de esto."},"t112":{"es":"D&iacute;a dos"},"t113":{"es":"La parte que realmente mata a las plataformas."},"t114":{"es":"Los caminos dorados logran que se cree un servicio. Lo que mata a las plataformas es el mes cuatro, cuando el parque ya se desvi&oacute; en silencio de lo que git dice que es verdad y nadie sabe cu&aacute;l de los dos tiene raz&oacute;n."},"t115":{"es":"Acto VIII &mdash; cuatro campos con deriva, atribuidos, con un diff propuesto."},"t116":{"es":"Campo"},"t117":{"es":"En git"},"t118":{"es":"En el cl&uacute;ster"},"t119":{"es":"Qui&eacute;n / c&oacute;mo"},"t120":{"es":"Impacto"},"t121":{"es":"k.mensah &#183; <code>kubectl scale</code> a las 02:14"},"t122":{"es":"12 r&eacute;plicas no planificadas &mdash; <b>$197/mes</b>, nunca reconciliadas de vuelta"},"t123":{"es":"Terraform fuera de banda, del pipeline anterior a la plataforma"},"t124":{"es":"<span class=\"pill no\">PCI</span> 23 d&iacute;as de ventana de recuperaci&oacute;n perdidos en silencio"},"t125":{"es":"namespace recreado sin volver a aplicarla"},"t126":{"es":"<span class=\"pill no\">PCI</span> alcanzable desde cualquier namespace durante 15 d&iacute;as"},"t127":{"es":"la recreaci&oacute;n del namespace restaur&oacute; el valor por defecto"},"t128":{"es":"token de service account montado en un pod PCI"},"t129":{"es":"<strong>El agente de deriva no tiene ninguna herramienta que mute un cl&uacute;ster.</strong> No podr&iacute;a \"simplemente arreglarlo\" aunque se lo pidieras. Todo lo que cree se convierte en un diff que una persona mergea &mdash; as&iacute; que cuando se equivoque, y se va a equivocar, el historial de git sigue siendo la verdad."},"t130":{"es":"Componentes"},"t131":{"es":"Nueve piezas, todas reemplazables."},"t132":{"es":"Nada est&aacute; vendorizado ni reimplementado. <code>./bin/setup.sh</code> descarga artefactos oficiales de release en versiones fijadas. Donde un proyecto todav&iacute;a no tiene historia ag&eacute;ntica, esta p&aacute;gina lo dice en lugar de insinuar lo contrario."},"t133":{"es":"Proyecto"},"t134":{"es":"Rol aqu&iacute;"},"t135":{"es":"Licencia"},"t136":{"es":"Versi&oacute;n"},"t137":{"es":"Superficie ag&eacute;ntica hoy"},"t138":{"es":"Eval&uacute;a cada veredicto de pol&iacute;tica de esta demo"},"t139":{"es":"<span class=\"pill ok\">la compuerta misma</span>"},"t140":{"es":"Spec de cara al desarrollador; renderiza los manifiestos"},"t141":{"es":"<span class=\"pill warn\">YAML peque&ntilde;o y con esquema que un LLM acierta</span>"},"t142":{"es":"Segunda opini&oacute;n independiente sobre la salida renderizada"},"t143":{"es":"<span class=\"pill ok\">verificaci&oacute;n</span>"},"t144":{"es":"La API de plataforma hacia la que renderiza el provisioner"},"t145":{"es":"<span class=\"pill no\">sin servidor MCP oficial</span>"},"t146":{"es":"Forma de cat&aacute;logo + Software Template; <code>AiResource</code>"},"t147":{"es":"<span class=\"pill ok\">backend MCP Actions propio</span>"},"t148":{"es":"Reconcilia el cambio mergeado"},"t149":{"es":"Ruta de promoci&oacute;n staging &#8594; prod, con compuerta humana"},"t150":{"es":"<span class=\"pill no\">propuesta MCP cerrada como no planificada</span>"},"t151":{"es":"Origen del patr&oacute;n MCP con autorizaci&oacute;n usado aqu&iacute;"},"t152":{"es":"<span class=\"pill ok\">2 servidores MCP, 3 agentes en el repo</span>"},"t153":{"es":"Esc&aacute;neres opcionales y cadena de herramientas IaC"},"t154":{"es":"<span class=\"pill warn\">opcional</span>"},"t155":{"es":"Versiones verificadas contra las p&aacute;ginas de release upstream en agosto de 2026. Excluidos a prop&oacute;sito, con las razones en el README: Cyclops y Kusion (ambos inactivos desde hace ~13 meses), y Port (n&uacute;cleo de c&oacute;digo cerrado, servidor MCP archivado, agentes de IA detr&aacute;s de un plan de pago)."},"t156":{"es":"Resultados de pruebas"},"t157":{"es":"Pruebas de aceptaci&oacute;n"},"t158":{"es":"Producido por <code>src/build_report.py</code>, que ejecuta y cronometra cada prueba contra los binarios reales y escribe <a href=\"outputs/verify-report.json\"><code>outputs/verify-report.json</code></a>. La misma suite corre en GitHub Actions en cada push, y adem&aacute;s semanalmente &mdash; porque el modo de falla que vale la pena atrapar es un release upstream que cambia el comportamiento bajo una demo que afirma ser reproducible."},"t159":{"es":"Prueba"},"t160":{"es":"Evidencia"},"t161":{"es":"Resultado"},"t162":{"es":"Duraci&oacute;n"},"t163":{"es":"Inicio r&aacute;pido"},"t164":{"es":"Cuatro maneras de ejecutarlo. Ninguna necesita una cuenta."},"t165":{"es":"Sin cl&uacute;ster, sin credenciales de nube, sin API key, sin LLM. Python 3.10+ y unos noventa segundos."},"t166":{"es":"1 &#183; GitHub Codespaces"},"t167":{"es":"El dev container instala la &uacute;nica dependencia de Python, descarga los binarios fijados y corre la suite de aceptaci&oacute;n antes de darte un prompt &mdash; as&iacute; que lo primero que ves es 14/14 en verde."},"t168":{"es":"2 &#183; Local"},"t169":{"es":"3 &#183; Docker"},"t170":{"es":"4 &#183; Apunta tu propio agente"},"t171":{"es":"Luego p&iacute;dele un servicio. Listar&aacute; los caminos dorados, leer&aacute; el esquema de par&aacute;metros, renderizar&aacute;, evaluar&aacute;, remediar&aacute; y se detendr&aacute; en el pull request &mdash; porque eso es lo &uacute;ltimo que su identidad tiene permitido hacer."},"t172":{"es":"Reproducibilidad"},"t173":{"es":"C&oacute;mo se construy&oacute; esto &mdash; sin humo ni espejos."},"t174":{"es":"Una demo que se sobrevende es peor que ninguna demo. Aqu&iacute; est&aacute; la l&iacute;nea, trazada con honestidad, y el comando que la verifica en lugar de pedirte que le creas a esta tabla."},"t175":{"es":"Componente"},"t176":{"es":"Estado"},"t177":{"es":"Detalle"},"t178":{"es":"Evaluaci&oacute;n de pol&iacute;ticas"},"t179":{"es":"<span class=\"pill ok\">real</span>"},"t180":{"es":"El binario fijado de <code>conftest</code> sobre el Rego en <code>policy/</code>. Cada n&uacute;mero de esta p&aacute;gina sale de ah&iacute;."},"t181":{"es":"Renderizado de manifiestos"},"t182":{"es":"<span class=\"pill ok\">real</span>"},"t183":{"es":"El binario fijado de <code>score-k8s</code> con el conjunto de provisioners en <code>platform/</code>."},"t184":{"es":"<span class=\"pill ok\">real</span>"},"t185":{"es":"Un linter independiente que nadie aqu&iacute; ajust&oacute;. Encontr&oacute; cuatro defectos genuinos en los valores por defecto de la plataforma durante el desarrollo &mdash; <code>containerPort</code> faltante, sin anti-afinidad, una referencia irresoluble a ServiceAccount y un <code>unhealthyPodEvictionPolicy</code> sin definir. Los cuatro se corrigieron <em>en la plataforma</em>, no se rodearon en la demo."},"t186":{"es":"Servidor MCP"},"t187":{"es":"<span class=\"pill ok\">real</span>"},"t188":{"es":"MCP 2025-06-18 sobre stdio y HTTP en streaming, solo con la librer&iacute;a est&aacute;ndar. Valida el Origin contra DNS rebinding. Ap&uacute;ntale Claude Code o Cursor."},"t189":{"es":"Autorizaci&oacute;n"},"t190":{"es":"<span class=\"pill ok\">real</span>"},"t191":{"es":"Aplicada en c&oacute;digo en <code>tools/list</code> y <code>tools/call</code>, no por instrucci&oacute;n en el prompt."},"t192":{"es":"GIFs y casts"},"t193":{"es":"<span class=\"pill ok\">real</span>"},"t194":{"es":"Renderizados con <code>agg</code> a partir de casts de asciinema de corridas reales. Los tiempos entre l&iacute;neas se sintetizan para que la reproducci&oacute;n sea legible, y el prompt de shell que se ve lo agrega el constructor de casts; no se edita ni un car&aacute;cter de la salida de las herramientas. El resumen es una selecci&oacute;n de actos de una sola captura &mdash; se quitan l&iacute;neas, nunca se reescriben."},"t195":{"es":"El razonador del agente"},"t196":{"es":"<span class=\"pill warn\">determinista por defecto</span>"},"t197":{"es":"Las denegaciones se parsean y se mapean a cambios de par&aacute;metros de Score mediante reglas, as&iacute; que la demo se reproduce exactamente sin ninguna API key. <code>--backend llm</code> mete un modelo real contra cualquier endpoint compatible con OpenAI (Ollama, vLLM, OpenRouter, Z.AI, OpenAI); el ciclo no cambia. Que no altere el resultado es justamente el punto."},"t198":{"es":"Extracci&oacute;n de intenci&oacute;n"},"t199":{"es":"<span class=\"pill warn\">regex</span>"},"t200":{"es":"De prosa a una solicitud estructurada. Un modelo lo hace mejor con entradas desordenadas y peor en reproducibilidad. Una sola funci&oacute;n, reemplazable con <code>--backend</code>."},"t201":{"es":"Cifras de costo"},"t202":{"es":"<span class=\"pill warn\">tarifario est&aacute;tico</span>"},"t203":{"es":"Una tabla versionada en <code>src/costing.py</code>, para que no haga falta ninguna cuenta. El esquema es un subconjunto de Infracost &mdash; sustituye por <code>infracost breakdown --format json</code> y el Rego no cambia."},"t204":{"es":"Observaci&oacute;n de deriva"},"t205":{"es":"<span class=\"pill warn\">fixture</span>"},"t206":{"es":"<code>platform/observed-state.yaml</code>. La detecci&oacute;n, la atribuci&oacute;n y el parche propuesto son c&oacute;digo real sobre esa forma; en un parque real lo alimentar&iacute;as desde el &aacute;rbol de recursos de Argo CD."},"t207":{"es":"Cl&uacute;ster de Kubernetes"},"t208":{"es":"<span class=\"pill no\">no presente</span>"},"t209":{"es":"No se aplica nada en ning&uacute;n lado. Los manifiestos se renderizan y se eval&uacute;an, que es donde vive cada afirmaci&oacute;n de esta p&aacute;gina. Son v&aacute;lidos contra un cl&uacute;ster real."},"t210":{"es":"Aprovisionamiento en la nube"},"t211":{"es":"<span class=\"pill no\">no presente</span>"},"t212":{"es":"El <code>SQLInstance</code> es un composite real con forma de Crossplane; no se instala ninguna Composition ni se toca ninguna cuenta de nube."},"t213":{"es":"Northwind Retail"},"t214":{"es":"<span class=\"pill no\">ficticio</span>"},"t215":{"es":"La empresa, los equipos y los n&uacute;meros de ticket. El dolor no."},"t216":{"es":"<strong>No conf&iacute;es en esta tabla &mdash; corre la suite.</strong> <code>./run.sh verify</code> ejecuta las 14 pruebas contra los binarios reales en unos ocho segundos, y GitHub Actions corre lo mismo sobre un checkout limpio en cada push."},"t217":{"es":"Repositorio"},"t218":{"es":"<a href=\"https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza\">C&oacute;digo en GitHub</a>"},"t219":{"es":"<a href=\"https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1\">Abrir en Codespaces</a>"},"t220":{"es":"Salidas"},"t221":{"es":"Demos"},"t222":{"es":"<a href=\"gifs/wow.gif\">wow.gif &mdash; la corrida completa</a>"},"t223":{"es":"Construido sobre"},"t224":{"es":"Northwind Retail es ficticia. El bundle de pol&iacute;ticas, el conjunto de provisioners, el servidor MCP y cada veredicto de esta p&aacute;gina no lo son. Licencia MIT; las herramientas upstream conservan sus propias licencias."},"t225":{"es":"// construido con herramientas reales &#183; sin mocks &#183; sin capturas &nbsp; 2026.08.20"},"t226":{"es":"score.yaml &mdash; toda la solicitud de base de datos"},"t227":{"es":"renderizado por platform/northwind.provisioners.yaml"},"_dynamic":{"_note":"Strings the page builds in JavaScript. Policy ids stay as-is; the prose around them is translated.","pg":{"raw":{"label":"Lo que devolvió el modelo","detail":"Sin plataforma. Un Deployment plausible, ejecutable y no conforme."},"registry":{"label":"Fija la imagen, usa el registro aprobado","detail":"NW-K8S-001, NW-K8S-008 — tag inmutable desde ghcr.io/northwind-retail."},"labels":{"label":"Adjunta propiedad y atribución de costos","detail":"NW-K8S-003 — quién es dueño, qué centro de costos paga, qué clasificación."},"resources":{"label":"Declara un sobre de recursos","detail":"NW-K8S-002 — requests y limits en cada contenedor."},"security":{"label":"Endurece el security context del pod","detail":"NW-K8S-004 — sin root, sin escalada de privilegios, rootfs de solo lectura, drop ALL."},"probes":{"label":"Agrega health probes","detail":"NW-K8S-005 — sin ellas, Argo Rollouts no puede verificar un canary."},"secrets":{"label":"Mueve las credenciales a una referencia de Secret","detail":"NW-K8S-006 — sin contraseñas literales en el pod spec."},"availability":{"label":"Cumple el piso de disponibilidad de producción","detail":"NW-K8S-007 — más de una réplica, distribuidas entre zonas."},"pci":{"label":"Aplica el conjunto de controles PCI","detail":"NW-PCI-001/005/006 — NetworkPolicy de denegación por defecto, sink de auditoría, sin token de SA."},"golden":{"label":"O bien: renderízalo desde el camino dorado","detail":"score.yaml + platform/northwind.provisioners.yaml + valores por defecto de admisión."}},"ui":{"goldenLabel":"Or: render it from the golden path","goldenDetail":"score.yaml + platform/northwind.provisioners.yaml + admission defaults.","denial":"denegación","denials":"denegaciones","passed":"aprobado","zeroDenials":"0 denegaciones","pass":"pasa","fail":"falla","acceptanceHeading":"{passed}/{total} pruebas de aceptación pasan","summary":"{passed} / {total} pasaron · {failed} fallaron · total {secs}s · conftest {conftest} · score-k8s {score} · kube-linter {linter}","goldenEmpty":"El camino dorado renderiza exactamente esto, por defecto, en {iterations} iteraciones a ${cost}/mes — {objects} objetos, sin que nadie tenga que acordarse de marcar ocho casillas, y con la que nadie recuerda también atrapada.","docTitle":"Agentic Platform Engineering Extravaganza","metaDescription":"Una demostración funcional y de punta a punta de ingeniería de plataformas agéntica sobre herramientas enteramente libres y de código abierto. 42 violaciones de política reales sin plataforma; 0 con una. Cada veredicto sale de una evaluación real de OPA."},"checks":{"_note":"Only the check NAME is translated. 'detail' is evidence emitted by the run itself and stays verbatim.","T01":"Cadena de herramientas upstream fijada presente","T02":"El bundle de políticas compila bajo OPA","T03":"Las reglas PCI rechazan una base de datos no conforme","T04":"Los manifiestos sin guía son rechazados","T05":"El camino dorado converge a cero denegaciones","T06":"El agente corrige entradas, nunca la salida renderizada","T07":"El linter independiente no encuentra nada","T08":"El agente no puede aprobar producción","T09":"Una persona del grupo dueño sí puede","T10":"La visibilidad de herramientas cambia por identidad","T11":"Conformidad con el protocolo MCP 2025-06-18","T12":"El transporte HTTP de MCP valida el Origin","T13":"Renderizar dos veces es idéntico byte a byte","T14":"Los artefactos versionados se reproducen exactamente"}}};
+
+/* ---------- bilingual runtime ----------
+ * English is the source of truth and lives in the markup. Spanish lives in
+ * site/i18n.es.json, keyed by the `data-i18n` attribute on the element it
+ * replaces. src/build_site.py refuses to build when the two drift apart, so a
+ * reader switching languages cannot be shown a different set of claims.
+ *
+ * Deliberately never translated: everything inside <pre> and <code>. That is
+ * verbatim output from conftest, score-k8s and kube-linter, plus commands you
+ * are meant to copy. Translating real tool output would be the one lie on a
+ * page whose entire argument is that nothing here is faked.
+ */
+const DYN = I18N._dynamic;
+const EN = new Map();
+document.querySelectorAll('[data-i18n]').forEach(function (el) {
+  EN.set(el, el.innerHTML);
+});
+let LANG = 'en';
+
+function t(path, english) {
+  if (LANG !== 'es') return english;
+  const v = path.split('.').reduce(function (o, k) { return o && o[k]; }, DYN);
+  return (typeof v === 'string' && v) ? v : english;
+}
+function fmt(s, vars) {
+  return s.replace(/\{(\w+)\}/g, function (_, k) { return vars[k]; });
+}
 
 /* ---------- acceptance table ---------- */
-(function () {
+function renderReport() {
   const body = document.getElementById('verifyBody');
+  body.innerHTML = '';
   REPORT.checks.forEach(function (c) {
     const tr = document.createElement('tr');
     const id = document.createElement('td');
     id.className = 'mono'; id.style.color = 'var(--dim)'; id.textContent = c.id;
-    const nm = document.createElement('td'); nm.textContent = c.name;
+    const nm = document.createElement('td');
+    nm.textContent = t('checks.' + c.id, c.name);
     const ev = document.createElement('td');
+    // c.detail is evidence the run itself emitted -- it stays verbatim.
     ev.className = 'mono'; ev.style.color = 'var(--muted)'; ev.textContent = c.detail;
     const rs = document.createElement('td');
     const pill = document.createElement('span');
     pill.className = 'pill ' + (c.passed ? 'ok' : 'no');
-    pill.textContent = c.passed ? 'pass' : 'fail';
+    pill.textContent = c.passed ? t('ui.pass', 'pass') : t('ui.fail', 'fail');
     rs.appendChild(pill);
     const ms = document.createElement('td');
     ms.className = 'num';
@@ -953,25 +1000,34 @@ const REPORT = {"passed":14,"total":14,"totalMs":5743.8,"toolVersions":{"conftes
     tr.appendChild(rs); tr.appendChild(ms);
     body.appendChild(tr);
   });
+
   const v = REPORT.toolVersions || {};
-  document.getElementById('verifyHeading').textContent =
-    REPORT.passed + '/' + REPORT.total + ' acceptance checks pass';
-  document.getElementById('verifySummary').textContent =
-    REPORT.passed + ' / ' + REPORT.total + ' passed · ' +
-    (REPORT.total - REPORT.passed) + ' failed · total ' +
-    (REPORT.totalMs / 1000).toFixed(1) + 's · conftest ' +
-    String(v.conftest || '').split(' ').pop() + ' · score-k8s ' +
-    String(v['score-k8s'] || '').split(' ')[1] + ' · kube-linter ' +
-    String(v['kube-linter'] || '');
-})();
+  const nums = {
+    passed: REPORT.passed,
+    total: REPORT.total,
+    failed: REPORT.total - REPORT.passed,
+    secs: (REPORT.totalMs / 1000).toFixed(1),
+    conftest: String(v.conftest || '').split(' ').pop(),
+    score: String(v['score-k8s'] || '').split(' ')[1],
+    linter: String(v['kube-linter'] || '')
+  };
+  document.getElementById('verifyHeading').textContent = LANG === 'es'
+    ? fmt(DYN.ui.acceptanceHeading, nums)
+    : nums.passed + '/' + nums.total + ' acceptance checks pass';
+  document.getElementById('verifySummary').textContent = LANG === 'es'
+    ? fmt(DYN.ui.summary, nums)
+    : nums.passed + ' / ' + nums.total + ' passed · ' + nums.failed + ' failed · total ' +
+      nums.secs + 's · conftest ' + nums.conftest + ' · score-k8s ' + nums.score +
+      ' · kube-linter ' + nums.linter;
+}
 
 /* ---------- policy playground ---------- */
 // The last entry is not a hand-hardening step -- it is the alternative to
 // hand-hardening. Appended here so the walkthrough ends where the repo does.
 PG.stages.push({
   key: 'golden',
-  label: 'Or: render it from the golden path',
-  detail: 'score.yaml + platform/northwind.provisioners.yaml + admission defaults.',
+  label: DYN.ui.goldenLabel,
+  detail: DYN.ui.goldenDetail,
   denyCount: PG.goldenPath.denyCount,
   findings: []
 });
@@ -982,18 +1038,21 @@ const badgeEl = document.getElementById('pgBadge');
 const meterEl = document.getElementById('pgMeter');
 let level = 0;
 
-PG.stages.slice(1).forEach(function (s, i) {
-  const el = document.createElement('div');
-  el.className = 'pg-step';
-  el.innerHTML = '<div class="tick">✓</div><div><div class="lb"></div><div class="dt"></div></div>';
-  el.querySelector('.lb').textContent = s.label;
-  el.querySelector('.dt').textContent = s.detail;
-  el.addEventListener('click', function () {
-    level = (level === i + 1) ? i : i + 1;
-    render();
+function buildSteps() {
+  stepsEl.innerHTML = '';
+  PG.stages.slice(1).forEach(function (s, i) {
+    const el = document.createElement('div');
+    el.className = 'pg-step';
+    el.innerHTML = '<div class="tick">✓</div><div><div class="lb"></div><div class="dt"></div></div>';
+    el.querySelector('.lb').textContent = t('pg.' + s.key + '.label', s.label);
+    el.querySelector('.dt').textContent = t('pg.' + s.key + '.detail', s.detail);
+    el.addEventListener('click', function () {
+      level = (level === i + 1) ? i : i + 1;
+      render();
+    });
+    stepsEl.appendChild(el);
   });
-  stepsEl.appendChild(el);
-});
+}
 
 function render() {
   Array.prototype.forEach.call(stepsEl.children, function (el, i) {
@@ -1002,22 +1061,37 @@ function render() {
   const stage = PG.stages[level];
   const n = stage.denyCount;
 
-  badgeEl.textContent = n === 0 ? 'passed' : n + (n === 1 ? ' denial' : ' denials');
+  badgeEl.textContent = n === 0
+    ? t('ui.passed', 'passed')
+    : n + ' ' + (n === 1 ? t('ui.denial', 'denial') : t('ui.denials', 'denials'));
   badgeEl.className = 'badge ' + (n === 0 ? 'pass' : 'fail');
   meterEl.style.width = (100 * n / PG.stages[0].denyCount) + '%';
 
   listEl.innerHTML = '';
   if (!stage.findings.length) {
+    const g = PG.goldenPath;
+    const blurb = LANG === 'es'
+      ? fmt(DYN.ui.goldenEmpty, {
+          iterations: g.iterations,
+          cost: g.monthlyCostUsd.toFixed(2),
+          objects: g.objectCount
+        })
+      : 'The golden path renders exactly this, by default, in ' + g.iterations +
+        ' iterations at $' + g.monthlyCostUsd.toFixed(2) + '/mo — ' + g.objectCount +
+        ' objects, nobody remembering to tick eight boxes, and the one nobody ' +
+        'remembers caught too.';
+    const zero = LANG === 'es' ? DYN.ui.zeroDenials : '0 denials';
     listEl.innerHTML =
       '<div class="pg-empty"><div class="big">✓</div>' +
-      '<div style="color:var(--green);font-weight:600;font-size:17px">0 denials</div>' +
+      '<div style="color:var(--green);font-weight:600;font-size:17px"></div>' +
       '<div style="color:var(--muted);margin-top:8px;font-size:14px;max-width:44ch;' +
-      'margin-inline:auto">The golden path renders exactly this, by default, in ' +
-      PG.goldenPath.iterations + ' iterations at $' + PG.goldenPath.monthlyCostUsd.toFixed(2) +
-      '/mo — ' + PG.goldenPath.objectCount + ' objects, nobody remembering to tick eight ' +
-      'boxes, and the one nobody remembers caught too.</div></div>';
+      'margin-inline:auto"></div></div>';
+    const kids = listEl.querySelectorAll('.pg-empty > div');
+    kids[1].textContent = zero;
+    kids[2].textContent = blurb;
     return;
   }
+  // Findings are raw conftest / kube-linter messages. They are not translated.
   stage.findings.forEach(function (f) {
     const row = document.createElement('div');
     row.className = 'f';
@@ -1031,7 +1105,41 @@ function render() {
     listEl.appendChild(row);
   });
 }
-render();
+
+/* ---------- language switch ---------- */
+const EN_DESC = document.getElementById('metaDesc').getAttribute('content');
+
+function applyLang(lang) {
+  LANG = (lang === 'es') ? 'es' : 'en';
+  document.documentElement.lang = LANG;
+  EN.forEach(function (english, el) {
+    const entry = I18N[el.getAttribute('data-i18n')];
+    el.innerHTML = (LANG === 'es' && entry && entry.es) ? entry.es : english;
+  });
+  document.getElementById('metaDesc')
+    .setAttribute('content', LANG === 'es' ? DYN.ui.metaDescription : EN_DESC);
+  document.querySelectorAll('.langsw button').forEach(function (b) {
+    b.setAttribute('aria-pressed', String(b.dataset.lang === LANG));
+  });
+  renderReport();
+  buildSteps();
+  render();
+  try { localStorage.setItem('lang', LANG); } catch (e) { /* private window, blocked storage */ }
+}
+
+document.querySelectorAll('.langsw button').forEach(function (b) {
+  b.addEventListener('click', function () { applyLang(b.dataset.lang); });
+});
+
+let initial = 'en';
+try {
+  const saved = localStorage.getItem('lang');
+  if (saved === 'es' || saved === 'en') initial = saved;
+  else if (/^es\b/i.test(navigator.language || '')) initial = 'es';
+} catch (e) {
+  if (/^es\b/i.test(navigator.language || '')) initial = 'es';
+}
+applyLang(initial);
 </script>
 </body>
 </html>
