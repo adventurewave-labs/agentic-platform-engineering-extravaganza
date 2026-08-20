@@ -1,0 +1,159 @@
+# Northwind Retail — platform provisioners for Score.
+#
+# This file is the abstraction boundary of the entire platform, and it is
+# eleven-ish screens of YAML owned by five people.
+#
+# A developer writes `resources: { db: { type: postgres } }` in score.yaml and
+# stops thinking. The platform team decides, here, that "postgres" means a
+# Crossplane composite resource with encryption, backups, a private endpoint
+# and a cost-centre tag -- not an unmanaged StatefulSet running
+# mirror.gcr.io/postgres:17-alpine, which is what the stock score-k8s
+# provisioner gives you.
+#
+# Swap this file and every service in the estate gets the new definition of
+# "postgres" on its next render. That is the leverage platform engineering is
+# actually for, and it is exactly the leverage an agent inherits for free: the
+# agent never has to know how to provision a database correctly, because the
+# only database it *can* ask for is the correct one.
+#
+# Format: score-k8s template provisioners (Go templates + sprig).
+#   https://github.com/score-spec/score-k8s
+
+# ---------------------------------------------------------------------------
+# postgres -> Crossplane SQLInstance composite resource
+# ---------------------------------------------------------------------------
+- uri: template://northwind/postgres-crossplane
+  type: postgres
+  class: default
+  description: >-
+    Provisions a managed Postgres through the Northwind platform API (a
+    Crossplane v2 namespaced composite). Encrypted at rest, private endpoint,
+    backups sized to the data classification.
+
+  init: |
+    service: {{ .SourceWorkload }}
+    dbname: {{ .SourceWorkload | replace "-" "_" }}
+    instanceClass: {{ default "db.t4g.medium" .Params.instanceClass }}
+    storageGb: {{ default 100 .Params.storageGb }}
+    region: {{ default "eu-west-1" .Params.region }}
+    encrypted: {{ default true .Params.encrypted }}
+    backupRetentionDays: {{ default 7 .Params.backupRetentionDays }}
+    multiAz: {{ default false .Params.multiAz }}
+    classification: {{ default "internal" .Params.classification }}
+    residency: {{ default "eu" .Params.residency }}
+    costCenter: {{ default "UNASSIGNED" .Params.costCenter }}
+    owner: {{ default "group:default/platform-team" .Params.owner }}
+    environment: {{ default "staging" .Params.environment }}
+
+  state: |
+    instance: nw-{{ .Init.service }}-{{ .Init.environment }}
+    username: nw_{{ .Init.dbname }}
+    database: {{ .Init.dbname }}
+    # Deliberately a fixed placeholder, not a generated credential. The
+    # rendered Secret is committed to this repository as evidence, and a demo
+    # that ships a real-looking password in git while enforcing NW-K8S-006
+    # would be arguing with itself. In a real estate this whole object is an
+    # ExternalSecret and the value never touches a manifest at all.
+    password: {{ default "PLACEHOLDER-issued-by-vault-at-sync" .State.password }}
+
+  outputs: |
+    host: {{ .State.instance }}.db.northwind.internal
+    port: 5432
+    name: {{ .State.database }}
+    database: {{ .State.database }}
+    username: {{ .State.username }}
+    password: {{ encodeSecretRef (printf "nw-db-%s" .Guid) "password" }}
+
+  expected_outputs: [host, port, name, database, username, password]
+
+  supported_params:
+    - instanceClass
+    - storageGb
+    - region
+    - encrypted
+    - backupRetentionDays
+    - multiAz
+    - classification
+    - residency
+    - costCenter
+    - owner
+    - environment
+
+  manifests: |
+    # The platform API surface. A developer never writes this; the platform
+    # team's Composition turns it into whatever the cloud actually needs.
+    - apiVersion: platform.northwind.io/v1alpha1
+      kind: SQLInstance
+      metadata:
+        name: {{ .State.instance }}
+        annotations:
+          k8s.score.dev/source-workload: {{ .SourceWorkload }}
+          k8s.score.dev/resource-uid: {{ .Uid }}
+          k8s.score.dev/resource-guid: {{ .Guid }}
+          northwind.io/provisioner: template://northwind/postgres-crossplane
+        labels:
+          app.kubernetes.io/name: {{ .State.instance }}
+          app.kubernetes.io/managed-by: score-k8s
+          backstage.io/component: {{ .SourceWorkload }}
+          northwind.io/owner: {{ .Init.owner | replace "group:default/" "" }}
+          northwind.io/cost-center: {{ .Init.costCenter }}
+          northwind.io/data-classification: {{ .Init.classification }}
+          northwind.io/data-residency: {{ .Init.residency }}
+          northwind.io/environment: {{ .Init.environment }}
+      spec:
+        crossplane:
+          compositionRef:
+            name: sqlinstance.postgres.northwind.io
+        parameters:
+          engine: postgres
+          engineVersion: "17.4"
+          instanceClass: {{ .Init.instanceClass }}
+          storageGb: {{ .Init.storageGb }}
+          region: {{ .Init.region }}
+          storageEncrypted: {{ .Init.encrypted }}
+          backupRetentionDays: {{ .Init.backupRetentionDays }}
+          multiAz: {{ .Init.multiAz }}
+          publiclyAccessible: false
+          costCenter: {{ .Init.costCenter }}
+          databaseName: {{ .State.database }}
+          masterUsername: {{ .State.username }}
+          passwordSecretRef:
+            name: nw-db-{{ .Guid }}
+            key: password
+
+    # In a real estate this Secret is an ExternalSecret pointing at Vault. It
+    # is rendered inline here so the demo has no external dependency; the
+    # shape the workload consumes (a secretKeyRef) is identical either way.
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: nw-db-{{ .Guid }}
+        annotations:
+          k8s.score.dev/source-workload: {{ .SourceWorkload }}
+          k8s.score.dev/resource-uid: {{ .Uid }}
+          k8s.score.dev/resource-guid: {{ .Guid }}
+          northwind.io/rotate-every: 90d
+          northwind.io/secret-source: >-
+            placeholder; replace this template block with an ExternalSecret
+            pointing at your secret manager
+        labels:
+          app.kubernetes.io/managed-by: score-k8s
+          northwind.io/data-classification: {{ .Init.classification }}
+      type: Opaque
+      data:
+        password: {{ .State.password | b64enc }}
+
+# ---------------------------------------------------------------------------
+# dns -> a platform-managed hostname
+# ---------------------------------------------------------------------------
+- uri: template://northwind/dns
+  type: dns
+  class: default
+  description: Allocates a hostname under the Northwind service domain.
+  init: |
+    sub: {{ .SourceWorkload }}
+    environment: {{ default "staging" .Params.environment }}
+  outputs: |
+    host: {{ .Init.sub }}.{{ .Init.environment }}.northwind.io
+  expected_outputs: [host]
+  supported_params: [environment]

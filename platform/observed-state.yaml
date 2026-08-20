@@ -1,0 +1,90 @@
+# Observed cluster state, as of the last reconciliation sweep.
+#
+# A fixture, not a live cluster read. In a real estate the `observed` block is
+# what Argo CD's resource tree reports (argoproj-labs/mcp-for-argocd) or what a
+# Kubernetes MCP server returns (containers/kubernetes-mcp-server); `desired`
+# is rendered from git. Everything downstream of this file -- detection,
+# attribution, policy evaluation, the proposed patch -- is real code operating
+# on this shape.
+#
+# The scenario is the one every platform team recognises: it is 02:14, prod is
+# hot, someone scales it by hand, and four weeks later nobody can say whether
+# git or the cluster is correct. The manual change also silently broke two
+# controls that nobody was watching.
+
+lastSweep: "2026-08-20T06:00:00Z"
+
+workloads:
+  payments-ledger/prod:
+    lastReconciled: "2026-07-23T11:04:19Z"
+
+    desired:
+      replicas: 6
+      image: ghcr.io/northwind-retail/payments-ledger:1.4.2
+      cpuLimit: 500m
+      memoryLimit: 512Mi
+      backupRetentionDays: 30
+      networkPolicy: payments-ledger-default-deny
+      automountServiceAccountToken: false
+
+    observed:
+      replicas: 18
+      image: ghcr.io/northwind-retail/payments-ledger:1.4.2
+      cpuLimit: 500m
+      memoryLimit: 512Mi
+      backupRetentionDays: 7
+      networkPolicy: null
+      automountServiceAccountToken: true
+
+    attribution:
+      replicas:
+        severity: high
+        changedBy: k.mensah
+        changedAt: "2026-07-29T02:14:33Z"
+        via: "kubectl scale --replicas=18 (direct, out of band)"
+        impact: "12 unplanned replicas at $16.43/mo each — $197/mo, never reconciled back"
+        remediation: "set spec.replicas back to 6 in deploy/prod, or raise the desired count in git if 18 is genuinely correct now"
+        policyId: NW-FIN-001
+
+      backupRetentionDays:
+        severity: critical
+        changedBy: terraform-legacy-pipeline
+        changedAt: "2026-08-02T19:41:02Z"
+        via: "out-of-band Terraform apply from the pre-platform pipeline"
+        impact: "PCI backup floor breached; 23 days of recovery window silently lost"
+        remediation: "restore spec.parameters.backupRetentionDays to 30 on the SQLInstance"
+        policyId: NW-PCI-003
+
+      networkPolicy:
+        severity: critical
+        changedBy: unknown
+        changedAt: "unknown (first absent in the 2026-08-05 sweep)"
+        via: "namespace was recreated without reapplying the policy"
+        impact: "PCI workload has been reachable from every namespace in the cluster for 15 days"
+        remediation: "reapply the default-deny NetworkPolicy from deploy/prod/manifests.yaml"
+        policyId: NW-PCI-001
+
+      automountServiceAccountToken:
+        severity: high
+        changedBy: unknown
+        changedAt: "unknown"
+        via: "namespace recreation restored the default"
+        impact: "service-account token is mounted into a PCI pod"
+        remediation: "set spec.template.spec.automountServiceAccountToken=false"
+        policyId: NW-PCI-006
+
+  payments-gateway/prod:
+    lastReconciled: "2026-08-19T22:15:07Z"
+    desired:
+      replicas: 6
+      image: ghcr.io/northwind-retail/payments-gateway:3.2.1
+      backupRetentionDays: 30
+      networkPolicy: payments-gateway-default-deny
+      automountServiceAccountToken: false
+    observed:
+      replicas: 6
+      image: ghcr.io/northwind-retail/payments-gateway:3.2.1
+      backupRetentionDays: 30
+      networkPolicy: payments-gateway-default-deny
+      automountServiceAccountToken: false
+    attribution: {}
