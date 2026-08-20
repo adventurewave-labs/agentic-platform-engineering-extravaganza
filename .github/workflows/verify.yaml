@@ -50,17 +50,21 @@ jobs:
           path: bin
           key: tools-${{ runner.os }}-${{ hashFiles('bin/setup.sh') }}
 
+      # Invoked through `bash` rather than as `./bin/setup.sh` on purpose: a
+      # checkout can arrive without the executable bit (a zip download, a
+      # Windows clone, a file uploaded through a web UI), and CI failing for
+      # that reason tells you nothing useful about the repository.
       - name: Fetch the pinned upstream binaries
-        run: ./bin/setup.sh
+        run: bash ./bin/setup.sh
 
       - name: Report the exact versions in play
-        run: ./run.sh versions
+        run: bash ./run.sh versions
 
       - name: Verify
-        run: ./run.sh verify
+        run: bash ./run.sh verify
 
       - name: The demo still runs end to end
-        run: ./run.sh demo --speed 0 --no-color
+        run: bash ./run.sh demo --speed 0 --no-color
 
       # verify-report.json carries wall-clock timings, so it is excluded here
       # on purpose: a duration is evidence, not a deterministic artefact.
