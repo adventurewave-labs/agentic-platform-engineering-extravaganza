@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic Platform Engineering Extravaganza</title>
+<meta name="description" content="A working, end-to-end demonstration of agentic platform engineering on entirely free and open-source tooling. 42 real policy violations without a platform; 0 with one. Every verdict from a real OPA evaluation.">
+<meta property="og:title" content="Agentic Platform Engineering, in production.">
+<meta property="og:description" content="42 real policy violations without a platform. 0 with one. Golden path + Score + Crossplane + OPA + an authz-gated MCP server. Nothing mocked.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#08090d">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#11041;</text></svg>">
+<style>
+:root{
+  --bg:#08090d; --bg2:#0c0e14; --panel:#11141c; --panel2:#161a24; --term:#0a0c11;
+  --line:#1e2430; --line2:#2b3342;
+  --text:#e8edf7; --muted:#8b96ac; --dim:#5a637a;
+  --violet:#a78bfa; --cyan:#22d3ee; --teal:#2dd4bf; --green:#4ade80;
+  --amber:#fbbf24; --red:#f87171; --pink:#f472b6; --blue:#60a5fa; --lime:#a3e635;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(1000px 560px at 10% -10%, rgba(167,139,250,.14), transparent 62%),
+    radial-gradient(900px 520px at 90% 2%, rgba(34,211,238,.11), transparent 62%);
+  background-attachment:fixed;
+}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+code,pre,.mono{font-family:var(--mono)}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+section{padding:80px 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(26px,3.5vw,38px);letter-spacing:-.03em;font-weight:750;line-height:1.14}
+h3{font-size:18px;font-weight:650;letter-spacing:-.015em}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:12px}
+.sub{color:var(--muted);margin-top:14px;max-width:74ch;font-size:16.5px}
+
+nav{position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);
+  background:rgba(8,9,13,.84);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:22px;height:58px}
+nav .brand{font-weight:700;font-size:13.5px;letter-spacing:-.02em;white-space:nowrap}
+nav .brand i{color:var(--violet);font-style:normal}
+.navlinks{display:flex;gap:18px;overflow-x:auto;flex:1;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{font-size:13px;color:var(--muted);white-space:nowrap}
+.navlinks a:hover{color:var(--text);text-decoration:none}
+.navbtns{display:flex;gap:8px}
+.ghbtn{font-size:12.5px;border:1px solid var(--line2);border-radius:7px;padding:6px 12px;
+  color:var(--text);background:var(--panel);white-space:nowrap}
+.ghbtn:hover{border-color:var(--violet);text-decoration:none}
+@media(max-width:820px){.navlinks{display:none}}
+
+.hero{padding:82px 0 56px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  border:1px solid var(--line2);border-radius:999px;padding:5px 13px;color:var(--muted)}
+.tag.on{color:var(--green);border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.07)}
+.tag.v{color:var(--violet);border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.07)}
+h1{font-size:clamp(36px,6.4vw,66px);line-height:1.02;letter-spacing:-.04em;font-weight:800;max-width:15ch}
+h1 .g{background:linear-gradient(100deg,var(--violet),var(--cyan) 55%,var(--teal));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{margin-top:24px;font-size:19px;color:var(--muted);max-width:66ch}
+.lede strong{color:var(--text);font-weight:600}
+.cta{display:flex;gap:11px;margin-top:32px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:11px 20px;border-radius:9px;
+  font-size:14px;font-weight:600;border:1px solid var(--line2);background:var(--panel);color:var(--text)}
+.btn:hover{border-color:var(--violet);background:var(--panel2);text-decoration:none}
+.btn.p{background:linear-gradient(100deg,var(--violet),#7c6df0);border-color:transparent;color:#08090d}
+.btn.p:hover{filter:brightness(1.1)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:13px;margin-top:50px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:19px}
+.stat .n{font-family:var(--mono);font-size:29px;font-weight:700;letter-spacing:-.03em}
+.stat .k{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+.n.red{color:var(--red)}.n.green{color:var(--green)}.n.amber{color:var(--amber)}
+.n.violet{color:var(--violet)}.n.cyan{color:var(--cyan)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+
+figure{margin:30px 0 0}
+figure img{width:100%;border-radius:12px;border:1px solid var(--line2);display:block;background:#0a0c11}
+figcaption{margin-top:11px;font-size:13px;color:var(--dim);text-align:center}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:15px;margin-top:30px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:21px;
+  position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--violet)}
+.card.amber::before{background:var(--amber)}.card.red::before{background:var(--red)}
+.card.green::before{background:var(--green)}.card.cyan::before{background:var(--cyan)}
+.card.pink::before{background:var(--pink)}
+.card .no{font-family:var(--mono);font-size:10.5px;color:var(--dim);letter-spacing:.15em}
+.card h3{margin:6px 0 8px;font-size:16.5px}
+.card p{font-size:13.8px;color:var(--muted)}
+
+.term{background:var(--term);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:20px}
+.term-bar{display:flex;align-items:center;gap:8px;padding:10px 15px;border-bottom:1px solid var(--line);
+  background:var(--panel)}
+.term-bar .dots{display:flex;gap:6px}
+.term-bar .dots i{width:10px;height:10px;border-radius:50%;background:var(--line2)}
+.term-bar .t{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-left:6px}
+.term-bar .badge-real{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  color:var(--green);border:1px solid rgba(74,222,128,.35);border-radius:5px;padding:2px 8px}
+.term pre{background:none;border:none;border-radius:0;padding:16px 18px;font-size:12.3px;line-height:1.62}
+pre{background:var(--term);border:1px solid var(--line);border-radius:11px;padding:16px 18px;
+  overflow-x:auto;font-size:12.5px;line-height:1.7;color:var(--muted)}
+pre .c{color:var(--dim)}pre .k{color:var(--violet)}pre .s{color:var(--teal)}
+pre .n{color:var(--amber)}pre .g{color:var(--green)}pre .r{color:var(--red)}
+pre .b{color:var(--text);font-weight:600}pre .p{color:var(--pink)}
+
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:20px}
+th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--dim);padding:9px 11px;border-bottom:1px solid var(--line2);font-weight:500}
+td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.mono,th.mono{font-family:var(--mono);font-size:12.3px}
+td.num{text-align:right;font-family:var(--mono);font-size:12.3px;color:var(--muted);white-space:nowrap}
+.pill{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.pill.ok{color:var(--green);border-color:rgba(74,222,128,.35)}
+.pill.no{color:var(--red);border-color:rgba(248,113,113,.35)}
+.pill.warn{color:var(--amber);border-color:rgba(251,191,36,.35)}
+.tbl-wrap{overflow-x:auto}
+
+.flow{margin-top:32px;overflow-x:auto;padding-bottom:8px}
+.flow svg{min-width:920px;width:100%;height:auto}
+
+.pg{display:grid;grid-template-columns:330px 1fr;gap:18px;margin-top:28px;align-items:start}
+@media(max-width:900px){.pg{grid-template-columns:1fr}.pg-out{position:static!important}}
+.pg-steps{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px}
+.pg-step{display:flex;gap:11px;align-items:flex-start;padding:10px 11px;border-radius:9px;
+  cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
+.pg-step:hover{background:var(--panel2)}
+.pg-step.on{background:rgba(167,139,250,.10);border-color:rgba(167,139,250,.35)}
+.pg-step .tick{flex:none;width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line2);
+  margin-top:2px;display:grid;place-items:center;font-size:11px;color:var(--bg)}
+.pg-step.on .tick{background:var(--violet);border-color:var(--violet)}
+.pg-step .lb{font-size:13.2px;font-weight:550}
+.pg-step .dt{font-size:11.2px;color:var(--dim);margin-top:3px;font-family:var(--mono);line-height:1.5}
+.pg-out{background:var(--term);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column;min-height:300px;position:sticky;top:74px}
+.pg-bar{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid var(--line);
+  background:var(--panel);flex-wrap:wrap}
+.pg-bar .cmd{font-family:var(--mono);font-size:11.8px;color:var(--dim)}
+.badge{font-family:var(--mono);font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:6px}
+.badge.fail{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.35)}
+.badge.pass{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35)}
+.meter{height:5px;background:var(--line);border-radius:3px;overflow:hidden;flex:1;min-width:80px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--amber));
+  transition:width .3s cubic-bezier(.4,0,.2,1)}
+.pg-list{overflow-y:auto;padding:13px 16px;flex:1;max-height:600px}
+.f{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(30,36,48,.7);
+  font-family:var(--mono);font-size:11.8px;line-height:1.6;animation:fin .22s ease}
+.f:last-child{border-bottom:none}
+@keyframes fin{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.f .id{flex:none;color:var(--red);font-weight:700;width:112px}
+.f .id.kl{color:var(--amber)}
+.f .m{color:var(--muted);min-width:0;word-break:break-word}
+.pg-empty{padding:52px 22px;text-align:center}
+.pg-empty .big{font-size:40px;margin-bottom:10px}
+
+.callout{border-left:3px solid var(--violet);background:rgba(167,139,250,.06);
+  padding:17px 21px;border-radius:0 11px 11px 0;margin-top:24px}
+.callout p{color:var(--text);font-size:15.4px}
+.callout p+p{margin-top:9px}
+.callout.g{border-left-color:var(--green);background:rgba(74,222,128,.06)}
+.callout.a{border-left-color:var(--amber);background:rgba(251,191,36,.06)}
+
+ul.why{list-style:none;margin-top:16px}
+ul.why li{padding-left:24px;position:relative;font-size:14.5px;color:var(--muted);margin-bottom:11px}
+ul.why li::before{content:"\25B8";position:absolute;left:4px;color:var(--violet)}
+ul.why li b{color:var(--text);font-weight:600}
+
+footer{padding:52px 0 74px;border-top:1px solid var(--line);color:var(--dim);font-size:13.5px}
+footer a{color:var(--muted)}
+.foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:26px;margin-bottom:28px}
+.foot-grid h4{font-size:11px;font-family:var(--mono);letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;font-weight:500}
+.foot-grid li{list-style:none;margin-bottom:5px}
+.stamp{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:8px}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="brand">&#11041; agentic<i>&#183;</i>platform<i>&#183;</i>engineering</div>
+  <div class="navlinks">
+    <a href="#demo">Demo</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#policy">Policy gate</a>
+    <a href="#authz">Authorization</a>
+    <a href="#render">Render</a>
+    <a href="#daytwo">Day 2</a>
+    <a href="#components">Components</a>
+    <a href="#verify">Test results</a>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#real">Reproducibility</a>
+  </div>
+  <div class="navbtns">
+    <a class="ghbtn" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Codespaces</a>
+    <a class="ghbtn" href="https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza">GitHub &#8599;</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="tags">
+    <span class="tag on">Real OPA</span>
+    <span class="tag on">Real score-k8s</span>
+    <span class="tag on">Real MCP 2025-06-18</span>
+    <span class="tag v">100% open source</span>
+    <span class="tag">No cluster &#183; No API key</span>
+  </div>
+  <h1>Agentic platform engineering, <span class="g">with the platform still in charge</span>.</h1>
+  <p class="lede">
+    A working, end-to-end demonstration built entirely on free, open-source tooling. One request &mdash;
+    <em>"a PCI-scope payments service with a Postgres database, EU residency, staging and prod"</em> &mdash;
+    routed two ways. Without a platform, a capable model returns Kubernetes manifests that apply
+    cleanly and fail <strong>42 real policy checks</strong>. Through the golden path they converge to
+    <strong>zero in three iterations</strong>, inside budget, with a human still holding the
+    production approval.
+  </p>
+  <div class="cta">
+    <a class="btn p" href="#demo">Watch the demo &rarr;</a>
+    <a class="btn" href="#policy">Try the policy gate</a>
+    <a class="btn" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Open in Codespaces</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n red">42</div><div class="k">policy violations with no platform in the way</div></div>
+    <div class="stat"><div class="n green">0</div><div class="k">after the golden path, in 3 real iterations</div></div>
+    <div class="stat"><div class="n amber">11 d</div><div class="k">the ticket trail this replaces, across 6 teams</div></div>
+    <div class="stat"><div class="n violet">$602</div><div class="k">per month the FinOps gate caught, on one service</div></div>
+    <div class="stat"><div class="n cyan">0</div><div class="k">cluster mutations any agent is able to perform</div></div>
+  </div>
+</div></header>
+
+<section id="demo"><div class="wrap">
+  <div class="kicker">90-second cinematic demo</div>
+  <h2>One request, eight acts, nothing pre-recorded.</h2>
+  <p class="sub">
+    Every policy verdict below came from running the real <code>conftest</code> binary against the
+    real Rego in <code>policy/</code>. Every manifest came from the real <code>score-k8s</code>
+    binary and the provisioner set in <code>platform/</code>. Run it twice and the numbers are
+    identical &mdash; that is what a control plane is supposed to give you.
+  </p>
+
+  <figure>
+    <img src="gifs/highlight.gif" alt="Terminal recording: 42 policy violations without a platform, converging to zero through the golden path" loading="lazy">
+    <figcaption>Acts II, III, V, VII and the scorecard. The full eight-act run is
+      <a href="gifs/wow.gif">gifs/wow.gif</a>; every cast is in <code>recordings/</code>.</figcaption>
+  </figure>
+
+  <div class="cards">
+    <div class="card amber"><div class="no">ACT I</div><h3>The ticket trail</h3>
+      <p>One sentence becomes six tickets across six teams. Eleven working days, about four hours
+      of which is work. The rest is queue.</p></div>
+    <div class="card amber"><div class="no">ACT II</div><h3>Skip the platform</h3>
+      <p>A capable model writes the YAML from the prompt. It parses, it applies, it would pass a
+      distracted review. Conftest and kube-linter return 42 denials.</p></div>
+    <div class="card"><div class="no">ACT III</div><h3>The platform API</h3>
+      <p>The agent connects over MCP as a principal and receives 12 of 14 tools. The two it does
+      not receive are the entire point.</p></div>
+    <div class="card cyan"><div class="no">ACT IV</div><h3>Render</h3>
+      <p>Three lines of Score become a Crossplane composite with encryption, a private endpoint,
+      sized backups and a cost-centre tag.</p></div>
+    <div class="card pink"><div class="no">ACT V</div><h3>The gate, and the loop</h3>
+      <p>Real OPA denials, each carrying its own remediation. The agent changes the inputs,
+      re-renders, re-evaluates. Zero in three iterations.</p></div>
+    <div class="card green"><div class="no">ACT VI</div><h3>Money is policy</h3>
+      <p>$960.82/mo against a $400 envelope. The gate reduced capacity &mdash; never the 30-day PCI
+      backup window.</p></div>
+    <div class="card"><div class="no">ACT VII</div><h3>Propose, then stop</h3>
+      <p>The agent opens a PR carrying the policy verdict and cost delta, then tries to approve its
+      own production promotion. The platform declines.</p></div>
+    <div class="card red"><div class="no">ACT VIII</div><h3>Day two</h3>
+      <p>18 replicas where git says 6. The PCI backup window silently cut. The NetworkPolicy gone
+      for fifteen days. Attributed, and proposed as a diff.</p></div>
+  </div>
+</div></section>
+
+<section id="architecture"><div class="wrap">
+  <div class="kicker">The stack</div>
+  <h2>Intent in, auditable pull request out.</h2>
+  <p class="sub">
+    Two front doors onto one golden path: a portal for humans, MCP for agents, the same
+    authorization policy behind both. Every box is a real open-source project or a file in this
+    repository &mdash; nothing is a placeholder.
+  </p>
+
+  <div class="flow">
+  <svg viewBox="0 0 1080 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture: intent flows through the platform API, golden path, policy gates and delivery">
+    <defs>
+      <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+        <path d="M0,0 L7,3.2 L0,6.4 z" fill="#3d4560"/>
+      </marker>
+      <linearGradient id="gv" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#22d3ee"/>
+      </linearGradient>
+      <style>
+        .bx{fill:#11141c;stroke:#1e2430;stroke-width:1.2;rx:9}
+        .bx2{fill:#161a24;stroke:#2b3342;stroke-width:1.2;rx:9}
+        .t{fill:#e8edf7;font:600 13px Inter,sans-serif}
+        .st{fill:#8b96ac;font:11px ui-monospace,monospace}
+        .lb{fill:#5a637a;font:10px ui-monospace,monospace;letter-spacing:.1em}
+        .ln{stroke:#3d4560;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+        .lnd{stroke:#3d4560;stroke-width:1.4;fill:none;stroke-dasharray:4 4;marker-end:url(#ar)}
+      </style>
+    </defs>
+    <text x="20" y="26" class="lb">INTENT</text>
+    <rect x="20" y="38" width="150" height="60" class="bx"/>
+    <text x="34" y="62" class="t">Developer</text>
+    <text x="34" y="80" class="st">"a PCI service&#8230;"</text>
+    <rect x="20" y="118" width="150" height="60" class="bx"/>
+    <text x="34" y="142" class="t">Agent</text>
+    <text x="34" y="160" class="st">MCP client</text>
+    <path class="ln" d="M172,68 L215,68 L215,140 L245,140"/>
+    <path class="ln" d="M172,148 L245,148"/>
+
+    <text x="250" y="26" class="lb">PLATFORM API</text>
+    <rect x="248" y="38" width="192" height="230" rx="10" fill="#0c0e14" stroke="url(#gv)" stroke-width="1.4"/>
+    <text x="264" y="62" class="t">Northwind control plane</text>
+    <text x="264" y="80" class="st">src/platform_mcp.py</text>
+    <rect x="264" y="92" width="160" height="40" class="bx2"/>
+    <text x="276" y="110" class="t" style="font-size:12px">Software catalog</text>
+    <text x="276" y="125" class="st">Backstage-shaped</text>
+    <rect x="264" y="140" width="160" height="40" class="bx2"/>
+    <text x="276" y="158" class="t" style="font-size:12px">Golden-path scaffolder</text>
+    <text x="276" y="173" class="st">Software Template</text>
+    <rect x="264" y="188" width="160" height="44" class="bx2"/>
+    <text x="276" y="206" class="t" style="font-size:12px">Authorization</text>
+    <text x="276" y="221" class="st">12 actions &#183; filtered</text>
+    <text x="264" y="252" class="st" style="fill:#4ade80">MCP 2025-06-18 &#183; stdio + HTTP</text>
+    <path class="ln" d="M442,152 L500,152"/>
+
+    <text x="505" y="26" class="lb">RENDER</text>
+    <rect x="503" y="38" width="196" height="106" class="bx"/>
+    <text x="518" y="62" class="t">Score workload spec</text>
+    <text x="518" y="80" class="st">score.dev/v1b1</text>
+    <text x="518" y="100" class="st" style="fill:#2dd4bf">score-k8s generate</text>
+    <text x="518" y="118" class="st">+ northwind provisioner set</text>
+    <text x="518" y="134" class="st">+ platform defaults</text>
+    <rect x="503" y="158" width="196" height="110" class="bx"/>
+    <text x="518" y="182" class="t">Rendered objects</text>
+    <text x="518" y="200" class="st" style="fill:#a78bfa">SQLInstance (Crossplane)</text>
+    <text x="518" y="216" class="st">Deployment &#183; Service</text>
+    <text x="518" y="232" class="st">NetworkPolicy &#183; PDB</text>
+    <text x="518" y="248" class="st">ServiceAccount &#183; Secret</text>
+    <path class="ln" d="M591,146 L591,156"/>
+    <path class="ln" d="M701,212 L738,212"/>
+
+    <text x="744" y="26" class="lb">GATES</text>
+    <rect x="741" y="38" width="150" height="52" class="bx"/>
+    <text x="755" y="60" class="t" style="font-size:12.5px">Score spec</text>
+    <text x="755" y="77" class="st">NW-SCORE-001..005</text>
+    <rect x="741" y="98" width="150" height="52" class="bx"/>
+    <text x="755" y="120" class="t" style="font-size:12.5px">Kubernetes + PCI</text>
+    <text x="755" y="137" class="st">NW-K8S-* &#183; NW-PCI-*</text>
+    <rect x="741" y="158" width="150" height="52" class="bx"/>
+    <text x="755" y="180" class="t" style="font-size:12.5px">FinOps envelope</text>
+    <text x="755" y="197" class="st">NW-FIN-001..006</text>
+    <rect x="741" y="218" width="150" height="52" class="bx"/>
+    <text x="755" y="240" class="t" style="font-size:12.5px">kube-linter</text>
+    <text x="755" y="257" class="st">independent check</text>
+    <text x="741" y="292" class="st" style="fill:#fbbf24">conftest &#183; OPA &#183; Apache-2.0</text>
+
+    <path class="lnd" d="M816,300 L816,336 L601,336 L601,274"/>
+    <text x="606" y="360" class="st" style="fill:#f472b6" text-anchor="middle">a denial carries its remediation &#8594; the agent changes the INPUT and re-renders</text>
+
+    <path class="ln" d="M893,140 L946,140"/>
+    <text x="952" y="26" class="lb">DELIVERY</text>
+    <rect x="949" y="38" width="112" height="52" class="bx"/>
+    <text x="962" y="60" class="t" style="font-size:12.5px">Pull request</text>
+    <text x="962" y="77" class="st">agent-authored</text>
+    <rect x="949" y="98" width="112" height="52" class="bx"/>
+    <text x="962" y="120" class="t" style="font-size:12.5px">Human review</text>
+    <text x="962" y="137" class="st" style="fill:#f87171">required</text>
+    <rect x="949" y="158" width="112" height="52" class="bx"/>
+    <text x="962" y="180" class="t" style="font-size:12.5px">Argo CD</text>
+    <text x="962" y="197" class="st">reconcile</text>
+    <rect x="949" y="218" width="112" height="52" class="bx"/>
+    <text x="962" y="240" class="t" style="font-size:12.5px">Kargo</text>
+    <text x="962" y="257" class="st">staging &#8594; prod</text>
+    <path class="ln" d="M1005,92 L1005,96"/>
+    <path class="ln" d="M1005,152 L1005,156"/>
+    <path class="ln" d="M1005,212 L1005,216"/>
+  </svg>
+  </div>
+
+  <div class="callout">
+    <p><strong>The split that makes it work.</strong> Platform defaults eliminate the entire class
+    of structural mistakes deterministically &mdash; security context, probes, labels,
+    service-account tokens. No model judgement is involved and none is wanted. What the platform
+    <em>cannot</em> decide for you is judgement: how big, which region, how long to keep backups,
+    how much to spend.</p>
+    <p>Those are exactly the calls an agent gets plausibly wrong, and exactly what the policy bundle
+    is for. Defaults for the deterministic half, policy for the judgement half, and the agent
+    operates in between.</p>
+  </div>
+</div></section>
+
+<section id="policy"><div class="wrap">
+  <div class="kicker">Open Policy Agent &#183; Conftest 0.69.0 &#183; Apache-2.0</div>
+  <h2>The policy gate, and the agent that closes it.</h2>
+  <p class="sub">
+    25 controls across four bundles &mdash; 34 <code>deny</code>/<code>warn</code> rule bodies &mdash;
+    all real Rego. Every message carries a policy id and an explicit remediation after
+    <code>-&gt;</code>. That second half is what makes the loop agentic rather than merely a linter:
+    the agent parses it, changes a Score parameter, and the whole artefact is regenerated.
+  </p>
+
+  <figure>
+    <img src="gifs/policy_gate.gif" alt="Terminal recording of the policy gate: three iterations from denials to zero" loading="lazy">
+    <figcaption>Act V &mdash; three real conftest evaluations, converging to zero.</figcaption>
+  </figure>
+
+  <div class="term">
+    <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
+      <span class="t">./run.sh act 5</span><span class="badge-real">REAL OUTPUT</span></div>
+    <pre><span class="p">&#9613; ITERATION 1</span>   <span class="c">$960.82/mo vs $400.00 budget</span>
+  <span class="c">1.</span> <span class="r">NW-PCI-003</span>  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7
+                 is below the 30-day PCI floor
+     <span class="c">fix &#8594;</span> <span class="n">set spec.parameters.backupRetentionDays&gt;=30</span>
+  <span class="c">2.</span> <span class="r">NW-FIN-001</span>  payments-ledger/prod: estimated $960.82/mo exceeds the
+                 CC-4471 budget of $400.00/mo by $560.82
+     <span class="c">fix &#8594;</span> <span class="n">right-size the largest line item or request a budget increase</span>
+  <span class="c">3.</span> <span class="r">NW-FIN-003</span>  resource "payments-ledger-postgres" is $820.67/mo &mdash; 85% of
+                 the whole service budget
+     <span class="c">fix &#8594;</span> <span class="n">single line items over 70% need an explicit exception</span>
+
+   <span class="k">agent &#8594;</span> <span class="c">2 input change(s), then re-render from source</span>
+     <span class="c">&#183;</span> <span class="b">db_backup_retention_days</span> <span class="r">7</span> <span class="c">&#8594;</span> <span class="g">30</span>
+       <span class="c">PCI requires a 30-day minimum recovery window</span>
+     <span class="c">&#183;</span> <span class="b">db_instance_class</span> <span class="r">db.r6g.xlarge</span> <span class="c">&#8594;</span> <span class="g">db.t4g.large</span>
+       <span class="c">largest reducible line item; stays inside the cost-centre envelope</span>
+
+<span class="p">&#9613; ITERATION 3</span>   <span class="c">$359.15/mo vs $400.00 budget</span>
+   <span class="g">&#10004; 0 denials across 4 gates</span>
+
+  <span class="g">PASSED &mdash; 0 denials</span>  <span class="c">converged in 3 iterations</span></pre>
+  </div>
+
+  <ul class="why">
+    <li><b>It fixes causes, never symptoms.</b> Every remediation edits a Score parameter and the
+    artefact is regenerated. Patch the rendered output instead and the finding returns silently on
+    the next render &mdash; that is how automated remediation becomes worse than none.</li>
+    <li><b>Compliance outranks cost.</b> The budget gate reduced capacity and left the 30-day PCI
+    backup window alone. It went the other way, 7 days to 30, in the same run.</li>
+    <li><b>It stops when it cannot map a denial to an input.</b> No guessing, no silencing &mdash;
+    the finding escalates to a human, which is the correct outcome rather than a bug.</li>
+    <li><b>The engine is the real one.</b> The same <code>conftest</code> you would run in your own
+    CI, at a pinned version, over Rego you can read in <code>policy/</code>.</li>
+  </ul>
+
+  <h3 style="margin-top:46px">Build the platform one control at a time</h3>
+  <p class="sub">
+    Start from what the model handed back and switch on the guardrails a platform team would encode
+    once. Each verdict list is a genuine <code>conftest</code> + <code>kube-linter</code> run
+    captured at build time by <code>src/build_playground.py</code> &mdash; the page replays recorded
+    output, it does not approximate Rego in JavaScript.
+  </p>
+
+  <div class="pg">
+    <div class="pg-steps" id="pgSteps"></div>
+    <div class="pg-out">
+      <div class="pg-bar">
+        <span class="cmd">$ conftest test --policy policy/ manifests.yaml</span>
+        <span class="meter"><i id="pgMeter" style="width:100%"></i></span>
+        <span class="badge fail" id="pgBadge">42 denials</span>
+      </div>
+      <div class="pg-list" id="pgList"></div>
+    </div>
+  </div>
+
+  <div class="callout g">
+    <p><strong>Switch every control on and one finding survives:</strong>
+    <code class="mono">no-anti-affinity</code> &mdash; replicas that could all land on one node. It
+    is the least memorable item on the list, which is exactly why hand-hardening leaves it behind
+    and a rendered golden path does not. That is the case for rendering rather than reviewing.</p>
+  </div>
+</div></section>
+
+<section id="authz"><div class="wrap">
+  <div class="kicker">The idea worth stealing</div>
+  <h2>A prompt is a request. An absent tool is a fact.</h2>
+  <p class="sub">
+    Every tool this platform exposes declares a permission, and <code>tools/list</code> is filtered
+    by the calling identity <em>before the model ever sees it</em>. An agent without
+    <code>delivery:approve</code> is not instructed to avoid approving production. It is never told
+    the capability exists.
+  </p>
+
+  <figure>
+    <img src="gifs/authz.gif" alt="Terminal recording of the MCP tool list being filtered by identity" loading="lazy">
+    <figcaption>Act III &mdash; the same server, two identities, two different worlds.</figcaption>
+  </figure>
+
+  <div class="grid2" style="margin-top:28px">
+    <div class="term">
+      <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
+        <span class="t">./run.sh tools platform-agent</span><span class="badge-real">REAL OUTPUT</span></div>
+      <pre><span class="c">identity: agent:platform-agent  (12/14 tools visible)</span>
+
+    catalog.get_entity                 <span class="c">catalog:read</span>
+    catalog.query                      <span class="c">catalog:read</span>
+    catalog.refresh_entity             <span class="c">catalog:refresh</span>
+  <span class="n">!</span> catalog.register                   <span class="c">catalog:write</span>
+    platform.estimate_cost             <span class="c">finops:read</span>
+    platform.evaluate_policy           <span class="c">policy:evaluate</span>
+  <span class="n">!</span> platform.open_pull_request         <span class="c">delivery:propose</span>
+    platform.plan_promotion            <span class="c">delivery:plan</span>
+    platform.render_workload           <span class="c">platform:render</span>
+  <span class="n">!</span> scaffolder.execute                 <span class="c">scaffolder:execute</span>
+    scaffolder.get_template_parameters <span class="c">scaffolder:read</span>
+    scaffolder.list_templates          <span class="c">scaffolder:read</span>
+
+  <span class="c">withheld from this identity:</span>
+    <span class="r">x platform.approve_promotion       identity lacks delivery:approve</span>
+    <span class="r">x platform.detect_drift            identity lacks observability:read</span></pre>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
+        <span class="t">platform/catalog/ai-resources.yaml</span></div>
+      <pre><span class="k">apiVersion</span>: backstage.io/v1alpha1
+<span class="k">kind</span>: <span class="g">AiResource</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: platform-agent
+<span class="k">spec</span>:
+  <span class="k">type</span>: agent
+  <span class="k">owner</span>: group:default/platform-team
+  <span class="k">identity</span>: platform-agent
+  <span class="c"># The blast radius: twelve entries,</span>
+  <span class="c"># and note which one is absent.</span>
+  <span class="k">allowedTools</span>:
+    - <span class="s">catalog.query</span>
+    - <span class="s">catalog.get_entity</span>
+    - <span class="s">catalog.refresh_entity</span>
+    - <span class="s">catalog.register</span>
+    - <span class="s">scaffolder.list_templates</span>
+    - <span class="s">scaffolder.get_template_parameters</span>
+    - <span class="s">scaffolder.execute</span>
+    - <span class="s">platform.render_workload</span>
+    - <span class="s">platform.evaluate_policy</span>
+    - <span class="s">platform.estimate_cost</span>
+    - <span class="s">platform.plan_promotion</span>
+    - <span class="s">platform.open_pull_request</span>
+    <span class="c"># platform.approve_promotion is not</span>
+    <span class="c"># here, and never will be.</span></pre>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="panel">
+      <h3>Two layers, deliberately</h3>
+      <ul class="why">
+        <li><b>Identity &#8594; actions.</b> Twelve platform actions granted per principal, in
+        <code>src/catalog.py</code>. <code>platform-agent</code> holds <code>delivery:propose</code>
+        and never <code>delivery:approve</code>.</li>
+        <li><b><code>AiResource.spec.allowedTools</code>.</b> A git-tracked, owned, reviewable
+        catalog entity that narrows an agent further. An agent's blast radius is a YAML file a
+        human reviews and an auditor can diff.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Four identities, four different worlds</h3>
+      <pre style="margin-top:14px">./run.sh tools platform-agent    <span class="c"># 12/14</span>
+./run.sh tools drift-agent       <span class="c">#  5/14</span>
+./run.sh tools cost-reviewer     <span class="c">#  3/14</span>
+./run.sh tools release-manager   <span class="c"># 14/14</span></pre>
+      <p class="sub" style="font-size:14px;margin-top:14px">
+        Borrowed from <a href="https://github.com/openchoreo/openchoreo">OpenChoreo</a> (Apache-2.0,
+        CNCF Sandbox), whose control plane routes agent tool calls through the same policy decision
+        point as human API access &mdash; as far as I found, the only OSS internal developer
+        platform that does.
+      </p>
+    </div>
+  </div>
+</div></section>
+
+<section id="render"><div class="wrap">
+  <div class="kicker">Score 0.16.0 &#183; Crossplane v2 &#183; Apache-2.0</div>
+  <h2>Three lines in. A managed, encrypted, tagged database out.</h2>
+  <p class="sub">
+    A developer writes <code>resources: {db: {type: postgres}}</code> and stops thinking. The
+    platform team decides, in one file, that "postgres" means a Crossplane composite with
+    encryption, a private endpoint, sized backups and a cost-centre tag &mdash; not an unmanaged
+    StatefulSet running a mirrored image. Swap that file and every service in the estate gets the
+    new definition on its next render.
+  </p>
+
+  <figure>
+    <img src="gifs/render.gif" alt="Terminal recording of score.yaml rendered through the Northwind provisioner set" loading="lazy">
+    <figcaption>Act IV &mdash; real <code>score-k8s generate</code>, real provisioner set.</figcaption>
+  </figure>
+
+  <div class="grid2" style="margin-top:24px">
+    <div class="term">
+      <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
+        <span class="t">score.yaml &mdash; the entire database request</span></div>
+      <pre><span class="k">resources</span>:
+  <span class="k">db</span>:
+    <span class="k">type</span>: <span class="s">postgres</span>
+
+<span class="c"># That is the whole thing. The only</span>
+<span class="c"># infrastructure a product engineer</span>
+<span class="c"># at Northwind ever writes.</span></pre>
+    </div>
+    <div class="term">
+      <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
+        <span class="t">rendered by platform/northwind.provisioners.yaml</span>
+        <span class="badge-real">REAL RENDER</span></div>
+      <pre><span class="k">apiVersion</span>: platform.northwind.io/v1alpha1
+<span class="k">kind</span>: <span class="b">SQLInstance</span>
+<span class="k">spec</span>:
+  <span class="k">crossplane</span>:
+    <span class="k">compositionRef</span>:
+      <span class="k">name</span>: sqlinstance.postgres.northwind.io
+  <span class="k">parameters</span>:
+    <span class="k">storageEncrypted</span>: <span class="g">true</span>
+    <span class="k">publiclyAccessible</span>: <span class="g">false</span>
+    <span class="k">backupRetentionDays</span>: <span class="n">30</span>
+    <span class="k">region</span>: <span class="s">eu-west-1</span>
+    <span class="k">instanceClass</span>: <span class="s">db.t4g.medium</span>
+    <span class="k">costCenter</span>: <span class="s">CC-4471</span>
+    <span class="k">passwordSecretRef</span>: <span class="c">{ name: ..., key: password }</span></pre>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Plus, without being asked:</strong> hardened securityContext, dropped capabilities,
+    read-only root filesystem, liveness and readiness probes, topology spread, a
+    PodDisruptionBudget, a default-deny NetworkPolicy, no automounted service-account token, and
+    ownership and cost-centre labels on every object.</p>
+    <p>Every Act II violation that had exactly one correct answer is now structurally impossible
+    &mdash; and no model was consulted about any of it.</p>
+  </div>
+</div></section>
+
+<section id="daytwo"><div class="wrap">
+  <div class="kicker">Day two</div>
+  <h2>The part that actually kills platforms.</h2>
+  <p class="sub">
+    Golden paths get a service created. What kills platforms is month four, when the estate has
+    quietly diverged from what git says is true and nobody knows which of the two is correct.
+  </p>
+
+  <figure>
+    <img src="gifs/drift.gif" alt="Terminal recording of drift detection with attribution" loading="lazy">
+    <figcaption>Act VIII &mdash; four drifted fields, attributed, with a proposed diff.</figcaption>
+  </figure>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Field</th><th>In git</th><th>In cluster</th><th>Who / how</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">replicas</td><td class="mono" style="color:var(--green)">6</td>
+        <td class="mono" style="color:var(--red)">18</td>
+        <td>k.mensah &#183; <code>kubectl scale</code> at 02:14</td>
+        <td>12 unplanned replicas &mdash; <b>$197/mo</b>, never reconciled back</td></tr>
+      <tr><td class="mono">backupRetentionDays</td><td class="mono" style="color:var(--green)">30</td>
+        <td class="mono" style="color:var(--red)">7</td>
+        <td>out-of-band Terraform from the pre-platform pipeline</td>
+        <td><span class="pill no">PCI</span> 23 days of recovery window silently lost</td></tr>
+      <tr><td class="mono">networkPolicy</td><td class="mono" style="color:var(--green)">default-deny</td>
+        <td class="mono" style="color:var(--red)">absent</td>
+        <td>namespace recreated without reapplying it</td>
+        <td><span class="pill no">PCI</span> reachable from every namespace for 15 days</td></tr>
+      <tr><td class="mono">automountServiceAccountToken</td><td class="mono" style="color:var(--green)">false</td>
+        <td class="mono" style="color:var(--red)">true</td>
+        <td>namespace recreation restored the default</td>
+        <td>service-account token mounted into a PCI pod</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout a">
+    <p><strong>The drift agent holds no tool that mutates a cluster.</strong> It could not "just fix
+    it" even if you asked. Everything it believes becomes a diff a human merges &mdash; so when it
+    is wrong, and it will be, the git history is still the truth.</p>
+  </div>
+</div></section>
+
+<section id="components"><div class="wrap">
+  <div class="kicker">Components</div>
+  <h2>Nine pieces, every one replaceable.</h2>
+  <p class="sub">
+    Nothing is vendored or reimplemented. <code>./bin/setup.sh</code> fetches official release
+    artefacts at pinned versions. Where a project has no agentic story yet, this page says so
+    rather than implying one.
+  </p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>Project</th><th>Role here</th><th class="mono">License</th>
+      <th class="mono">Version</th><th>Agentic surface today</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><a href="https://github.com/open-policy-agent/conftest">Conftest</a> / <a href="https://github.com/open-policy-agent/opa">OPA</a></td>
+        <td>Evaluates every policy verdict in this demo</td>
+        <td class="mono">Apache-2.0</td><td class="mono">0.69.0 / 1.19.1</td>
+        <td><span class="pill ok">the gate itself</span></td></tr>
+      <tr><td><a href="https://github.com/score-spec/score-k8s">score-k8s</a> / <a href="https://github.com/score-spec/spec">Score</a></td>
+        <td>Developer-facing spec; renders the manifests</td>
+        <td class="mono">Apache-2.0</td><td class="mono">0.16.0</td>
+        <td><span class="pill warn">small schema'd YAML an LLM gets right</span></td></tr>
+      <tr><td><a href="https://github.com/stackrox/kube-linter">kube-linter</a></td>
+        <td>Independent second opinion on rendered output</td>
+        <td class="mono">Apache-2.0</td><td class="mono">0.8.3</td>
+        <td><span class="pill ok">verification</span></td></tr>
+      <tr><td><a href="https://github.com/crossplane/crossplane">Crossplane v2</a></td>
+        <td>The platform API the provisioner renders into</td>
+        <td class="mono">Apache-2.0</td><td class="mono">v2.4.0</td>
+        <td><span class="pill no">no official MCP server</span></td></tr>
+      <tr><td><a href="https://github.com/backstage/backstage">Backstage</a></td>
+        <td>Catalog + Software Template shape; <code>AiResource</code></td>
+        <td class="mono">Apache-2.0</td><td class="mono">v1.54.0</td>
+        <td><span class="pill ok">first-party MCP Actions backend</span></td></tr>
+      <tr><td><a href="https://github.com/argoproj/argo-cd">Argo CD</a></td>
+        <td>Reconciles the merged change</td>
+        <td class="mono">Apache-2.0</td><td class="mono">v3.5.1</td>
+        <td><span class="pill ok">argoproj-labs/mcp-for-argocd</span></td></tr>
+      <tr><td><a href="https://github.com/akuity/kargo">Kargo</a></td>
+        <td>Promotion path staging &#8594; prod, with a human gate</td>
+        <td class="mono">Apache-2.0</td><td class="mono">v1.11.2</td>
+        <td><span class="pill no">MCP proposal closed not-planned</span></td></tr>
+      <tr><td><a href="https://github.com/openchoreo/openchoreo">OpenChoreo</a></td>
+        <td>Source of the authz-gated MCP pattern used here</td>
+        <td class="mono">Apache-2.0</td><td class="mono">v1.2.2</td>
+        <td><span class="pill ok">2 MCP servers, 3 in-tree agents</span></td></tr>
+      <tr><td><a href="https://github.com/aquasecurity/trivy">Trivy</a> / <a href="https://github.com/opentofu/opentofu">OpenTofu</a></td>
+        <td>Optional scanners and IaC toolchain</td>
+        <td class="mono">Apache-2.0 / MPL-2.0</td><td class="mono">0.74.0 / 1.12.6</td>
+        <td><span class="pill warn">optional</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="sub" style="font-size:13.5px;margin-top:16px;color:var(--dim)">
+    Versions verified against upstream release pages in August 2026. Deliberately excluded, with
+    reasons in the README: Cyclops and Kusion (both dormant for ~13 months), and Port
+    (closed-source core, archived MCP server, AI agents behind a paid tier).
+  </p>
+</div></section>
+
+<section id="verify"><div class="wrap">
+  <div class="kicker">Test results</div>
+  <h2 id="verifyHeading">Acceptance checks</h2>
+  <p class="sub">
+    Produced by <code>src/build_report.py</code>, which executes and times each check against the
+    real binaries and writes
+    <a href="outputs/verify-report.json"><code>outputs/verify-report.json</code></a>. The same suite
+    runs in GitHub Actions on every push, plus weekly &mdash; because the failure mode worth
+    catching is an upstream release changing behaviour under a demo that claims to be reproducible.
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th class="mono">#</th><th>Check</th><th>Evidence</th><th>Result</th><th class="num">Duration</th></tr></thead>
+      <tbody id="verifyBody"></tbody>
+    </table>
+  </div>
+  <p class="stamp" id="verifySummary"></p>
+</div></section>
+
+<section id="quickstart"><div class="wrap">
+  <div class="kicker">Quickstart</div>
+  <h2>Four ways to run it. None of them need an account.</h2>
+  <p class="sub">
+    No cluster, no cloud credentials, no API key, no LLM. Python 3.10+ and about ninety seconds.
+  </p>
+
+  <div class="grid2" style="margin-top:28px">
+    <div>
+      <h3 style="margin-bottom:12px">1 &#183; GitHub Codespaces</h3>
+      <p class="sub" style="font-size:14px;margin-top:0">
+        The dev container installs the one Python dependency, fetches the pinned binaries and runs
+        the acceptance suite before handing you a prompt &mdash; so the first thing you see is
+        14/14 passing.
+      </p>
+      <p style="margin-top:16px">
+        <a class="btn p" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">
+          Open in GitHub Codespaces &rarr;</a>
+      </p>
+      <pre style="margin-top:16px"><span class="c"># what the container does before you get a prompt</span>
+pip install -r requirements.txt
+./bin/setup.sh --all      <span class="c"># pinned upstream binaries</span>
+./run.sh verify           <span class="c"># 14/14</span></pre>
+
+      <h3 style="margin:30px 0 12px">2 &#183; Local</h3>
+      <pre>git clone https://github.com/adventurewave-labs/\
+agentic-platform-engineering-extravaganza
+cd agentic-platform-engineering-extravaganza
+
+./run.sh setup   <span class="c"># pinned upstream binaries</span>
+./run.sh demo    <span class="c"># eight acts and a scorecard</span>
+./run.sh verify  <span class="c"># 14 acceptance checks</span></pre>
+    </div>
+
+    <div>
+      <h3 style="margin-bottom:12px">3 &#183; Docker</h3>
+      <pre>docker compose run --rm demo
+docker compose run --rm verify
+docker compose up site   <span class="c"># :8080</span>
+docker compose up mcp    <span class="c"># :8099</span></pre>
+
+      <h3 style="margin:30px 0 12px">4 &#183; Point your own agent at it</h3>
+      <pre><span class="c"># stdio</span>
+claude mcp add northwind -- \
+  python3 src/platform_mcp.py
+
+<span class="c"># or streamable HTTP</span>
+./run.sh mcp 8099
+claude mcp add --transport http \
+  northwind http://127.0.0.1:8099/mcp</pre>
+      <p class="sub" style="font-size:14px;margin-top:14px">
+        Then ask it for a service. It will list the golden paths, read the parameter schema,
+        render, evaluate, remediate, and stop at the pull request &mdash; because that is the last
+        thing its identity is permitted to do.
+      </p>
+    </div>
+  </div>
+</div></section>
+
+<section id="real"><div class="wrap">
+  <div class="kicker">Reproducibility</div>
+  <h2>How this was built &mdash; no smoke, no mirrors.</h2>
+  <p class="sub">
+    A demo that overstates itself is worse than no demo. Here is the line, drawn honestly, and the
+    command that checks it rather than asking you to take this table's word for it.
+  </p>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Component</th><th>Status</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">Policy evaluation</td><td><span class="pill ok">real</span></td>
+        <td>The pinned <code>conftest</code> binary over the Rego in <code>policy/</code>. Every number on this page comes from it.</td></tr>
+      <tr><td class="mono">Manifest rendering</td><td><span class="pill ok">real</span></td>
+        <td>The pinned <code>score-k8s</code> binary with the provisioner set in <code>platform/</code>.</td></tr>
+      <tr><td class="mono">kube-linter</td><td><span class="pill ok">real</span></td>
+        <td>An independent linter nobody here tuned. It found four genuine defects in the platform defaults during development &mdash; missing <code>containerPort</code>, no anti-affinity, an unresolvable ServiceAccount reference, an unset <code>unhealthyPodEvictionPolicy</code>. All four were fixed <em>in the platform</em>, not worked around in the demo.</td></tr>
+      <tr><td class="mono">MCP server</td><td><span class="pill ok">real</span></td>
+        <td>MCP 2025-06-18 over stdio and streamable HTTP, stdlib only. Origin-validated against DNS rebinding. Point Claude Code or Cursor at it.</td></tr>
+      <tr><td class="mono">Authorization</td><td><span class="pill ok">real</span></td>
+        <td>Enforced in code at <code>tools/list</code> and <code>tools/call</code>, not by prompt instruction.</td></tr>
+      <tr><td class="mono">GIFs and casts</td><td><span class="pill ok">real</span></td>
+        <td>Rendered from asciinema casts of actual runs via <code>agg</code>. Line timings are synthesised so playback is readable, and the shell prompt shown is added by the cast builder; not one character of tool output is edited. The highlight reel is a selection of acts from one capture &mdash; lines dropped, never rewritten.</td></tr>
+      <tr><td class="mono">The agent's reasoner</td><td><span class="pill warn">deterministic by default</span></td>
+        <td>Denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. <code>--backend llm</code> swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI); the loop is unchanged. That it makes no difference to the outcome is the point.</td></tr>
+      <tr><td class="mono">Intent extraction</td><td><span class="pill warn">regex</span></td>
+        <td>Prose to a structured request. A model does this better on messy input and worse on reproducibility. One function, replaced by <code>--backend</code>.</td></tr>
+      <tr><td class="mono">Cost figures</td><td><span class="pill warn">static rate card</span></td>
+        <td>A checked-in table in <code>src/costing.py</code>, so there is no account requirement. The schema is an Infracost subset &mdash; swap in <code>infracost breakdown --format json</code> and the Rego does not change.</td></tr>
+      <tr><td class="mono">Drift observation</td><td><span class="pill warn">fixture</span></td>
+        <td><code>platform/observed-state.yaml</code>. Detection, attribution and the proposed patch are real code over that shape; in a live estate you would feed it from Argo CD's resource tree.</td></tr>
+      <tr><td class="mono">Kubernetes cluster</td><td><span class="pill no">not present</span></td>
+        <td>Nothing is applied anywhere. The manifests are rendered and evaluated, which is where every claim here lives. They are valid against a real cluster.</td></tr>
+      <tr><td class="mono">Cloud provisioning</td><td><span class="pill no">not present</span></td>
+        <td>The <code>SQLInstance</code> is a real Crossplane-shaped composite; no Composition is installed and no cloud account is touched.</td></tr>
+      <tr><td class="mono">Northwind Retail</td><td><span class="pill no">fictional</span></td>
+        <td>The company, the teams and the ticket numbers. The pain is not.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>Do not trust this table &mdash; run the suite.</strong> <code>./run.sh verify</code>
+    executes all 14 checks against the real binaries in about eight seconds, and GitHub Actions runs
+    the same thing on a clean checkout on every push.</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="foot-grid">
+    <div>
+      <h4>Repository</h4>
+      <ul>
+        <li><a href="https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza">Source on GitHub</a></li>
+        <li><a href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">Open in Codespaces</a></li>
+        <li><a href="https://github.com/adventurewave-labs/agentic-devops-extravaganza">Agentic DevOps Extravaganza</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Outputs</h4>
+      <ul>
+        <li><a href="outputs/verify-report.json">verify-report.json</a></li>
+        <li><a href="outputs/run-record.json">run-record.json</a></li>
+        <li><a href="outputs/final-manifests.yaml">final-manifests.yaml</a></li>
+        <li><a href="outputs/final-score.yaml">final-score.yaml</a></li>
+        <li><a href="outputs/kargo-pipeline.yaml">kargo-pipeline.yaml</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Demos</h4>
+      <ul>
+        <li><a href="gifs/highlight.gif">highlight.gif</a></li>
+        <li><a href="gifs/wow.gif">wow.gif &mdash; the full run</a></li>
+        <li><a href="gifs/policy_gate.gif">policy_gate.gif</a></li>
+        <li><a href="gifs/authz.gif">authz.gif</a></li>
+        <li><a href="gifs/render.gif">render.gif</a></li>
+        <li><a href="gifs/drift.gif">drift.gif</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Built on</h4>
+      <ul>
+        <li><a href="https://www.openpolicyagent.org/">Open Policy Agent</a></li>
+        <li><a href="https://score.dev/">Score</a></li>
+        <li><a href="https://backstage.io/">Backstage</a></li>
+        <li><a href="https://crossplane.io/">Crossplane</a></li>
+        <li><a href="https://openchoreo.dev/">OpenChoreo</a></li>
+        <li><a href="https://asciinema.org/">asciinema + agg</a></li>
+      </ul>
+    </div>
+  </div>
+  <p>Northwind Retail is fictional. The policy bundle, the provisioner set, the MCP server and every
+  verdict on this page are not. MIT licensed; upstream tools keep their own licenses.</p>
+  <p class="stamp">// built with real tools &#183; no mocks &#183; no screenshots &nbsp; 2026.08.20</p>
+</div></footer>
+
+<script>
+const PG = {"stages":[{"key":"raw","label":"What the model handed back","detail":"No platform. A plausible, runnable, non-compliant Deployment.","denyCount":42,"findings":[{"id":"NW-K8S-001","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": image \"payments-ledger:latest\" is not immutably pinned"},{"id":"NW-K8S-001","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": image \"postgres:latest\" is not immutably pinned"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory request"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory request"},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-008","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": image \"payments-ledger:latest\" is not from an approved registry"},{"id":"NW-K8S-008","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": image \"postgres:latest\" is not from an approved registry"},{"id":"KL-latest-tag","tool":"kube-linter","message":"Deployment/payments-ledger: The container \"payments-ledger\" is using an invalid container image, \"payments-ledger:latest\". Please use images that are not blocked by the `BlockList` criteria : [\".*:(latest)$\" \"^[^:]*$\" \"(.*/[^:]+)$\"]"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0"},{"id":"KL-latest-tag","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: The container \"postgres\" is using an invalid container image, \"postgres:latest\". Please use images that are not blocked by the `BlockList` criteria : [\".*:(latest)$\" \"^[^:]*$\" \"(.*/[^:]+)$\"]"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0"}]},{"key":"registry","label":"Pin the image, use the approved registry","detail":"NW-K8S-001, NW-K8S-008 \u2014 immutable tag from ghcr.io/northwind-retail.","denyCount":36,"findings":[{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory request"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory request"},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"Deployment/payments-ledger: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"app.kubernetes.io/name\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"backstage.io/component\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/cost-center\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/data-classification\""},{"id":"NW-K8S-003","tool":"conftest","message":"StatefulSet/payments-ledger-db: missing required label \"northwind.io/owner\""},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0"}]},{"key":"labels","label":"Attach ownership and cost attribution","detail":"NW-K8S-003 \u2014 who owns this, which cost centre pays, what classification.","denyCount":33,"findings":[{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no memory request"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no CPU limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory limit"},{"id":"NW-K8S-002","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no memory request"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" has memory limit 0"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"},{"id":"KL-unset-cpu-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has cpu request 0"},{"id":"KL-unset-memory-requirements","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" has memory limit 0"}]},{"key":"resources","label":"Declare a resource envelope","detail":"NW-K8S-002 \u2014 requests and limits on every container.","denyCount":23,"findings":[{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"Deployment/payments-ledger: pod may run as root"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": does not drop ALL capabilities"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": writable root filesystem"},{"id":"NW-K8S-004","tool":"conftest","message":"StatefulSet/payments-ledger-db: pod may run as root"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"Deployment/payments-ledger: container \"payments-ledger\" is not set to runAsNonRoot"},{"id":"KL-no-read-only-root-fs","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" does not have a read-only root file system"},{"id":"KL-run-as-non-root","tool":"kube-linter","message":"StatefulSet/payments-ledger-db: container \"postgres\" is not set to runAsNonRoot"}]},{"key":"security","label":"Harden the pod security context","detail":"NW-K8S-004 \u2014 non-root, no privilege escalation, read-only rootfs, drop ALL.","denyCount":13,"findings":[{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": no readinessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no livenessProbe"},{"id":"NW-K8S-005","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": no readinessProbe"},{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"}]},{"key":"probes","label":"Add health probes","detail":"NW-K8S-005 \u2014 without these, Argo Rollouts cannot verify a canary.","denyCount":9,"findings":[{"id":"NW-K8S-006","tool":"conftest","message":"Deployment/payments-ledger container \"payments-ledger\": env \"DB_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-006","tool":"conftest","message":"StatefulSet/payments-ledger-db container \"postgres\": env \"POSTGRES_PASSWORD\" holds a literal value that looks like a credential"},{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"}]},{"key":"secrets","label":"Move credentials to a Secret reference","detail":"NW-K8S-006 \u2014 no literal passwords in the pod spec.","denyCount":7,"findings":[{"id":"NW-K8S-007","tool":"conftest","message":"Deployment/payments-ledger: prod workload has fewer than 2 replicas"},{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"}]},{"key":"availability","label":"Meet the production availability floor","detail":"NW-K8S-007 \u2014 more than one replica, spread across zones.","denyCount":7,"findings":[{"id":"NW-PCI-001","tool":"conftest","message":"Deployment/payments-ledger: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-001","tool":"conftest","message":"StatefulSet/payments-ledger-db: PCI workload has no paired NetworkPolicy"},{"id":"NW-PCI-005","tool":"conftest","message":"Deployment/payments-ledger: no audit sink configured"},{"id":"NW-PCI-005","tool":"conftest","message":"StatefulSet/payments-ledger-db: no audit sink configured"},{"id":"NW-PCI-006","tool":"conftest","message":"Deployment/payments-ledger: service-account token is automounted into a PCI pod"},{"id":"NW-PCI-006","tool":"conftest","message":"StatefulSet/payments-ledger-db: service-account token is automounted into a PCI pod"},{"id":"KL-no-anti-affinity","tool":"kube-linter","message":"Deployment/payments-ledger: object has 3 replicas but does not specify inter pod anti-affinity"}]},{"key":"pci","label":"Apply the PCI control set","detail":"NW-PCI-001/005/006 \u2014 default-deny NetworkPolicy, audit sink, no SA token.","denyCount":1,"findings":[{"id":"KL-no-anti-affinity","tool":"kube-linter","message":"Deployment/payments-ledger: object has 3 replicas but does not specify inter pod anti-affinity"}]}],"goldenPath":{"denyCount":0,"iterations":3,"manifestKinds":["Deployment","NetworkPolicy","PodDisruptionBudget","SQLInstance","Secret","Service","ServiceAccount"],"objectCount":7,"monthlyCostUsd":359.15}};
+const REPORT = {"passed":14,"total":14,"totalMs":5743.8,"toolVersions":{"conftest":"Conftest: 0.69.0","kube-linter":"0.8.3","score-k8s":"score-k8s 0.16.0 (go1.26.4 - linux/amd64)"},"checks":[{"id":"T01","name":"Pinned upstream toolchain present","passed":true,"detail":"conftest 0.69.0, score-k8s 0.16.0, kube-linter 0.8.3","ms":3080.1},{"id":"T02","name":"Policy bundle compiles under OPA","passed":true,"detail":"4 bundles, 34 rule bodies compile under OPA","ms":29.0},{"id":"T03","name":"PCI rules reject a non-compliant database","passed":true,"detail":"4 denials on a deliberately non-compliant database","ms":77.0},{"id":"T04","name":"Unguided manifests are rejected","passed":true,"detail":"42 denials across 12 distinct policies","ms":201.6},{"id":"T05","name":"Golden path converges to zero denials","passed":true,"detail":"0 denials after 3 iterations, $359.15/mo","ms":1190.0},{"id":"T06","name":"Agent fixes inputs, never rendered output","passed":true,"detail":"1 change(s), all to Score inputs: db_backup_retention_days","ms":325.2},{"id":"T07","name":"Independent linter finds nothing","passed":true,"detail":"0 findings on 7 rendered objects","ms":172.5},{"id":"T08","name":"Agent cannot approve production","passed":true,"detail":"12/14 tools listed; approve_promotion withheld and refused","ms":39.7},{"id":"T09","name":"A human in the owning group can","passed":true,"detail":"release-manager holds delivery:approve and the call succeeds","ms":26.7},{"id":"T10","name":"Tool visibility differs per identity","passed":true,"detail":"platform-agent 12/14 \u00b7 drift-agent 5/14 \u00b7 cost-reviewer 3/14 \u00b7 release-manager 14/14","ms":109.5},{"id":"T11","name":"MCP 2025-06-18 protocol conformance","passed":true,"detail":"initialize \u00b7 tools/list \u00b7 tools/call \u00b7 resources/list over stdio","ms":160.3},{"id":"T12","name":"MCP HTTP transport validates Origin","passed":true,"detail":"localhost accepted, foreign origin rejected (DNS-rebinding guard)","ms":0.1},{"id":"T13","name":"Rendering twice is byte-identical","passed":true,"detail":"two independent renders, 322 lines, byte-identical","ms":169.7},{"id":"T14","name":"Committed artefacts reproduce exactly","passed":true,"detail":"committed run record matches (42 denials)","ms":162.4}]};
+
+/* ---------- acceptance table ---------- */
+(function () {
+  const body = document.getElementById('verifyBody');
+  REPORT.checks.forEach(function (c) {
+    const tr = document.createElement('tr');
+    const id = document.createElement('td');
+    id.className = 'mono'; id.style.color = 'var(--dim)'; id.textContent = c.id;
+    const nm = document.createElement('td'); nm.textContent = c.name;
+    const ev = document.createElement('td');
+    ev.className = 'mono'; ev.style.color = 'var(--muted)'; ev.textContent = c.detail;
+    const rs = document.createElement('td');
+    const pill = document.createElement('span');
+    pill.className = 'pill ' + (c.passed ? 'ok' : 'no');
+    pill.textContent = c.passed ? 'pass' : 'fail';
+    rs.appendChild(pill);
+    const ms = document.createElement('td');
+    ms.className = 'num';
+    ms.textContent = c.ms >= 1000 ? (c.ms / 1000).toFixed(2) + ' s' : c.ms.toFixed(1) + ' ms';
+    tr.appendChild(id); tr.appendChild(nm); tr.appendChild(ev);
+    tr.appendChild(rs); tr.appendChild(ms);
+    body.appendChild(tr);
+  });
+  const v = REPORT.toolVersions || {};
+  document.getElementById('verifyHeading').textContent =
+    REPORT.passed + '/' + REPORT.total + ' acceptance checks pass';
+  document.getElementById('verifySummary').textContent =
+    REPORT.passed + ' / ' + REPORT.total + ' passed · ' +
+    (REPORT.total - REPORT.passed) + ' failed · total ' +
+    (REPORT.totalMs / 1000).toFixed(1) + 's · conftest ' +
+    String(v.conftest || '').split(' ').pop() + ' · score-k8s ' +
+    String(v['score-k8s'] || '').split(' ')[1] + ' · kube-linter ' +
+    String(v['kube-linter'] || '');
+})();
+
+/* ---------- policy playground ---------- */
+// The last entry is not a hand-hardening step -- it is the alternative to
+// hand-hardening. Appended here so the walkthrough ends where the repo does.
+PG.stages.push({
+  key: 'golden',
+  label: 'Or: render it from the golden path',
+  detail: 'score.yaml + platform/northwind.provisioners.yaml + admission defaults.',
+  denyCount: PG.goldenPath.denyCount,
+  findings: []
+});
+
+const stepsEl = document.getElementById('pgSteps');
+const listEl = document.getElementById('pgList');
+const badgeEl = document.getElementById('pgBadge');
+const meterEl = document.getElementById('pgMeter');
+let level = 0;
+
+PG.stages.slice(1).forEach(function (s, i) {
+  const el = document.createElement('div');
+  el.className = 'pg-step';
+  el.innerHTML = '<div class="tick">✓</div><div><div class="lb"></div><div class="dt"></div></div>';
+  el.querySelector('.lb').textContent = s.label;
+  el.querySelector('.dt').textContent = s.detail;
+  el.addEventListener('click', function () {
+    level = (level === i + 1) ? i : i + 1;
+    render();
+  });
+  stepsEl.appendChild(el);
+});
+
+function render() {
+  Array.prototype.forEach.call(stepsEl.children, function (el, i) {
+    el.classList.toggle('on', i < level);
+  });
+  const stage = PG.stages[level];
+  const n = stage.denyCount;
+
+  badgeEl.textContent = n === 0 ? 'passed' : n + (n === 1 ? ' denial' : ' denials');
+  badgeEl.className = 'badge ' + (n === 0 ? 'pass' : 'fail');
+  meterEl.style.width = (100 * n / PG.stages[0].denyCount) + '%';
+
+  listEl.innerHTML = '';
+  if (!stage.findings.length) {
+    listEl.innerHTML =
+      '<div class="pg-empty"><div class="big">✓</div>' +
+      '<div style="color:var(--green);font-weight:600;font-size:17px">0 denials</div>' +
+      '<div style="color:var(--muted);margin-top:8px;font-size:14px;max-width:44ch;' +
+      'margin-inline:auto">The golden path renders exactly this, by default, in ' +
+      PG.goldenPath.iterations + ' iterations at $' + PG.goldenPath.monthlyCostUsd.toFixed(2) +
+      '/mo — ' + PG.goldenPath.objectCount + ' objects, nobody remembering to tick eight ' +
+      'boxes, and the one nobody remembers caught too.</div></div>';
+    return;
+  }
+  stage.findings.forEach(function (f) {
+    const row = document.createElement('div');
+    row.className = 'f';
+    const id = document.createElement('span');
+    id.className = 'id' + (f.tool === 'kube-linter' ? ' kl' : '');
+    id.textContent = f.id;
+    const m = document.createElement('span');
+    m.className = 'm';
+    m.textContent = f.message;
+    row.appendChild(id); row.appendChild(m);
+    listEl.appendChild(row);
+  });
+}
+render();
+</script>
+</body>
+</html>

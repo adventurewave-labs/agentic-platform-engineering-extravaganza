@@ -1,0 +1,21 @@
+# The image fetches its own pinned binaries in the tools stage; shipping a
+# 500 MB build context of someone else's release artefacts is not useful.
+bin/*
+!bin/setup.sh
+
+# Scratch state, which also contains absolute host paths.
+workspace/
+**/.score-k8s/
+var/
+
+.git/
+.github/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.local

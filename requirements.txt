@@ -1,0 +1,3 @@
+# The only Python dependency. Everything else this demo runs is a pinned
+# upstream binary fetched by ./bin/setup.sh, not a package.
+PyYAML>=6.0,<7

@@ -1,0 +1,62 @@
+# Agentic Platform Engineering Extravaganza
+#
+#   docker compose run --rm demo      the eight-act run
+#   docker compose run --rm verify    ten checks that it is not a recording
+#   docker compose up site            the showcase page on :8080
+#   docker compose up mcp             the platform MCP server on :8099
+#   docker compose run --rm tools     the tool list each identity receives
+
+services:
+
+  demo:
+    build: .
+    image: agentic-platform-engineering:latest
+    container_name: ape-demo
+    command: ["demo"]
+    tty: true
+    restart: "no"
+
+  verify:
+    build: .
+    image: agentic-platform-engineering:latest
+    container_name: ape-verify
+    command: ["verify"]
+    restart: "no"
+
+  site:
+    build: .
+    image: agentic-platform-engineering:latest
+    container_name: ape-site
+    environment:
+      NORTHWIND_BIND: "0.0.0.0"
+    command: ["site"]
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/')"]
+      interval: 15s
+      timeout: 4s
+      retries: 5
+
+  mcp:
+    build: .
+    image: agentic-platform-engineering:latest
+    container_name: ape-mcp
+    command: ["mcp", "8099"]
+    # The identity decides which tools a connecting agent is offered.
+    # Try: platform-agent | drift-agent | cost-reviewer | release-manager
+    environment:
+      NORTHWIND_IDENTITY: platform-agent
+      NORTHWIND_BIND: "0.0.0.0"
+    ports:
+      - "8099:8099"
+    restart: unless-stopped
+
+  tools:
+    build: .
+    image: agentic-platform-engineering:latest
+    container_name: ape-tools
+    command: ["tools", "platform-agent"]
+    restart: "no"

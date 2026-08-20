@@ -1,0 +1,35 @@
+# Upstream binaries — fetched by ./bin/setup.sh, never committed.
+# They are ~500 MB of other people's release artefacts; pinning the versions in
+# setup.sh is the reproducible way to do this, not vendoring them here.
+bin/*
+!bin/setup.sh
+!bin/.gitkeep
+
+# Scratch space the renderer and scaffolder write into.
+workspace/
+**/.score-k8s/
+**/manifests.yaml
+!outputs/**
+var/
+*.pid
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local credentials for an optional LLM backend. Never commit one.
+.env
+.env.local
+*.key
