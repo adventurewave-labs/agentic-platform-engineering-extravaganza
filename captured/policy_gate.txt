@@ -1,0 +1,54 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
+│ one request · eight acts · every verdict from a real OPA evaluation                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+━━━ ACT V  The gate: what the platform cannot decide for you ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  reasoner: deterministic reasoner (no model, fully reproducible)
+  engine:   conftest 0.69.0  ·  real Rego, real evaluation
+
+  ▍ ITERATION 1   $960.82/mo vs $400.00 budget
+   1. NW-PCI-003  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day
+                  PCI floor
+      fix → set spec.parameters.backupRetentionDays>=30
+   2. NW-FIN-001  payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $560.82
+      fix → right-size the largest line item or request a budget increase from the cost-center
+            owner
+   3. NW-FIN-003  payments-ledger/prod: resource "payments-ledger-postgres" is $820.67/mo — 85% of
+                  the whole service budget
+      fix → single line items over 70% need an explicit exception annotation from the cost-center
+            owner
+
+    agent → 2 input change(s), then re-render from source
+      · db_backup_retention_days 7 → 30
+        PCI requires a 30-day minimum recovery window
+      · db_instance_class db.r6g.xlarge → db.t4g.large
+        largest reducible line item; db.r6g.xlarge -> db.t4g.large stays inside the cost-centre
+        envelope
+
+  ▍ ITERATION 2   $463.15/mo vs $400.00 budget
+   1. NW-FIN-001  payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $63.15
+      fix → right-size the largest line item or request a budget increase from the cost-center
+            owner
+
+    agent → 1 input change(s), then re-render from source
+      · db_instance_class db.t4g.large → db.t4g.medium
+        largest reducible line item; db.t4g.large -> db.t4g.medium stays inside the cost-centre
+        envelope
+
+  ▍ ITERATION 3   $359.15/mo vs $400.00 budget
+    ✔ 0 denials across 4 gates
+
+
+    PASSED — 0 denials    converged in 3 iterations
+
+
+  Note what the agent never did: it never edited a rendered manifest
+  to make a check go green. Every fix changed an input and the whole
+  artefact was regenerated. Patch the output instead and the finding
+  comes back silently on the next render — that is how automated
+  remediation becomes worse than none.

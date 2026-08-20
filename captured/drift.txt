@@ -1,0 +1,52 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
+│ one request · eight acts · every verdict from a real OPA evaluation                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+━━━ ACT VIII  Day 2 — the part that actually kills platforms ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Four weeks later. The golden path worked. Then production met
+  a Tuesday.
+
+  ⟶ mcp platform.detect_drift(service="payments-ledger", environment="prod") as drift-agent
+  ✔ comparing observed state against git
+    ← OutOfSync — 4 field(s) diverged since 2026-07-23
+
+  ▍ CRITICAL backupRetentionDays   30 in git → 7 in cluster
+    out-of-band Terraform apply from the pre-platform pipeline
+    terraform-legacy-pipeline · 2026-08-02T19:41:02 · NW-PCI-003
+    impact: PCI backup floor breached; 23 days of recovery window silently lost
+
+  ▍ CRITICAL networkPolicy   payments-ledger-default-deny in git → None in cluster
+    namespace was recreated without reapplying the policy
+    unknown · unknown (first abse · NW-PCI-001
+    impact: PCI workload has been reachable from every namespace in the cluster for 15 days
+
+  ▍ HIGH     replicas   6 in git → 18 in cluster
+    kubectl scale --replicas=18 (direct, out of band)
+    k.mensah · 2026-07-29T02:14:33 · NW-FIN-001
+    impact: 12 unplanned replicas at $16.43/mo each — $197/mo, never reconciled back
+
+  ▍ HIGH     automountServiceAccountToken   False in git → True in cluster
+    namespace recreation restored the default
+    unknown · unknown · NW-PCI-006
+    impact: service-account token is mounted into a PCI pod
+
+  Two of those are PCI findings that no dashboard was watching, and
+  one of them has been true for fifteen days.
+
+  ⟶ mcp platform.open_pull_request(branch="drift/payments-ledger-prod-reconcile") as drift-agent
+    ← PR opened: fix(payments-ledger): reconcile 4 drifted field(s) in prod
+
+╭─ proposed reconciliation — awaiting human review ────────────────────────────────────────────────╮
+│   backupRetentionDays           7 → 30                                                           │
+│   networkPolicy                 None → payments-ledger-default-deny                              │
+│   replicas                      18 → 6                                                           │
+│   automountServiceAccountToken  True → False                                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+  The drift agent holds no tool that mutates a cluster. It could not
+  just fix it, even if you asked. Everything it believes becomes a
+  diff a human merges — so when it is wrong, and it will be, the
+  git history is still the truth.

@@ -1,0 +1,227 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
+│ one request · eight acts · every verdict from a real OPA evaluation                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+━━━ ACT II  Skip the platform: let the model write the YAML ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The obvious move in 2026: hand the sentence to a capable model and
+  ask for Kubernetes manifests. No platform, no golden path, no gate.
+
+  ✔ 3 manifests generated: Deployment, Service, StatefulSet
+
+╭─ what came back ─────────────────────────────────────────────────────────────────────────────────╮
+│   image:     payments-ledger:latest                                                              │
+│   replicas:  1                                                                                   │
+│   env:       DB_PASSWORD=postgres                                                                │
+│   service:   type: LoadBalancer                                                                  │
+│   database:  StatefulSet, postgres:latest, no PVC                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+  It parses. It applies. It would pass a review from anyone
+  who was not looking hard. Run it past the policy bundle.
+
+  ✔ conftest test --policy policy/kubernetes
+
+   1. NW-K8S-001  Deployment/payments-ledger container "payments-ledger": image
+                  "payments-ledger:latest" is not immutably pinned
+      fix → pin to a semver tag or @sha256 digest in score.yaml containers.payments-ledger.image
+   2. NW-K8S-001  StatefulSet/payments-ledger-db container "postgres": image "postgres:latest" is
+                  not immutably pinned
+      fix → pin to a semver tag or @sha256 digest in score.yaml containers.postgres.image
+   3. NW-K8S-002  Deployment/payments-ledger container "payments-ledger": no CPU limit
+      fix → set containers.payments-ledger.resources.limits.cpu in score.yaml
+   4. NW-K8S-002  Deployment/payments-ledger container "payments-ledger": no memory limit
+      fix → set containers.payments-ledger.resources.limits.memory in score.yaml
+   5. NW-K8S-002  Deployment/payments-ledger container "payments-ledger": no memory request
+      fix → set containers.payments-ledger.resources.requests.memory in score.yaml
+   6. NW-K8S-002  StatefulSet/payments-ledger-db container "postgres": no CPU limit
+      fix → set containers.postgres.resources.limits.cpu in score.yaml
+   7. NW-K8S-002  StatefulSet/payments-ledger-db container "postgres": no memory limit
+      fix → set containers.postgres.resources.limits.memory in score.yaml
+   8. NW-K8S-002  StatefulSet/payments-ledger-db container "postgres": no memory request
+      fix → set containers.postgres.resources.requests.memory in score.yaml
+   9. NW-K8S-003  Deployment/payments-ledger: missing required label "app.kubernetes.io/name"
+      fix → the golden-path scaffolder injects this from catalog-info.yaml; re-run
+            scaffolder.execute with the owning Group set
+      ... and 33 more
+
+    BLOCKED — 42 policy violations  
+
+  NW-K8S-003×10  NW-K8S-002×6  NW-K8S-004×6  NW-K8S-005×4  KL-latest-tag×2
+
+  The model was not stupid. It was unguided.
+  Nothing in the prompt told it what PCI means at Northwind, which
+  registry is approved, or that this cost centre has $400 a month.
+  That knowledge is not in any model. It is in a platform.
+
+
+━━━ ACT III  The same request, through the platform API ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The platform speaks MCP. The agent connects as a principal, not
+  as an administrator.
+
+  ⟶ mcp initialize(protocolVersion=2025-06-18)
+    ← northwind-platform v1.0.0 · authenticated as agent:platform-agent
+
+  ⟶ mcp tools/list() as platform-agent
+    ← 12 of 14 tools returned
+
+        catalog.get_entity                catalog:read
+        catalog.query                     catalog:read
+        catalog.refresh_entity            catalog:refresh
+      ! catalog.register                  catalog:write
+        platform.estimate_cost            finops:read
+        platform.evaluate_policy          policy:evaluate
+      ! platform.open_pull_request        delivery:propose
+        platform.plan_promotion           delivery:plan
+        platform.render_workload          platform:render
+      ! scaffolder.execute                scaffolder:execute
+        scaffolder.get_template_parametersscaffolder:read
+        scaffolder.list_templates         scaffolder:read
+
+      ✗ platform.approve_promotion        withheld — identity lacks delivery:approve
+      ✗ platform.detect_drift             withheld — identity lacks observability:read
+
+  Read that last line again. The agent is not instructed to avoid
+  approving its own production release. It is never told the
+  capability exists. A prompt is a request; an absent tool is a fact.
+
+  ⟶ mcp catalog.query(kind="AiResource")
+    ← 4 agent-fleet entities — every one owned, versioned and reviewable
+      platform-agent            agent   12 tools
+      drift-agent               agent   5 tools
+      cost-reviewer             agent   3 tools
+      northwind-golden-path     skill   no tool grant
+
+  An agent’s blast radius lives in git. Widening it is a pull request.
+
+  ⟶ mcp scaffolder.list_templates()
+    ← 1 golden path(s)
+      golden-path-service-postgres
+        HTTP service + Postgres (Northwind golden path)
+
+
+━━━ ACT V  The gate: what the platform cannot decide for you ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  reasoner: deterministic reasoner (no model, fully reproducible)
+  engine:   conftest 0.69.0  ·  real Rego, real evaluation
+
+  ▍ ITERATION 1   $960.82/mo vs $400.00 budget
+   1. NW-PCI-003  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day
+                  PCI floor
+      fix → set spec.parameters.backupRetentionDays>=30
+   2. NW-FIN-001  payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $560.82
+      fix → right-size the largest line item or request a budget increase from the cost-center
+            owner
+   3. NW-FIN-003  payments-ledger/prod: resource "payments-ledger-postgres" is $820.67/mo — 85% of
+                  the whole service budget
+      fix → single line items over 70% need an explicit exception annotation from the cost-center
+            owner
+
+    agent → 2 input change(s), then re-render from source
+      · db_backup_retention_days 7 → 30
+        PCI requires a 30-day minimum recovery window
+      · db_instance_class db.r6g.xlarge → db.t4g.large
+        largest reducible line item; db.r6g.xlarge -> db.t4g.large stays inside the cost-centre
+        envelope
+
+  ▍ ITERATION 2   $463.15/mo vs $400.00 budget
+   1. NW-FIN-001  payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $63.15
+      fix → right-size the largest line item or request a budget increase from the cost-center
+            owner
+
+    agent → 1 input change(s), then re-render from source
+      · db_instance_class db.t4g.large → db.t4g.medium
+        largest reducible line item; db.t4g.large -> db.t4g.medium stays inside the cost-centre
+        envelope
+
+  ▍ ITERATION 3   $359.15/mo vs $400.00 budget
+    ✔ 0 denials across 4 gates
+
+
+    PASSED — 0 denials    converged in 3 iterations
+
+
+  Note what the agent never did: it never edited a rendered manifest
+  to make a check go green. Every fix changed an input and the whole
+  artefact was regenerated. Patch the output instead and the finding
+  comes back silently on the next render — that is how automated
+  remediation becomes worse than none.
+
+
+━━━ ACT VII  Delivery: propose, and stop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⟶ mcp platform.plan_promotion(service="payments-ledger", toStage="prod") as platform-agent
+    ← verification: northwind-slo-gate  ·  requiresHumanApproval: True
+
+  ⟶ mcp platform.open_pull_request(service="payments-ledger") as platform-agent
+    ← PR #1074 opened  ·  mergeable: False  ·  reviewers: group:default/payments
+
+╭─ github.com/northwind-retail/payments-ledger — PR #1074 ─────────────────────────────────────────╮
+│   feat(payments-ledger): golden-path service + Postgres                                          │
+│                                                                                                  │
+│   golden path        golden-path-service-postgres                                                │
+│   policy             0 denials · 4 gates · conftest + kube-linter                                │
+│   cost               $359.15/mo (within the $400 CC-4471 envelope)                               │
+│   classification     pci · eu residency · 30d backups · default-deny netpol                      │
+│   delivery           Argo CD × 2 · Kargo Warehouse → staging → prod                              │
+│   author             agent:platform-agent                                                        │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+  The reviewer opens this and sees evidence, not a diff to audit
+  by hand. That is the review getting cheaper without getting weaker.
+
+  Now the agent tries to finish the job.
+
+  ⟶ mcp platform.approve_promotion(service="payments-ledger", stage="prod") as platform-agent
+
+    DENIED  
+    permission denied: agent:platform-agent lacks the 'delivery:approve' action required by
+    platform.approve_promotion. This is an authorization decision made by the platform, not a
+    suggestion. Ask a principal that holds it.
+
+  This is not the model declining. This is the platform declining.
+  There is no phrasing of the request that gets past it, because
+  there is nothing to phrase — the tool was never in the list.
+
+  ⟶ mcp platform.approve_promotion(service="payments-ledger", stage="prod") as release-manager
+    ← approved by user:release-manager — Kargo freight promoted to prod
+
+
+━━━ SCORECARD  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  METRIC                                  BEFORE           AFTER             DELTA          
+  ──────────────────────────────────────────────────────────────────────────────────────────
+  time to a reviewable change             11 working days  11.3s             queue removed  
+  team handoffs                           6                1 (the approval)  −5             
+  policy violations without the platform  42               0                 −100%          
+  remediation iterations                  —                3                 converged      
+  monthly cost, first proposal            $960.82          $359.15           −$601.67       
+  day-2 drift found                       —                4 fields          2 critical     
+  cluster mutations by an agent           —                0                 by construction
+
+════════════════════════════════════════════════════════════════════════════════════════════════════
+
+  The agent is not the platform.
+
+  Act II is what an agent does with a model and no platform: 42 ways
+  to be plausibly, confidently wrong. The only thing that changed by
+  Act V was the platform around it — a golden path, a provisioner set,
+  a policy bundle, and an authorization model that treats an agent as
+  a principal with a blast radius.
+
+  DORA’s 2025 finding, in one line: where platform quality is low, the
+  effect of AI adoption on organisational performance is negligible.
+
+  Agentic platform engineering is not AI replacing platform engineers.
+  It is platform engineers becoming the thing that decides whether
+  any of this is safe to turn on.
+
+════════════════════════════════════════════════════════════════════════════════════════════════════
+
+  run record written to outputs/

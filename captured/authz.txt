@@ -1,0 +1,50 @@
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
+│ one request · eight acts · every verdict from a real OPA evaluation                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+━━━ ACT III  The same request, through the platform API ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The platform speaks MCP. The agent connects as a principal, not
+  as an administrator.
+
+  ⟶ mcp initialize(protocolVersion=2025-06-18)
+    ← northwind-platform v1.0.0 · authenticated as agent:platform-agent
+
+  ⟶ mcp tools/list() as platform-agent
+    ← 12 of 14 tools returned
+
+        catalog.get_entity                catalog:read
+        catalog.query                     catalog:read
+        catalog.refresh_entity            catalog:refresh
+      ! catalog.register                  catalog:write
+        platform.estimate_cost            finops:read
+        platform.evaluate_policy          policy:evaluate
+      ! platform.open_pull_request        delivery:propose
+        platform.plan_promotion           delivery:plan
+        platform.render_workload          platform:render
+      ! scaffolder.execute                scaffolder:execute
+        scaffolder.get_template_parametersscaffolder:read
+        scaffolder.list_templates         scaffolder:read
+
+      ✗ platform.approve_promotion        withheld — identity lacks delivery:approve
+      ✗ platform.detect_drift             withheld — identity lacks observability:read
+
+  Read that last line again. The agent is not instructed to avoid
+  approving its own production release. It is never told the
+  capability exists. A prompt is a request; an absent tool is a fact.
+
+  ⟶ mcp catalog.query(kind="AiResource")
+    ← 4 agent-fleet entities — every one owned, versioned and reviewable
+      platform-agent            agent   12 tools
+      drift-agent               agent   5 tools
+      cost-reviewer             agent   3 tools
+      northwind-golden-path     skill   no tool grant
+
+  An agent’s blast radius lives in git. Widening it is a pull request.
+
+  ⟶ mcp scaffolder.list_templates()
+    ← 1 golden path(s)
+      golden-path-service-postgres
+        HTTP service + Postgres (Northwind golden path)
