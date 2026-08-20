@@ -1,0 +1,85 @@
+# The repository holds itself to its own standard.
+#
+# `./run.sh verify` is what the README asks you to trust instead of the README.
+# Running it anywhere except CI would make that a slightly hollow invitation,
+# so it runs here on every push and pull request, on a clean checkout, with the
+# pinned upstream binaries fetched from scratch.
+#
+# It will fail if: a policy changes and the committed run record is not
+# regenerated, the golden path stops converging, the platform's rendered output
+# picks up a kube-linter finding, an agent identity gains the ability to approve
+# production, or the MCP server stops speaking the protocol.
+
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, because the failure mode this catches is an upstream release
+    # changing behaviour under a demo that claims to be reproducible.
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install --no-cache-dir PyYAML==6.0.2
+
+      - name: Cache the pinned upstream binaries
+        uses: actions/cache@v4
+        with:
+          path: bin
+          key: tools-${{ runner.os }}-${{ hashFiles('bin/setup.sh') }}
+
+      - name: Fetch the pinned upstream binaries
+        run: ./bin/setup.sh
+
+      - name: Report the exact versions in play
+        run: ./run.sh versions
+
+      - name: Verify
+        run: ./run.sh verify
+
+      - name: The demo still runs end to end
+        run: ./run.sh demo --speed 0 --no-color
+
+      # verify-report.json carries wall-clock timings, so it is excluded here
+      # on purpose: a duration is evidence, not a deterministic artefact.
+      # Everything else in outputs/ must reproduce byte-for-byte.
+      - name: The committed artefacts are unchanged by a fresh run
+        run: |
+          if ! git diff --quiet -- outputs/ ':!outputs/verify-report.json'; then
+            echo "::error::outputs/ drifted. Re-run './run.sh demo' and commit the result."
+            git --no-pager diff --stat -- outputs/ ':!outputs/verify-report.json'
+            exit 1
+          fi
+          echo "outputs/ reproduced byte-for-byte"
+
+      - name: The showcase page matches the policy bundle
+        run: |
+          python3 src/build_playground.py
+          if ! git diff --quiet -- outputs/playground.json; then
+            echo "::error::The page is stale against the policy bundle. Run 'make site-build'."
+            git --no-pager diff --stat -- outputs/playground.json
+            exit 1
+          fi
+          echo "the playground data still matches the policy bundle"
