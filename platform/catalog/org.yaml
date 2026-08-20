@@ -1,0 +1,72 @@
+# Northwind Retail — organisation and ownership.
+# Backstage-shaped (kind: Group / User). Drop this into a real Backstage
+# instance unchanged.
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-team
+  title: Platform Engineering
+  description: >-
+    Owns the golden paths, the policy bundle, and the agent fleet. Five people
+    serving 340 engineers, which is why any process that requires them to be in
+    the loop is a process that does not scale.
+spec:
+  type: team
+  profile:
+    displayName: Platform Engineering
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: payments
+  title: Payments
+  description: Card-present and card-not-present payment processing. PCI scope.
+  annotations:
+    northwind.io/cost-center: CC-4471
+    northwind.io/monthly-budget-usd: "400"
+    northwind.io/pagerduty-service: payments-oncall
+spec:
+  type: team
+  profile:
+    displayName: Payments
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: storefront
+  title: Storefront
+  annotations:
+    northwind.io/cost-center: CC-2201
+    northwind.io/monthly-budget-usd: "900"
+spec:
+  type: team
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: r.okonkwo
+  title: Rita Okonkwo
+  description: >-
+    Release manager, Payments. Holds the `release-manager` platform identity,
+    which is the only principal in this demo granted delivery:approve — see
+    src/catalog.py. No agent identity holds it.
+  annotations:
+    northwind.io/platform-identity: release-manager
+spec:
+  memberOf: [payments, platform-team]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: k.mensah
+  title: Kwame Mensah
+  description: >-
+    SRE, Payments. Scaled payments-ledger by hand at 02:14 during an incident
+    and never reconciled it back — which is not a criticism, it is Tuesday, and
+    it is why the drift agent in platform/observed-state.yaml exists.
+spec:
+  memberOf: [payments]

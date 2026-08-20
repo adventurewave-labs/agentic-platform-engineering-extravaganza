@@ -1,0 +1,109 @@
+# Northwind Retail — the agent fleet, as catalog entities.
+#
+# `AiResource` is an alpha Backstage kind (added in the docs/ai work, 2026)
+# for modelling agents, skills and MCP servers as first-class, *owned*,
+# *reviewable* catalog objects.
+#
+# The reason this file matters more than it looks: `spec.allowedTools` is the
+# agent's blast radius, and it lives in git. Widening what an agent may do is a
+# pull request that a human reviews and an auditor can diff -- not a prompt
+# edit, not a config flag in a SaaS console, not a conversation.
+#
+# Every agent below is also assigned an `identity`, which the MCP server
+# resolves to a set of platform actions (see src/catalog.py). The tool list an
+# agent receives is filtered by that identity before the model ever sees it.
+---
+apiVersion: backstage.io/v1alpha1
+kind: AiResource
+metadata:
+  name: platform-agent
+  title: Golden Path Agent
+  description: >-
+    Turns a natural-language service request into a scaffolded, policy-clean,
+    cost-approved pull request. Can propose a production promotion; cannot
+    approve one.
+  tags: [agent, golden-path, tier-1]
+spec:
+  type: agent
+  owner: group:default/platform-team
+  lifecycle: production
+  identity: platform-agent
+  license: Apache-2.0
+  # The allow-list. Note the absence of platform.approve_promotion.
+  allowedTools:
+    - catalog.query
+    - catalog.get_entity
+    - catalog.refresh_entity
+    - catalog.register
+    - scaffolder.list_templates
+    - scaffolder.get_template_parameters
+    - scaffolder.execute
+    - platform.render_workload
+    - platform.evaluate_policy
+    - platform.estimate_cost
+    - platform.plan_promotion
+    - platform.open_pull_request
+  dependsOn:
+    - api:default/northwind-platform-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: AiResource
+metadata:
+  name: drift-agent
+  title: Drift Reconciliation Agent
+  description: >-
+    Day-2. Watches for state that diverges from what git says should be true,
+    explains the divergence, and proposes the reconciling change. Read-mostly
+    by design: it may open a pull request, never mutate a cluster.
+  tags: [agent, day-2, gitops]
+spec:
+  type: agent
+  owner: group:default/platform-team
+  lifecycle: production
+  identity: drift-agent
+  license: Apache-2.0
+  allowedTools:
+    - catalog.query
+    - catalog.get_entity
+    - platform.detect_drift
+    - platform.evaluate_policy
+    - platform.open_pull_request
+  dependsOn:
+    - api:default/northwind-platform-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: AiResource
+metadata:
+  name: cost-reviewer
+  title: FinOps Review Agent
+  description: >-
+    Estimates the monthly cost of a proposed change and evaluates it against
+    the owning cost centre's envelope. Strictly read-only.
+  tags: [agent, finops, read-only]
+spec:
+  type: agent
+  owner: group:default/platform-team
+  lifecycle: production
+  identity: cost-reviewer
+  license: Apache-2.0
+  allowedTools:
+    - catalog.query
+    - platform.estimate_cost
+    - platform.evaluate_policy
+---
+apiVersion: backstage.io/v1alpha1
+kind: AiResource
+metadata:
+  name: northwind-golden-path
+  title: Golden Path Skill
+  description: >-
+    The house rules for creating a Northwind service: which template, which
+    annotations, which policy bundle, what "done" means. Published as an agent
+    skill so any MCP client picks up the same conventions.
+  tags: [skill, golden-path]
+spec:
+  type: skill
+  owner: group:default/platform-team
+  lifecycle: production
+  license: Apache-2.0
+  compatibility: [claude-code, cursor, vscode-copilot, kagent]

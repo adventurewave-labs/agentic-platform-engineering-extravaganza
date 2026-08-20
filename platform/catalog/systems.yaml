@@ -1,0 +1,83 @@
+# Northwind Retail — systems, components and platform resources.
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: payments-platform
+  title: Payments Platform
+  description: Everything inside PCI scope. Changes here carry an audit obligation.
+  tags: [pci, tier-1]
+spec:
+  owner: group:default/payments
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: payments-gateway
+  title: Payments Gateway
+  description: Public entry point for card authorisation. Talks to the acquirer.
+  tags: [pci, tier-1, go]
+  annotations:
+    northwind.io/data-classification: pci
+    northwind.io/data-residency: eu
+    northwind.io/cost-center: CC-4471
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/payments
+  system: payments-platform
+  dependsOn: [resource:default/payments-gateway-db]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: settlement-batch
+  title: Settlement Batch
+  description: Nightly settlement reconciliation against acquirer files.
+  tags: [pci, tier-2, python]
+  annotations:
+    northwind.io/data-classification: pci
+    northwind.io/data-residency: eu
+    northwind.io/cost-center: CC-4471
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/payments
+  system: payments-platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: payments-gateway-db
+  title: payments-gateway Postgres
+  description: Provisioned by the platform API as a Crossplane SQLInstance composite.
+  tags: [pci, postgres, crossplane]
+  annotations:
+    northwind.io/data-classification: pci
+    northwind.io/region: eu-west-1
+spec:
+  type: database
+  owner: group:default/payments
+  system: payments-platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: northwind-platform-api
+  title: Northwind Platform API
+  description: >-
+    The self-service surface. Exposed to humans through Backstage and to agents
+    through MCP over the same authorization policy.
+  tags: [mcp, platform, self-service]
+spec:
+  type: mcp-server
+  lifecycle: production
+  owner: group:default/platform-team
+  system: payments-platform
+  definition:
+    remotes:
+      - transport: stdio
+        command: python3 src/platform_mcp.py
+      - transport: streamable-http
+        url: http://127.0.0.1:8099/mcp
