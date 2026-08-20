@@ -1,0 +1,51 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "name": "Agentic Platform Engineering Extravaganza",
+
+  // Plain Python. No cluster, no cloud account, no API key — the whole point
+  // is that this runs anywhere with a shell.
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    }
+  },
+
+  // Fetches PyYAML and the pinned upstream binaries (conftest, score-k8s,
+  // kube-linter) so the codespace is ready the moment it finishes booting.
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "tsandall.opa",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "files.associations": { "*.rego": "rego" }
+      }
+    }
+  },
+
+  "forwardPorts": [8080, 8099],
+  "portsAttributes": {
+    "8080": { "label": "showcase page", "onAutoForward": "notify" },
+    "8099": { "label": "platform MCP server", "onAutoForward": "silent" }
+  },
+
+  "remoteEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}/src",
+    "PATH": "${containerWorkspaceFolder}/bin:${containerEnv:PATH}",
+    // The showcase page and the MCP server must bind 0.0.0.0 to be reachable
+    // through the codespace's port forwarding.
+    "NORTHWIND_BIND": "0.0.0.0"
+  },
+
+  "remoteUser": "vscode"
+}
