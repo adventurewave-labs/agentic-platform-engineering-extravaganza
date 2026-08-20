@@ -1,0 +1,173 @@
+# Northwind Retail — golden path: HTTP service with a Postgres database.
+#
+# A Backstage Software Template (scaffolder.backstage.io/v1beta3), written to
+# the real schema with a real `skeleton/` directory beside it. Two of the steps
+# below (`publish:github`, `catalog:refresh-entity`) need a configured
+# Backstage instance to run, so treat this as a faithful, portable starting
+# point rather than something that will execute untouched.
+#
+# Here it is also reachable as an MCP tool (`scaffolder.execute`), which is the
+# whole point: humans get the form in the portal, agents get the same template
+# through the same authorization policy. One golden path, two front doors.
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: golden-path-service-postgres
+  title: HTTP service + Postgres (Northwind golden path)
+  description: >-
+    Scaffolds a production-shaped HTTP service: Score workload spec, hardened
+    container defaults, a Crossplane-provisioned Postgres, PCI network policy
+    when required, CI that publishes to the approved registry, Argo CD wiring
+    and a Kargo promotion pipeline through staging to production.
+  tags: [recommended, golden-path, service, postgres, pci-capable]
+  annotations:
+    northwind.io/policy-bundle: policy/
+    northwind.io/sla: "service is reachable in staging within 5 minutes of merge"
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: Identity
+      required: [name, description, owner, costCenter]
+      properties:
+        name:
+          title: Service name
+          type: string
+          description: Lowercase DNS-1123 label. Becomes the repo, the workload and the catalog component.
+          pattern: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+        description:
+          title: What does it do?
+          type: string
+        owner:
+          title: Owning group
+          type: string
+          description: Backstage group ref. Drives on-call and approval routing.
+          default: group:default/payments
+          enum:
+            - group:default/payments
+            - group:default/storefront
+            - group:default/platform-team
+        costCenter:
+          title: Cost centre
+          type: string
+          description: >-
+            Charge-back code. Must match the owning Group's
+            northwind.io/cost-center annotation in platform/catalog/org.yaml;
+            NW-FIN-004 rejects anything untagged.
+          default: CC-4471
+          enum: [CC-4471, CC-2201, CC-1000]
+
+    - title: Compliance
+      required: [dataClassification]
+      properties:
+        dataClassification:
+          title: Data classification
+          type: string
+          description: >-
+            Selecting "pci" activates the NW-PCI-* policy set: default-deny
+            NetworkPolicy, encrypted storage, 30-day backups, no automounted
+            service-account token, audit sink.
+          default: internal
+          enum: [public, internal, confidential, pci]
+        dataResidency:
+          title: Data residency
+          type: string
+          description: Required when dataClassification is pci.
+          default: eu
+          enum: [eu, us, apac]
+
+    - title: Runtime
+      required: [environments]
+      properties:
+        environments:
+          title: Environments
+          type: array
+          default: [staging, prod]
+          items:
+            type: string
+            enum: [dev, staging, prod]
+        cpu:
+          title: CPU limit
+          type: string
+          default: "500m"
+        memory:
+          title: Memory limit
+          type: string
+          default: "512Mi"
+        replicas:
+          title: Production replicas
+          type: integer
+          default: 3
+          minimum: 1
+
+    - title: Data
+      properties:
+        database:
+          title: Provision a Postgres database
+          type: boolean
+          default: true
+        dbInstanceClass:
+          title: Production instance class
+          type: string
+          default: db.t4g.medium
+          enum: [db.t4g.small, db.t4g.medium, db.t4g.large, db.r6g.xlarge, db.r6g.2xlarge]
+        dbStorageGb:
+          title: Storage (GiB)
+          type: integer
+          default: 100
+
+  steps:
+    - id: fetch
+      name: Render the skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          costCenter: ${{ parameters.costCenter }}
+          dataClassification: ${{ parameters.dataClassification }}
+          dataResidency: ${{ parameters.dataResidency }}
+          cpu: ${{ parameters.cpu }}
+          memory: ${{ parameters.memory }}
+          replicas: ${{ parameters.replicas }}
+          database: ${{ parameters.database }}
+          dbInstanceClass: ${{ parameters.dbInstanceClass }}
+          dbStorageGb: ${{ parameters.dbStorageGb }}
+
+    - id: publish
+      name: Create the repository
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=northwind-retail&repo=${{ parameters.name }}
+        defaultBranch: main
+        protectDefaultBranch: true
+        requiredApprovingReviewCount: 1
+
+    - id: register
+      name: Register in the catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+
+    # Backstage added a catalog refresh action in the v1.54.0 line precisely so
+    # an agent can scaffold a component and immediately read the catalog's view
+    # of it rather than racing the processing loop. Check the action id against
+    # your own Backstage version before copying this step; it is the step that
+    # closes the agentic loop, so it is worth getting right.
+    - id: refresh
+      name: Refresh the entity so the caller can read it back
+      action: catalog:refresh-entity
+      input:
+        entityRef: component:default/${{ parameters.name }}
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Catalog entry
+        icon: catalog
+        entityRef: component:default/${{ parameters.name }}
