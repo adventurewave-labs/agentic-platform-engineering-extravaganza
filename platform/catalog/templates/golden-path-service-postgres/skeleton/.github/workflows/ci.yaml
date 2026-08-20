@@ -1,0 +1,43 @@
+# Northwind golden path CI.
+#
+# The policy gate runs here too, on every pull request. Pre-merge and
+# pre-render are different moments and both are worth having: the agent's own
+# gate catches things before a human is asked to look, and this one catches
+# anything that reached the branch some other way.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the platform toolchain
+        run: curl -fsSL https://platform.northwind.internal/toolchain.sh | bash
+      - name: Render
+        run: score-k8s init && score-k8s generate score.yaml -o manifests.yaml
+      - name: Policy gate
+        run: conftest test --policy $NORTHWIND_POLICY_BUNDLE manifests.yaml
+      - name: Lint
+        run: kube-linter lint manifests.yaml
+
+  build:
+    needs: policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and publish to the approved registry
+        run: |
+          echo "${{ '${{ secrets.GITHUB_TOKEN }}' }}" | \
+            docker login ghcr.io -u "${{ '${{ github.actor }}' }}" --password-stdin
+          docker build -t "ghcr.io/northwind-retail/${{ values.name }}:${GITHUB_SHA::12}" .
+          docker push "ghcr.io/northwind-retail/${{ values.name }}:${GITHUB_SHA::12}"
