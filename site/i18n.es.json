@@ -873,8 +873,8 @@
     "es": "La empresa, los equipos y los n&uacute;meros de ticket. El dolor no."
   },
   "t216": {
-    "en": "<strong>Do not trust this table &mdash; run the suite.</strong> <code>./run.sh verify</code> executes all 14 checks against the real binaries in about eight seconds, and GitHub Actions runs the same thing on a clean checkout on every push.",
-    "es": "<strong>No conf&iacute;es en esta tabla &mdash; corre la suite.</strong> <code>./run.sh verify</code> ejecuta las 14 pruebas contra los binarios reales en unos ocho segundos, y GitHub Actions corre lo mismo sobre un checkout limpio en cada push."
+    "en": "<strong>Do not trust this table &mdash; run the suite.</strong> <code>./run.sh verify</code> executes all 15 checks against the real binaries in a few seconds, and GitHub Actions runs the same thing on a clean checkout on every push.",
+    "es": "<strong>No conf&iacute;es en esta tabla &mdash; corre la suite.</strong> <code>./run.sh verify</code> ejecuta las 15 pruebas contra los binarios reales en unos segundos, y GitHub Actions corre lo mismo sobre un checkout limpio en cada push."
   },
   "t217": {
     "en": "Repository",
