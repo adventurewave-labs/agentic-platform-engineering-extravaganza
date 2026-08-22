@@ -1,15 +1,15 @@
 {
   "passed": 15,
   "total": 15,
-  "totalMs": 3280.1,
+  "totalMs": 6789.5,
   "toolVersions": {
     "conftest": "Conftest: 0.69.0",
-    "opa": "not installed",
+    "opa": "Version: 1.19.1",
     "kube-linter": "0.8.3",
     "score-k8s": "score-k8s 0.16.0 (go1.26.4 - linux/amd64)",
-    "score-compose": "not installed",
-    "tofu": "not installed",
-    "trivy": "not installed"
+    "score-compose": "score-compose 0.45.0 (go1.26.5 - linux/amd64)",
+    "tofu": "OpenTofu v1.12.6",
+    "trivy": "Version: 0.74.0"
   },
   "checks": [
     {
@@ -17,77 +17,77 @@
       "name": "Pinned upstream toolchain present",
       "passed": true,
       "detail": "conftest 0.69.0, score-k8s 0.16.0, kube-linter 0.8.3",
-      "ms": 86.9
+      "ms": 216.7
     },
     {
       "id": "T02",
       "name": "Policy bundle compiles under OPA",
       "passed": true,
       "detail": "4 bundles, 34 rule bodies compile under OPA",
-      "ms": 21.6
+      "ms": 20.1
     },
     {
       "id": "T03",
       "name": "PCI rules reject a non-compliant database",
       "passed": true,
       "detail": "4 denials on a deliberately non-compliant database",
-      "ms": 53.0
+      "ms": 45.5
     },
     {
       "id": "T04",
       "name": "Unguided manifests are rejected",
       "passed": true,
       "detail": "42 denials across 12 distinct policies",
-      "ms": 145.5
+      "ms": 125.5
     },
     {
       "id": "T05",
       "name": "Golden path converges to zero denials",
       "passed": true,
       "detail": "0 denials after 3 iterations, $359.15/mo",
-      "ms": 885.4
+      "ms": 810.4
     },
     {
       "id": "T06",
       "name": "Agent fixes inputs, never rendered output",
       "passed": true,
       "detail": "1 change(s), all to Score inputs: db_backup_retention_days",
-      "ms": 269.6
+      "ms": 228.9
     },
     {
       "id": "T07",
       "name": "Independent linter finds nothing",
       "passed": true,
       "detail": "0 findings on 7 rendered objects",
-      "ms": 142.7
+      "ms": 122.5
     },
     {
       "id": "T08",
       "name": "Agent cannot approve production",
       "passed": true,
       "detail": "12/14 tools listed; approve_promotion withheld and refused",
-      "ms": 33.0
+      "ms": 32.9
     },
     {
       "id": "T09",
       "name": "A human in the owning group can",
       "passed": true,
       "detail": "release-manager holds delivery:approve and the call succeeds",
-      "ms": 22.4
+      "ms": 22.5
     },
     {
       "id": "T10",
       "name": "Tool visibility differs per identity",
       "passed": true,
       "detail": "platform-agent 12/14 \u00b7 drift-agent 5/14 \u00b7 cost-reviewer 3/14 \u00b7 release-manager 14/14",
-      "ms": 91.7
+      "ms": 85.2
     },
     {
       "id": "T11",
       "name": "MCP 2025-06-18 protocol conformance",
       "passed": true,
       "detail": "initialize \u00b7 tools/list \u00b7 tools/call \u00b7 resources/list over stdio",
-      "ms": 139.9
+      "ms": 131.7
     },
     {
       "id": "T12",
@@ -101,21 +101,21 @@
       "name": "Rendering twice is byte-identical",
       "passed": true,
       "detail": "two independent renders, 322 lines, byte-identical",
-      "ms": 141.8
+      "ms": 125.9
     },
     {
       "id": "T14",
       "name": "Committed artefacts reproduce exactly",
       "passed": true,
-      "detail": "committed run record matches (42 denials)",
-      "ms": 125.7
+      "detail": "all 6 recorded properties reproduce (42 denials, 3 iterations, $960.82 -> $359.15, 7 objects)",
+      "ms": 2237.0
     },
     {
       "id": "T15",
       "name": "The LLM backend converges too",
       "passed": true,
-      "detail": "0 denials after 3 iterations via the LLM code path, $359.15/mo, 2 model call(s)",
-      "ms": 1120.8
+      "detail": "same manifests and same $359.15/mo as the deterministic reasoner, after 3 iterations and 2 model call(s)",
+      "ms": 2584.6
     }
   ]
 }
