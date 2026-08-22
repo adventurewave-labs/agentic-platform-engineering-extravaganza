@@ -129,8 +129,8 @@
     "es": "Cada veredicto de pol&iacute;tica que ves abajo sali&oacute; de ejecutar el binario real de <code>conftest</code> contra el Rego real en <code>policy/</code>. Cada manifiesto sali&oacute; del binario real de <code>score-k8s</code> y del conjunto de provisioners en <code>platform/</code>. Ejec&uacute;talo dos veces y los n&uacute;meros son id&eacute;nticos &mdash; eso es lo que un control plane debe darte."
   },
   "t030": {
-    "en": "Acts II, III, V, VII and the scorecard. The full eight-act run is <a href=\"gifs/wow.gif\">gifs/wow.gif</a>; every cast is in <code>recordings/</code>.",
-    "es": "Actos II, III, V, VII y el marcador. La corrida completa de ocho actos est&aacute; en <a href=\"gifs/wow.gif\">gifs/wow.gif</a>; cada cast est&aacute; en <code>recordings/</code>."
+    "en": "A real recording of <code>./run.sh demo --acts 2,3,5,7 --scorecard</code>. The full eight-act run is <a href=\"gifs/wow.gif\">gifs/wow.gif</a>; every cast is in <code>recordings/</code>.",
+    "es": "Una grabaci&oacute;n real de <code>./run.sh demo --acts 2,3,5,7 --scorecard</code>. La corrida completa de ocho actos es <a href=\"gifs/wow.gif\">gifs/wow.gif</a>; cada cast est&aacute; en <code>recordings/</code>."
   },
   "t031": {
     "en": "The ticket trail",
@@ -785,8 +785,8 @@
     "es": "<span class=\"pill ok\">real</span>"
   },
   "t194": {
-    "en": "Rendered from asciinema casts of actual runs via <code>agg</code>. Line timings are synthesised so playback is readable, and the shell prompt shown is added by the cast builder; not one character of tool output is edited. The highlight reel is a selection of acts from one capture &mdash; lines dropped, never rewritten.",
-    "es": "Renderizados con <code>agg</code> a partir de casts de asciinema de corridas reales. Los tiempos entre l&iacute;neas se sintetizan para que la reproducci&oacute;n sea legible, y el prompt de shell que se ve lo agrega el constructor de casts; no se edita ni un car&aacute;cter de la salida de las herramientas. El resumen es una selecci&oacute;n de actos de una sola captura &mdash; se quitan l&iacute;neas, nunca se reescriben."
+    "en": "Genuine PTY recordings. A pseudo-terminal is allocated, the command is typed into a real interactive shell, and every byte is timestamped as it arrives &mdash; what <code>asciinema rec</code> does, minus the human hand. Wall-clock timings, a real shell prompt, and the highlight reel is a real run of a real command rather than a full run with lines cut out of it. <code>agg</code> plays back faster than life and trims dead air over 1.5s; both are declared in <code>src/build_casts.py</code> and neither can change a character of what was recorded.",
+    "es": "Grabaciones PTY genuinas. Se asigna una pseudo-terminal, el comando se escribe en un shell interactivo real, y cada byte se marca con la hora en que lleg&oacute; &mdash; lo mismo que hace <code>asciinema rec</code>, sin la mano humana. Tiempos de reloj reales, un prompt de shell real, y el resumen es una corrida real de un comando real, no una corrida completa a la que se le quitaron l&iacute;neas. <code>agg</code> reproduce m&aacute;s r&aacute;pido que la vida y recorta el tiempo muerto de m&aacute;s de 1.5s; ambos est&aacute;n declarados en <code>src/build_casts.py</code> y ninguno puede cambiar un car&aacute;cter de lo grabado."
   },
   "t195": {
     "en": "The agent's reasoner",
