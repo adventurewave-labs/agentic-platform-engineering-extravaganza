@@ -215,13 +215,77 @@ def c_deterministic_render():
 
 
 def c_reproducible():
+    """Every number the committed run record claims, recomputed from scratch.
+
+    This used to compare the unguided finding count and its per-policy
+    breakdown and stop there, while the README advertised it as checking the
+    iteration count, the cost before and after, and the object count too. Those
+    were recomputed elsewhere and printed, never asserted -- so a change that
+    moved the cost would have left this green and the committed artefact
+    stale. Now the check does what the sentence says.
+    """
     import agent, costing, gates, renderer
     prev = json.loads((OUTPUTS / "run-record.json").read_text())
     req = agent.parse_intent(REQUEST)
+
     vibe = gates.run_all(renderer.vibe_manifests(req))
-    same = (len(vibe.findings) == prev["vibeDenyCount"]
-            and vibe.by_policy() == prev["vibeByPolicy"])
-    return same, f"committed run record matches ({prev['vibeDenyCount']} denials)"
+    final, docs, est = _deterministic_landing()
+    turns = 0
+    probe = agent.parse_intent(REQUEST)
+    for turns in range(1, 7):
+        spec, d = renderer.golden_path(probe, "prod")
+        report = gates.run_all(d, score=spec, cost=costing.estimate(probe, "prod"))
+        if report.passed:
+            turns -= 1
+            break
+        probe, decisions = agent.remediate(probe, report.findings, "prod")
+        if not decisions:
+            break
+
+    actual = {
+        "vibeDenyCount": len(vibe.findings),
+        "vibeByPolicy": vibe.by_policy(),
+        "goldenPathIterations": turns + 1,
+        "costBefore": costing.estimate(agent.parse_intent(REQUEST),
+                                       "prod")["totalMonthlyCostUsd"],
+        "costAfter": est["totalMonthlyCostUsd"],
+        "objectCount": len(docs),
+    }
+    mismatched = [k for k, v in actual.items() if prev.get(k) != v]
+    if mismatched:
+        return False, "run record drifted: " + ", ".join(
+            f"{k} {prev.get(k)!r} != {v!r}" for k, v in actual.items()
+            if k in mismatched)
+    return True, (f"all 6 recorded properties reproduce "
+                  f"({actual['vibeDenyCount']} denials, "
+                  f"{actual['goldenPathIterations']} iterations, "
+                  f"${actual['costBefore']:,.2f} -> ${actual['costAfter']:,.2f}, "
+                  f"{actual['objectCount']} objects)")
+
+
+
+def _deterministic_landing():
+    """Run the golden path with the deterministic reasoner to convergence.
+
+    Returns (request, rendered docs, cost estimate) at the point it passed.
+    Two checks need this -- T14 to compare the committed run record against a
+    fresh run, T15 to compare the LLM code path against the default one -- and
+    having one definition of "where the loop lands" means they cannot disagree
+    about it.
+    """
+    import agent, costing, gates, renderer
+    req = agent.parse_intent(REQUEST)
+    docs, est = [], costing.estimate(req, "prod")
+    for _ in range(6):
+        spec, docs = renderer.golden_path(req, "prod")
+        est = costing.estimate(req, "prod")
+        if gates.run_all(docs, score=spec, cost=est).passed:
+            return req, docs, est
+        req, decisions = agent.remediate(req, gates.run_all(
+            docs, score=spec, cost=est).findings, "prod")
+        if not decisions:
+            break
+    return req, docs, est
 
 
 def c_llm_backend_loop():
@@ -257,14 +321,33 @@ def c_llm_backend_loop():
             if "deterministic" in label:
                 return False, f"fell back to the deterministic reasoner: {label}"
             req = agent.parse_intent(REQUEST)
+            docs = []
             for i in range(1, 6):
                 spec, docs = renderer.golden_path(req, "prod")
                 est = costing.estimate(req, "prod")
                 r = gates.run_all(docs, score=spec, cost=est)
                 if r.passed:
-                    return bool(handler.calls), (
-                        f"0 denials after {i} iterations via the LLM code path, "
-                        f"${est['totalMonthlyCostUsd']:,.2f}/mo, "
+                    # Converging is not the claim. The claim is that it lands
+                    # in the *same place*, so compare the artefacts rather than
+                    # printing them: the rendered manifests byte for byte, and
+                    # the monthly total to the cent.
+                    det_req, det_docs, det_cost = _deterministic_landing()
+                    same_manifests = renderer.dump(docs) == renderer.dump(det_docs)
+                    same_cost = (round(est["totalMonthlyCostUsd"], 2)
+                                 == round(det_cost["totalMonthlyCostUsd"], 2))
+                    if not handler.calls:
+                        return False, "the model was never called"
+                    if not same_manifests:
+                        return False, "the LLM path rendered different manifests"
+                    if not same_cost:
+                        return False, (f"cost differs: LLM "
+                                       f"${est['totalMonthlyCostUsd']:,.2f} vs "
+                                       f"deterministic "
+                                       f"${det_cost['totalMonthlyCostUsd']:,.2f}")
+                    return True, (
+                        f"same manifests and same "
+                        f"${est['totalMonthlyCostUsd']:,.2f}/mo as the "
+                        f"deterministic reasoner, after {i} iterations and "
                         f"{len(handler.calls)} model call(s)")
                 req, decisions = reason(req, r.findings, "prod")
                 if not decisions:

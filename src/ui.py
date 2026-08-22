@@ -11,6 +11,25 @@ import time
 NO_COLOR = bool(os.environ.get("NO_COLOR"))
 SPEED = float(os.environ.get("NORTHWIND_SPEED", "1.0"))  # 0 = instant
 
+# Cumulative seconds spent purely on pacing -- spinners, beats, typewriter
+# delays. None of it is work; all of it exists so a human can read the screen.
+#
+# The scorecard reports "time to a reviewable change", and without this the
+# number would be whatever --speed the run happened to use: ~32s at the demo's
+# natural pace, ~1s at --speed 0. Both would be true wall-clock and neither
+# would mean what the label says. `goldenpath.py` subtracts this, so the figure
+# measures the platform and is identical however fast you watch it.
+PRESENTATION_SECONDS = 0.0
+
+
+def _sleep(seconds: float) -> None:
+    """Sleep for presentation, and remember that we did."""
+    global PRESENTATION_SECONDS
+    if seconds <= 0:
+        return
+    time.sleep(seconds)
+    PRESENTATION_SECONDS += seconds
+
 WIDTH = min(shutil.get_terminal_size((100, 30)).columns, 100)
 
 
@@ -54,7 +73,7 @@ def color(text: str, name: str, bold: bool = False) -> str:
 
 def pause(seconds: float) -> None:
     if SPEED > 0:
-        time.sleep(seconds * SPEED)
+        _sleep(seconds * SPEED)
 
 
 def write(text: str = "") -> None:
@@ -73,7 +92,7 @@ def typed(text: str, delay: float = 0.012, prefix: str = "") -> None:
     for ch in text:
         sys.stdout.write(ch)
         sys.stdout.flush()
-        time.sleep(delay * SPEED)
+        _sleep(delay * SPEED)
     sys.stdout.write("\n")
     sys.stdout.flush()
 
@@ -148,7 +167,7 @@ def spinner(text: str, seconds: float = 1.0, done: str = "") -> None:
     while time.time() < end:
         sys.stdout.write(f"\r  {color(frames[i % len(frames)], 'cyan')} {text}   ")
         sys.stdout.flush()
-        time.sleep(0.07)
+        _sleep(0.07)
         i += 1
     sys.stdout.write("\r" + " " * (WIDTH - 1) + "\r")
     write(f"  {color('✔', 'green')} {done or text}")

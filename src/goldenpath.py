@@ -10,7 +10,8 @@ The demo. Eight acts and a scorecard, one request, no hand-waving.
 
 Every policy verdict printed by this script is produced by running the real
 conftest binary over the real Rego in policy/. Every manifest is produced by
-the real score-k8s binary. Nothing is a recording. Run it twice and the numbers
+the real score-k8s binary. Nothing here is replayed -- the GIFs in gifs/ are
+recordings *of this script running*, not a substitute for it. Run it twice and the numbers
 are identical, because that is what a control plane is supposed to give you.
 """
 
@@ -579,6 +580,8 @@ def scorecard(vibe: dict, turns: list[agent.Turn], before: dict, after: dict,
              + ui.color(" " + "━" * max(ui.WIDTH - 17, 0), "dark"))
     ui.write()
     ticket_days = sum(t[3] for t in TICKET_TRAIL)
+    # Never negative, never zero-looking, whatever the clock did.
+    elapsed = max(elapsed, 0.05)
     took = f"{elapsed:.1f}s" if elapsed < 60 else f"{elapsed / 60:.1f} min"
     # Deliberately not printed as a speed-up multiple. Eleven days of queue
     # against two seconds of compute produces a number in the hundreds of
@@ -741,7 +744,11 @@ def main() -> int:
             vibe, turns,
             costing.estimate(original, "prod"),
             costing.estimate(final, "prod"),
-            drift, time.time() - start,
+            # Wall clock minus everything spent on pacing. The scorecard row
+            # is labelled "time to a reviewable change"; charging the platform
+            # for the seconds the demo spends letting you read would make the
+            # headline figure a property of --speed rather than of the work.
+            drift, (time.time() - start) - ui.PRESENTATION_SECONDS,
         )
         # Only the required toolchain. Whether someone also installed the
         # optional scanners is not a property of this run.

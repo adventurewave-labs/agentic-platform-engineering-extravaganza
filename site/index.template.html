@@ -259,8 +259,8 @@ footer a{color:var(--muted)}
 </div></header>
 
 <section id="demo"><div class="wrap">
-  <div data-i18n="t027" class="kicker">90-second cinematic demo</div>
-  <h2 data-i18n="t028">One request, eight acts, nothing pre-recorded.</h2>
+  <div data-i18n="t027" class="kicker">A real recording &mdash; 20 seconds, four acts</div>
+  <h2 data-i18n="t028">One request, eight acts, every verdict computed live.</h2>
   <p data-i18n="t029" class="sub">
     Every policy verdict below came from running the real <code>conftest</code> binary against the
     real Rego in <code>policy/</code>. Every manifest came from the real <code>score-k8s</code>
@@ -440,26 +440,41 @@ footer a{color:var(--muted)}
     <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
       <span class="t">./run.sh act 5</span><span data-i18n="t087" class="badge-real">REAL OUTPUT</span></div>
     <pre><span class="p">&#9613; ITERATION 1</span>   <span class="c">$960.82/mo vs $400.00 budget</span>
-  <span class="c">1.</span> <span class="r">NW-PCI-003</span>  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7
-                 is below the 30-day PCI floor
-     <span class="c">fix &#8594;</span> <span class="n">set spec.parameters.backupRetentionDays&gt;=30</span>
-  <span class="c">2.</span> <span class="r">NW-FIN-001</span>  payments-ledger/prod: estimated $960.82/mo exceeds the
-                 CC-4471 budget of $400.00/mo by $560.82
-     <span class="c">fix &#8594;</span> <span class="n">right-size the largest line item or request a budget increase</span>
-  <span class="c">3.</span> <span class="r">NW-FIN-003</span>  resource "payments-ledger-postgres" is $820.67/mo &mdash; 85% of
-                 the whole service budget
-     <span class="c">fix &#8594;</span> <span class="n">single line items over 70% need an explicit exception</span>
+   <span class="c">1.</span> <span class="r">NW-PCI-003</span>  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day
+                  PCI floor
+      <span class="c">fix &#8594;</span> <span class="n">set spec.parameters.backupRetentionDays&gt;=30</span>
+   <span class="c">2.</span> <span class="r">NW-FIN-001</span>  payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $560.82
+      <span class="c">fix &#8594;</span> <span class="n">right-size the largest line item or request a budget increase from the cost-center</span>
+            owner
+   <span class="c">3.</span> <span class="r">NW-FIN-003</span>  payments-ledger/prod: resource "payments-ledger-postgres" is $820.67/mo &mdash; 85% of
+                  the whole service budget
+      <span class="c">fix &#8594;</span> <span class="n">single line items over 70% need an explicit exception annotation from the cost-center</span>
+            owner
 
-   <span class="k">agent &#8594;</span> <span class="c">2 input change(s), then re-render from source</span>
-     <span class="c">&#183;</span> <span class="b">db_backup_retention_days</span> <span class="r">7</span> <span class="c">&#8594;</span> <span class="g">30</span>
-       <span class="c">PCI requires a 30-day minimum recovery window</span>
-     <span class="c">&#183;</span> <span class="b">db_instance_class</span> <span class="r">db.r6g.xlarge</span> <span class="c">&#8594;</span> <span class="g">db.t4g.large</span>
-       <span class="c">largest reducible line item; stays inside the cost-centre envelope</span>
+    <span class="k">agent &#8594;</span> <span class="c">2 input change(s), then re-render from source</span>
+      <span class="c">&#183;</span> <span class="b">db_backup_retention_days</span> <span class="r">7</span> <span class="c">&#8594;</span> <span class="g">30</span>
+        PCI requires a 30-day minimum recovery window
+      <span class="c">&#183;</span> <span class="b">db_instance_class</span> <span class="r">db.r6g.xlarge</span> <span class="c">&#8594;</span> <span class="g">db.t4g.large</span>
+        largest reducible line item; db.r6g.xlarge -&gt; db.t4g.large stays inside the cost-centre
+        envelope
 
-<span class="p">&#9613; ITERATION 3</span>   <span class="c">$359.15/mo vs $400.00 budget</span>
-   <span class="g">&#10004; 0 denials across 4 gates</span>
+  <span class="p">&#9613; ITERATION 2</span>   <span class="c">$463.15/mo vs $400.00 budget</span>
+   <span class="c">1.</span> <span class="r">NW-FIN-001</span>  payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $63.15
+      <span class="c">fix &#8594;</span> <span class="n">right-size the largest line item or request a budget increase from the cost-center</span>
+            owner
 
-  <span class="g">PASSED &mdash; 0 denials</span>  <span class="c">converged in 3 iterations</span></pre>
+    <span class="k">agent &#8594;</span> <span class="c">1 input change(s), then re-render from source</span>
+      <span class="c">&#183;</span> <span class="b">db_instance_class</span> <span class="r">db.t4g.large</span> <span class="c">&#8594;</span> <span class="g">db.t4g.medium</span>
+        largest reducible line item; db.t4g.large -&gt; db.t4g.medium stays inside the cost-centre
+        envelope
+
+  <span class="p">&#9613; ITERATION 3</span>   <span class="c">$359.15/mo vs $400.00 budget</span>
+    <span class="g">&#10004; 0 denials across 4 gates</span>
+
+
+    <span class="g">PASSED &mdash; 0 denials</span>    <span class="c">converged in 3 iterations</span></pre>
   </div>
 
   <ul class="why">
@@ -749,8 +764,8 @@ footer a{color:var(--muted)}
         <td data-i18n="t150"><span class="pill no">MCP proposal closed not-planned</span></td></tr>
       <tr><td><a href="https://github.com/openchoreo/openchoreo">OpenChoreo</a></td>
         <td data-i18n="t151">Source of the authz-gated MCP pattern used here</td>
-        <td class="mono">Apache-2.0</td><td class="mono">v1.2.2</td>
-        <td data-i18n="t152"><span class="pill ok">2 MCP servers, 3 in-tree agents</span></td></tr>
+        <td class="mono">Apache-2.0</td><td class="mono">v1.2.3</td>
+        <td data-i18n="t152"><span class="pill ok">3 MCP servers, 3 in-tree agents</span></td></tr>
       <tr><td><a href="https://github.com/aquasecurity/trivy">Trivy</a> / <a href="https://github.com/opentofu/opentofu">OpenTofu</a></td>
         <td data-i18n="t153">Optional scanners and IaC toolchain</td>
         <td class="mono">Apache-2.0 / MPL-2.0</td><td class="mono">0.74.0 / 1.12.6</td>
@@ -797,9 +812,7 @@ footer a{color:var(--muted)}
     <div>
       <h3 data-i18n="t166" style="margin-bottom:12px">1 &#183; GitHub Codespaces</h3>
       <p data-i18n="t167" class="sub" style="font-size:14px;margin-top:0">
-        The dev container installs the one Python dependency, fetches the pinned binaries and runs
-        the acceptance suite before handing you a prompt &mdash; so the first thing you see is
-        14/14 passing.
+        The dev container installs the one Python dependency, fetches the pinned binaries, runs the unit tests and then the acceptance suite before handing you a prompt &mdash; so the first thing you see is 81 passing and 15/15.
       </p>
       <p style="margin-top:16px">
         <a class="btn p" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">
@@ -808,7 +821,8 @@ footer a{color:var(--muted)}
       <pre style="margin-top:16px"><span class="c"># what the container does before you get a prompt</span>
 pip install -r requirements.txt
 ./bin/setup.sh --all      <span class="c"># pinned upstream binaries</span>
-./run.sh verify           <span class="c"># 14/14</span></pre>
+./run.sh test             <span class="c"># 81 unit tests</span>
+./run.sh verify           <span class="c"># 15/15</span></pre>
 
       <h3 data-i18n="t168" style="margin:30px 0 12px">2 &#183; Local</h3>
       <pre>git clone https://github.com/adventurewave-labs/\
@@ -873,12 +887,12 @@ claude mcp add --transport http \
         <td data-i18n="t197">Denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. <code>--backend llm</code> swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI); the loop is unchanged. That it makes no difference to the outcome is the point.</td></tr>
       <tr><td data-i18n="t198" class="mono">Intent extraction</td><td data-i18n="t199"><span class="pill warn">regex</span></td>
         <td data-i18n="t200">Prose to a structured request. A model does this better on messy input and worse on reproducibility. One function, replaced by <code>--backend</code>.</td></tr>
-      <tr><td data-i18n="t201" class="mono">Cost figures</td><td data-i18n="t202"><span class="pill warn">static rate card</span></td>
-        <td data-i18n="t203">A checked-in table in <code>src/costing.py</code>, so there is no account requirement. The schema is an Infracost subset &mdash; swap in <code>infracost breakdown --format json</code> and the Rego does not change.</td></tr>
-      <tr><td data-i18n="t204" class="mono">Drift observation</td><td data-i18n="t205"><span class="pill warn">fixture</span></td>
-        <td data-i18n="t206"><code>platform/observed-state.yaml</code>. Detection, attribution and the proposed patch are real code over that shape; in a live estate you would feed it from Argo CD's resource tree.</td></tr>
-      <tr><td data-i18n="t207" class="mono">Kubernetes cluster</td><td data-i18n="t208"><span class="pill no">not present</span></td>
-        <td data-i18n="t209">Nothing is applied anywhere. The manifests are rendered and evaluated, which is where every claim here lives. They are valid against a real cluster.</td></tr>
+      <tr><td data-i18n="t201" class="mono">Cost figures</td><td data-i18n="t202"><span class="pill warn">static rate card by default</span></td>
+        <td data-i18n="t203">A checked-in table in <code>src/costing.py</code> by default, so there is no account requirement and the artefacts stay byte-reproducible. The swap is wired rather than asserted: <code>NORTHWIND_COST_SOURCE=infracost</code> re-prices the database and load-balancer lines against real cloud rates via <code>src/sources/infracost.py</code>, and every estimate carries a <code>costSource</code> so a rate-card number is never mistaken for a priced one. The Rego does not change &mdash; that was the claim.</td></tr>
+      <tr><td data-i18n="t204" class="mono">Drift observation</td><td data-i18n="t205"><span class="pill warn">fixture by default</span></td>
+        <td data-i18n="t206"><code>platform/observed-state.yaml</code> by default. Detection, attribution and the proposed patch are real code over that shape. <code>NORTHWIND_DRIFT_SOURCE=argocd</code> swaps the fixture for <code>src/sources/argocd.py</code>, which reads Argo CD's <code>managed-resources</code> for the desired/observed pair and <code>metadata.managedFields</code> for attribution &mdash; and reports a <em>field manager</em>, not a person, because that is all a control plane actually knows.</td></tr>
+      <tr><td data-i18n="t207" class="mono">Kubernetes cluster</td><td data-i18n="t208"><span class="pill warn">not in the demo; real in CI</span></td>
+        <td data-i18n="t209"><code>./run.sh demo</code> applies nothing anywhere. But &ldquo;valid against a real cluster&rdquo; is no longer left as an assertion: <code>.github/workflows/cluster.yaml</code> stands up a pinned kind cluster, installs the platform API as a real CRD, and puts the committed manifests through the actual API server &mdash; schema validation, admission, defaulting &mdash; then asserts the controllers acted. It also runs the negative control: the same API server <strong>accepts the unguided manifests too</strong>, all 42 violations of them.</td></tr>
       <tr><td data-i18n="t210" class="mono">Cloud provisioning</td><td data-i18n="t211"><span class="pill no">not present</span></td>
         <td data-i18n="t212">The <code>SQLInstance</code> is a real Crossplane-shaped composite; no Composition is installed and no cloud account is touched.</td></tr>
       <tr><td data-i18n="t213" class="mono">Northwind Retail</td><td data-i18n="t214"><span class="pill no">fictional</span></td>

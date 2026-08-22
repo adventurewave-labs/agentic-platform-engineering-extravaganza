@@ -18,7 +18,13 @@
 >
 > **The agent is not the platform.** This repository is that comparison, executable.
 
-![The argument in ninety seconds](gifs/highlight.gif)
+![The argument in four acts](gifs/highlight.gif)
+
+<sub>A real terminal recording of `./run.sh demo --acts 2,3,5,7 --scorecard` — a command you
+can type yourself. Every cast in [`recordings/`](recordings/) is a PTY capture with wall-clock
+timings; nothing is re-enacted and no line is edited in afterwards. `agg` plays it back faster
+than life and trims dead air over 1.5s; those are the only two liberties, and both are
+declared in [`src/build_casts.py`](src/build_casts.py).</sub>
 
 Every policy verdict below came from running the real `conftest` binary against the real Rego in
 [`policy/`](policy/). Every manifest came from running the real `score-k8s` binary against the
@@ -91,7 +97,7 @@ cd agentic-platform-engineering-extravaganza
 ./run.sh setup     # fetch the pinned upstream binaries (conftest, score-k8s, kube-linter)
 ./run.sh demo      # the full run: eight acts and a scorecard
 ./run.sh verify    # 15 acceptance checks against real tool output
-./run.sh test      # 68 unit tests, stdlib only, no extra dependencies
+./run.sh test      # 81 unit tests on stdlib unittest, no extra dependencies
 ```
 
 `run.sh` checks your Python version and installs the one dependency it needs if it is
@@ -159,8 +165,11 @@ Worth noticing what is <i>not</i> in that list. The PCI rules never fire, and ne
 production availability floor — because those rules key off labels
 (<code>northwind.io/data-classification</code>, <code>northwind.io/environment</code>) that the
 unguided output does not carry. <b>An unlabelled workload does not merely fail your compliance
-checks; it is invisible to them.</b> Getting <code>NW-K8S-003</code> right is what makes the other
-fourteen rules able to see the thing at all.
+checks; it is invisible to them.</b> Getting <code>NW-K8S-003</code> right is what lets four further rules &mdash;
+<code>NW-K8S-007</code>, <code>NW-PCI-001</code>, <code>NW-PCI-005</code>,
+<code>NW-PCI-006</code> &mdash; see the workload at all. That is not a rhetorical number: it is the
+difference this repository's own <a href="outputs/playground.json">playground data</a> records
+between the labelled and unlabelled runs.
 <br><br>
 Nothing in that prompt told the model what PCI means at Northwind, which registry is approved, or
 that this cost centre has $400 a month. That knowledge is not in any model. It is in a platform.
@@ -257,7 +266,7 @@ gone for fifteen days. Detected, attributed, and proposed as a diff — never ap
 
 ![Drift detection with attribution](gifs/drift.gif)
 
-The complete eight-act run is [`gifs/wow.gif`](gifs/wow.gif) (1.1 MB). Every `.cast` is in
+The complete eight-act run is [`gifs/wow.gif`](gifs/wow.gif) (about 1 MB). Every `.cast` is in
 [`recordings/`](recordings/) and plays with `asciinema play recordings/wow.cast` — and because
 these are genuine PTY captures, the playback timing is the timing the demo actually had.
 
@@ -384,7 +393,7 @@ Run the bundle against anything you like:
 
 ## Point your own agent at it
 
-The MCP server is a real one — MCP `2025-06-18`, stdio and streamable HTTP, stdlib only.
+The MCP server is a real one — MCP `2025-06-18`, stdio and streamable HTTP, and no MCP SDK: the protocol is implemented directly, against PyYAML and the standard library.
 
 ```bash
 # stdio
@@ -444,7 +453,8 @@ artefacts at pinned versions — nothing is vendored or reimplemented.
 | [Argo CD](https://github.com/argoproj/argo-cd) | reconciles the merged change | Apache-2.0 | v3.5.1 | [`argoproj-labs/mcp-for-argocd`](https://github.com/argoproj-labs/mcp-for-argocd) |
 | [Kargo](https://github.com/akuity/kargo) | promotion path with a human gate | Apache-2.0 | v1.11.2 | ⚠️ MCP proposal closed `not_planned` |
 | [OpenChoreo](https://github.com/openchoreo/openchoreo) | source of the authz-gated MCP pattern | Apache-2.0 | v1.2.3 | **3 MCP servers, 3 in-tree agents** |
-| [Trivy](https://github.com/aquasecurity/trivy) / [Checkov](https://github.com/bridgecrewio/checkov) / [OpenTofu](https://github.com/opentofu/opentofu) | optional scanners and IaC toolchain | Apache-2.0 / MPL-2.0 | 0.74.0 / 3.3.13 / 1.12.6 | optional |
+| [Trivy](https://github.com/aquasecurity/trivy) / [OpenTofu](https://github.com/opentofu/opentofu) | optional scanners and IaC toolchain | Apache-2.0 / MPL-2.0 | 0.74.0 / 1.12.6 | optional |
+| [Checkov](https://github.com/bridgecrewio/checkov) | optional IaC gate — **not** fetched by `bin/setup.sh`; `gates.py` runs whatever is on `$PATH` | Apache-2.0 | unpinned, by design | optional |
 
 **Deliberately excluded, with reasons** — because a survey that only lists winners is not a survey:
 
@@ -493,13 +503,21 @@ still converges to zero, kube-linter still finds nothing in the platform's outpu
 cannot approve production while a human still can, the MCP protocol still answers, the LLM backend
 still reaches the same answer as the deterministic one, and the committed run record still reproduces
 exactly (the unguided finding count and its per-policy breakdown, the iteration count, the cost before
-and after, and the rendered object count).
+and after, and the rendered object count &mdash; six properties, each compared, none merely
+printed).
 
-`./run.sh test` runs **68 unit tests** underneath that — stdlib `unittest`, no new dependency. They
+`./run.sh test` runs **81 unit tests** underneath that — stdlib `unittest`, no new dependency. They
 cover the branches the worked example never reaches: the intent extractor's whole surface, the
 staging-only FinOps rules, an unmappable denial, a model that replies with prose instead of JSON, a
 model that invents a field, and the Argo CD adapter's normalisation without an Argo CD. A system
 check tells you the demo broke; a unit test tells you which function did it.
+
+[`tests/test_docs.py`](tests/test_docs.py) holds this file to the same standard. Every number the
+README and the showcase page share — the size of the suite, the denial count, the cost before and
+after, the versions pinned in the stack table, a GIF size quoted to a decimal place — is checked
+against the code or the committed artefacts rather than against the other document. It also fails on
+a dangling README link, and on a `chmod` in the dev-container bootstrap that names a path which does
+not exist. Both of those had happened, and neither was caught by anything until it did.
 
 ---
 
@@ -538,6 +556,7 @@ check tells you the demo broke; a unit test tells you which function did it.
 │   ├── driftd.py                       the day-2 drift agent
 │   ├── sources/argocd.py               live observed state, instead of the fixture
 │   ├── sources/infracost.py            real cloud prices, instead of the rate card
+│   │                                   (sources/__init__.py states the contract)
 │   ├── goldenpath.py                   the eight-act orchestrator
 │   ├── ui.py                           terminal presentation
 │   ├── build_report.py                 the 15 acceptance checks, timed
@@ -551,16 +570,24 @@ check tells you the demo broke; a unit test tells you which function did it.
 │   ├── final-manifests.yaml            7 objects, 0 denials
 │   ├── kargo-pipeline.yaml             Warehouse → staging → prod
 │   ├── verify-report.json              the 15 checks, with real durations
+│   ├── final-cost.json                 the FinOps document the Rego evaluates
+│   ├── vibe-policy-report.json         the unguided run's 42 denials, in full
+│   ├── drift-report.json               the day-2 findings with attribution
 │   └── playground.json                 recorded conftest output for the page
 │
-├── tests/                              68 unit tests + the fake OpenAI endpoint
+├── tests/                              81 unit tests + the fake OpenAI endpoint
 │   ├── fake_llm.py                     replays a recorded transcript; no key, no spend
+│   ├── test_docs.py                    holds the README and the page to the same standard
+│   ├── context.py                      puts src/ on the path; __init__.py alongside
 │   └── test_agent.py  test_gates.py  test_costing.py  test_drift.py
 │
 ├── .github/workflows/
 │   ├── verify.yaml                     the 15 checks + the unit tests, on a clean checkout
-│   └── cluster.yaml                    a real kind cluster, and the negative control
+│   ├── cluster.yaml                    a real kind cluster, and the negative control
+│   ├── gifs.yaml                       re-renders the GIFs from the committed casts
+│   └── permissions.yaml                restores the exec bit on the shell entry points
 │
+├── examples/mcp.json                   drop-in config for any MCP client
 ├── recordings/  gifs/  captured/       demo assets, all regenerable
 ├── .devcontainer/                      one-click GitHub Codespaces
 ├── bin/setup.sh                        fetches the pinned upstream binaries
