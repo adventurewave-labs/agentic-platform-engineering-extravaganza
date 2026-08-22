@@ -9,7 +9,7 @@
 #   conftest      Apache-2.0   open-policy-agent/conftest     required
 #   score-k8s     Apache-2.0   score-spec/score-k8s           required
 #   kube-linter   Apache-2.0   stackrox/kube-linter           required
-#   opa           Apache-2.0   open-policy-agent/opa          optional
+#   opa           Apache-2.0   open-policy-agent/opa          required
 #   score-compose Apache-2.0   score-spec/score-compose       optional
 #   trivy         Apache-2.0   aquasecurity/trivy             optional
 #   opentofu      MPL-2.0      opentofu/opentofu              optional
@@ -91,13 +91,18 @@ install_required() {
   fetch_tar kube-linter \
     "https://github.com/stackrox/kube-linter/releases/download/v${KUBE_LINTER_VERSION}/kube-linter-${OS}.tar.gz"
   chmod +x "$BIN_DIR/kube-linter" 2>/dev/null || true
+  # opa was optional until the acceptance suite started using it. T02 compiles
+  # the bundles with `opa check --strict` -- conftest cannot be made to do that
+  # (it selects a parser from the input file before it loads any Rego, which is
+  # exactly how the previous version of that check managed to never fail). A
+  # required check cannot depend on an optional tool, so this moved up here.
+  fetch_bin opa \
+    "https://github.com/open-policy-agent/opa/releases/download/v${OPA_VERSION}/opa_${OS}_${ARCH}_static"
 }
 
 install_optional() {
   echo
   echo "Optional:"
-  fetch_bin opa \
-    "https://github.com/open-policy-agent/opa/releases/download/v${OPA_VERSION}/opa_${OS}_${ARCH}_static" || true
   fetch_tar score-compose \
     "https://github.com/score-spec/score-compose/releases/download/${SCORE_COMPOSE_VERSION}/score-compose_${SCORE_COMPOSE_VERSION}_${OS}_${ARCH}.tar.gz" \
     score-compose || true
@@ -135,5 +140,5 @@ case "${1:-}" in
   --all)   install_required; install_optional; echo; check ;;
   *)       install_required; echo
            echo "  Optional scanners not installed. Run './bin/setup.sh --all' for"
-           echo "  Trivy, OpenTofu, standalone OPA and the asciinema GIF renderer." ;;
+           echo "  Trivy, OpenTofu, score-compose and the asciinema GIF renderer." ;;
 esac
