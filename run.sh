@@ -62,7 +62,7 @@ preflight() {
 need_tools() {
   preflight
   local missing=0
-  for t in conftest score-k8s kube-linter; do
+  for t in conftest score-k8s kube-linter opa; do
     [ -x "$ROOT/bin/$t" ] || command -v "$t" >/dev/null 2>&1 || { missing=1; }
   done
   if [ "$missing" = 1 ]; then
@@ -108,9 +108,9 @@ cmd_gate() {
     echo "example: ./run.sh gate outputs/final-manifests.yaml"
     exit 1
   fi
-  local conftest="$ROOT/bin/conftest"
-  [ -x "$conftest" ] || conftest="$(command -v conftest)"
-  "$conftest" test --policy "$ROOT/policy" "$target"
+  # The whole gate stack, not just conftest. The page quotes the number this
+  # prints, and conftest alone accounts for only three quarters of it.
+  "$PY" "$ROOT/src/gate_cli.py" "$@"
 }
 
 cmd_drift()   { "$PY" "$ROOT/src/driftd.py" "${@:-payments-ledger}"; }

@@ -105,8 +105,8 @@
     "es": "tras el camino dorado, en 3 iteraciones reales"
   },
   "t024": {
-    "en": "the ticket trail this replaces, across 6 teams",
-    "es": "el rastro de tickets que esto reemplaza, en 6 equipos"
+    "en": "the illustrative ticket trail this replaces, across 6 teams",
+    "es": "el rastro de tickets ilustrativo que esto reemplaza, en 6 equipos"
   },
   "t025": {
     "en": "per month the FinOps gate caught, on one service",
@@ -349,8 +349,8 @@
     "es": "La compuerta de pol&iacute;ticas, y el agente que la cierra."
   },
   "t085": {
-    "en": "25 controls across four bundles &mdash; 34 <code>deny</code>/<code>warn</code> rule bodies &mdash; all real Rego. Every message carries a policy id and an explicit remediation after <code>-&gt;</code>. That second half is what makes the loop agentic rather than merely a linter: the agent parses it, changes a Score parameter, and the whole artefact is regenerated.",
-    "es": "25 controles repartidos en cuatro bundles &mdash; 34 cuerpos de regla <code>deny</code>/<code>warn</code> &mdash; todo Rego real. Cada mensaje lleva un id de pol&iacute;tica y una remediaci&oacute;n expl&iacute;cita despu&eacute;s de <code>-&gt;</code>. Esa segunda mitad es lo que vuelve al ciclo ag&eacute;ntico en lugar de un simple linter: el agente la parsea, cambia un par&aacute;metro de Score y todo el artefacto se regenera."
+    "en": "17 controls across three bundles &mdash; 34 <code>deny</code>/<code>warn</code> rule bodies &mdash; all real Rego. Every message carries a policy id and an explicit remediation after <code>-&gt;</code>. That second half is what makes the loop agentic rather than merely a linter: the agent parses it, changes a Score parameter, and the whole artefact is regenerated.",
+    "es": "17 controles repartidos en tres bundles &mdash; 34 cuerpos de regla <code>deny</code>/<code>warn</code> &mdash; todo Rego real. Cada mensaje lleva un id de pol&iacute;tica y una remediaci&oacute;n expl&iacute;cita despu&eacute;s de <code>-&gt;</code>. Esa segunda mitad es lo que vuelve al ciclo ag&eacute;ntico en lugar de un simple linter: el agente la parsea, cambia un par&aacute;metro de Score y todo el artefacto se regenera."
   },
   "t086": {
     "en": "Act V &mdash; three real conftest evaluations, converging to zero.",
@@ -677,8 +677,8 @@
     "es": "1 &#183; GitHub Codespaces"
   },
   "t167": {
-    "en": "The dev container installs the one Python dependency, fetches the pinned binaries, runs the unit tests and then the acceptance suite before handing you a prompt &mdash; so the first thing you see is 81 passing and 15/15.",
-    "es": "El dev container instala la &uacute;nica dependencia de Python, descarga los binarios fijados, corre las pruebas unitarias y luego la suite de aceptaci&oacute;n antes de darte un prompt &mdash; as&iacute; lo primero que ves es 81 en verde y 15/15."
+    "en": "The dev container installs the one Python dependency, fetches the pinned binaries, runs the unit tests and then the acceptance suite before handing you a prompt &mdash; so the first thing you see is 120 passing and 15/15.",
+    "es": "El dev container instala la &uacute;nica dependencia de Python, descarga los binarios fijados, corre las pruebas unitarias y luego la suite de aceptaci&oacute;n antes de darte un prompt &mdash; as&iacute; lo primero que ves es 120 en verde y 15/15."
   },
   "t168": {
     "en": "2 &#183; Local",
@@ -909,8 +909,8 @@
     "es": "Northwind Retail es ficticia. El bundle de pol&iacute;ticas, el conjunto de provisioners, el servidor MCP y cada veredicto de esta p&aacute;gina no lo son. Licencia MIT; las herramientas upstream conservan sus propias licencias."
   },
   "t225": {
-    "en": "// built with real tools &#183; no mocks &#183; no screenshots &nbsp; 2026.08.20",
-    "es": "// construido con herramientas reales &#183; sin mocks &#183; sin capturas &nbsp; 2026.08.20"
+    "en": "// built with real tools &#183; no mocks &#183; no screenshots &nbsp; __BUILD_STAMP__",
+    "es": "// construido con herramientas reales &#183; sin mocks &#183; sin capturas &nbsp; __BUILD_STAMP__"
   },
   "t226": {
     "en": "score.yaml &mdash; the entire database request",

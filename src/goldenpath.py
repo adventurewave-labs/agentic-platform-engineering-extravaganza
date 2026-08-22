@@ -18,6 +18,7 @@ are identical, because that is what a control plane is supposed to give you.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -639,7 +640,8 @@ def scorecard(vibe: dict, turns: list[agent.Turn], before: dict, after: dict,
         "costAfter": after["totalMonthlyCostUsd"],
         "driftFields": drift["driftCount"],
         "agentClusterMutations": 0,
-        "objectCount": 0,  # filled in by main() once the final render is written
+        "objectCount": 0,   # filled in by main() once the final render is written
+        "manifestSha256": "",  # ditto -- see the note in main()
     }
 
 
@@ -766,6 +768,13 @@ def main() -> int:
         (OUTPUTS / "drift-report.json").write_text(json.dumps(drift, indent=2))
         spec, docs = renderer.golden_path(final, "prod")
         record["objectCount"] = len(docs)
+        # The object count says how many manifests landed; it says nothing about
+        # what is inside them. A digest of the rendered bytes is what makes
+        # `verify` able to notice a change to a field nobody thought to assert
+        # -- which was the gap, since every other recorded property is a scalar
+        # somebody chose in advance.
+        record["manifestSha256"] = hashlib.sha256(
+            renderer.dump(docs).encode()).hexdigest()
         (OUTPUTS / "run-record.json").write_text(json.dumps(record, indent=2))
         (OUTPUTS / "final-score.yaml").write_text(yaml.safe_dump(spec, sort_keys=False))
         (OUTPUTS / "final-manifests.yaml").write_text(renderer.dump(docs))

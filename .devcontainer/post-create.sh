@@ -51,7 +51,7 @@ cat <<'BANNER'
   │    ./run.sh demo             the full run, eight acts            │
   │    ./run.sh act 5            just the policy gate + agent loop   │
   │    ./run.sh verify           15 checks that none of it is faked  │
-  │    ./run.sh test             81 unit tests, stdlib unittest      │
+  │    ./run.sh test             120 unit tests, stdlib unittest      │
 │    ./run.sh tools <identity> what each agent identity may call   │
   │    ./run.sh site             the showcase page on :8080          │
   │    ./run.sh mcp              the platform MCP server on :8099    │

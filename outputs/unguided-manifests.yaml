@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-ledger
+  labels:
+    app: payments-ledger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-ledger
+  template:
+    metadata:
+      labels:
+        app: payments-ledger
+    spec:
+      containers:
+      - name: payments-ledger
+        image: payments-ledger:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DATABASE_URL
+          value: postgresql://postgres:postgres@payments-ledger-db:5432/payments-ledger
+        - name: DB_PASSWORD
+          value: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-ledger
+  labels:
+    app: payments-ledger
+spec:
+  type: LoadBalancer
+  selector:
+    app: payments-ledger
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: payments-ledger-db
+  labels:
+    app: payments-ledger-db
+spec:
+  replicas: 1
+  serviceName: payments-ledger-db
+  selector:
+    matchLabels:
+      app: payments-ledger-db
+  template:
+    metadata:
+      labels:
+        app: payments-ledger-db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        env:
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: payments-ledger
+        ports:
+        - containerPort: 5432

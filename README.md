@@ -94,10 +94,10 @@ Then:
 git clone https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza
 cd agentic-platform-engineering-extravaganza
 
-./run.sh setup     # fetch the pinned upstream binaries (conftest, score-k8s, kube-linter)
+./run.sh setup     # fetch the pinned upstream binaries (conftest, opa, score-k8s, kube-linter)
 ./run.sh demo      # the full run: eight acts and a scorecard
 ./run.sh verify    # 15 acceptance checks against real tool output
-./run.sh test      # 81 unit tests on stdlib unittest, no extra dependencies
+./run.sh test      # 120 unit tests on stdlib unittest, no extra dependencies
 ```
 
 `run.sh` checks your Python version and installs the one dependency it needs if it is
@@ -362,7 +362,7 @@ this, and it deserves far more attention than it gets.
 
 ## The policy bundle
 
-Twenty-five controls across four bundles — 34 `deny`/`warn` rule bodies — all real Rego, all
+Seventeen controls across three bundles — 34 `deny`/`warn` rule bodies — all real Rego, all
 evaluated by conftest.
 
 | Bundle | Rules | Covers |
@@ -449,7 +449,7 @@ artefacts at pinned versions — nothing is vendored or reimplemented.
 | [score-k8s](https://github.com/score-spec/score-k8s) / [Score](https://github.com/score-spec/spec) | developer-facing spec; renders the manifests | Apache-2.0 | 0.16.0 | small schema'd YAML a model gets right |
 | [kube-linter](https://github.com/stackrox/kube-linter) | independent second opinion | Apache-2.0 | 0.8.3 | verification |
 | [Crossplane v2](https://github.com/crossplane/crossplane) | the platform API the provisioner renders into | Apache-2.0 | v2.4.0 | ⚠️ no official MCP server |
-| [Backstage](https://github.com/backstage/backstage) | catalog + Software Template shape; `AiResource` | Apache-2.0 | v1.54.0 | **first-party MCP Actions backend** |
+| [Backstage](https://github.com/backstage/backstage) | catalog + Software Template shape; `AiResource` | Apache-2.0 | v1.54.3 | **first-party MCP Actions backend** |
 | [Argo CD](https://github.com/argoproj/argo-cd) | reconciles the merged change | Apache-2.0 | v3.5.1 | [`argoproj-labs/mcp-for-argocd`](https://github.com/argoproj-labs/mcp-for-argocd) |
 | [Kargo](https://github.com/akuity/kargo) | promotion path with a human gate | Apache-2.0 | v1.11.2 | ⚠️ MCP proposal closed `not_planned` |
 | [OpenChoreo](https://github.com/openchoreo/openchoreo) | source of the authz-gated MCP pattern | Apache-2.0 | v1.2.3 | **3 MCP servers, 3 in-tree agents** |
@@ -498,15 +498,23 @@ A demo that overstates itself is worse than no demo. The line, drawn honestly:
 | Northwind Retail | ❌ **fictional** | the company, the teams, the ticket numbers. The pain is not. |
 
 `./run.sh verify` runs **15 acceptance checks** and is the thing to trust rather than this table: the toolchain
-is present, the Rego compiles, the unguided path is still rejected (≥20 findings), the golden path
-still converges to zero, kube-linter still finds nothing in the platform's output, the agent still
-cannot approve production while a human still can, the MCP protocol still answers, the LLM backend
-still reaches the same answer as the deterministic one, and the committed run record still reproduces
-exactly (the unguided finding count and its per-policy breakdown, the iteration count, the cost before
-and after, and the rendered object count &mdash; six properties, each compared, none merely
-printed).
+is present, the Rego compiles under `opa check --strict`, the unguided path is still rejected with
+exactly the recorded number of findings, the golden path still converges to zero, kube-linter still
+finds nothing in the platform's output, the agent still changes only inputs &mdash; proven by
+re-rendering, not by reading its own account of itself &mdash; the agent still cannot approve
+production while a human still can, tool visibility is still ordered by privilege, the MCP protocol
+still answers, the LLM backend still reaches the same answer as the deterministic one, and the
+committed run record still reproduces exactly (the unguided finding count and its per-policy
+breakdown, the iteration count, the cost before and after, the rendered object count, and a SHA-256
+of the rendered manifests &mdash; seven properties, each compared, none merely printed).
 
-`./run.sh test` runs **81 unit tests** underneath that — stdlib `unittest`, no new dependency. They
+Three of those sentences were not true before this round. The check that claimed the Rego compiled
+ran a command that could not have noticed if it did not; the check that claimed the agent never edits
+rendered output only ever inspected the agent's own decision records; and the unguided path was held
+to "at least 20" against an actual figure of 42. Each is now written so that breaking the thing it
+describes makes it fail &mdash; which was tested by breaking them.
+
+`./run.sh test` runs **120 unit tests** underneath that — stdlib `unittest`, no new dependency. They
 cover the branches the worked example never reaches: the intent extractor's whole surface, the
 staging-only FinOps rules, an unmappable denial, a model that replies with prose instead of JSON, a
 model that invents a field, and the Argo CD adapter's normalisation without an Argo CD. A system
@@ -575,7 +583,7 @@ not exist. Both of those had happened, and neither was caught by anything until 
 │   ├── drift-report.json               the day-2 findings with attribution
 │   └── playground.json                 recorded conftest output for the page
 │
-├── tests/                              81 unit tests + the fake OpenAI endpoint
+├── tests/                              120 unit tests + the fake OpenAI endpoint
 │   ├── fake_llm.py                     replays a recorded transcript; no key, no spend
 │   ├── test_docs.py                    holds the README and the page to the same standard
 │   ├── context.py                      puts src/ on the path; __init__.py alongside

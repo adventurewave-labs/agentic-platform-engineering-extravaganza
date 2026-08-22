@@ -12,6 +12,7 @@ recorded. `outputs/verify-report.json` is what the page renders and what
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -49,24 +50,48 @@ def c_toolchain():
 
 
 def c_rego_compiles():
-    binary = ROOT / "bin" / "conftest"
-    proc = subprocess.run(
-        [str(binary), "test", "--policy", str(ROOT / "policy"), "/dev/null"],
-        capture_output=True, text=True)
-    broken = "rego_parse_error" in proc.stdout + proc.stderr \
-        or "rego_type_error" in proc.stdout + proc.stderr
-    rules = sum(1 for p in (ROOT / "policy").rglob("*.rego")
-                for line in p.read_text().splitlines()
+    """Compile the bundles with OPA itself, and fail on OPA's own exit code.
+
+    The previous version of this check shelled out to
+    `conftest test --policy policy /dev/null`, which looks like it compiles the
+    bundle and does not: conftest selects a parser from the file extension
+    before it ever loads Rego, so /dev/null killed it with "unknown parser" and
+    the string it grepped for could never appear. It reported success against a
+    bundle containing a syntax error. `opa check --strict` is the right tool --
+    it does nothing but compile, and it exits non-zero when that fails.
+    """
+    binary = ROOT / "bin" / "opa"
+    if not binary.exists():
+        return False, "bin/opa not installed; run ./bin/setup.sh"
+    policy = ROOT / "policy"
+    proc = subprocess.run([str(binary), "check", "--strict", str(policy)],
+                          capture_output=True, text=True)
+    bundles = sorted(d.name for d in policy.iterdir()
+                     if d.is_dir() and any(d.glob("*.rego")))
+    if proc.returncode != 0:
+        first = ((proc.stderr or proc.stdout).strip().splitlines() or [""])[0]
+        return False, f"opa check failed: {first[:160]}"
+    rules = sum(1 for f in policy.rglob("*.rego")
+                for line in f.read_text().splitlines()
                 if line.startswith(("deny contains", "warn contains")))
-    return not broken, f"4 bundles, {rules} rule bodies compile under OPA"
+    return True, (f"{len(bundles)} bundles ({', '.join(bundles)}), "
+                  f"{rules} rule bodies compile under `opa check --strict`")
 
 
 def c_unguided_denied():
     import agent, gates, renderer
     req = agent.parse_intent(REQUEST)
     r = gates.run_all(renderer.vibe_manifests(req))
-    return len(r.findings) >= 20, (
-        f"{len(r.findings)} denials across {len(r.by_policy())} distinct policies")
+    # This used to accept anything >= 20 against an actual figure of 42. A
+    # threshold with that much slack cannot tell "the policies fired" from
+    # "half of them stopped firing", which is the only thing it is here to
+    # notice. The committed run record is the number to hold it to.
+    expected = json.loads((OUTPUTS / "run-record.json").read_text())["vibeDenyCount"]
+    got = len(r.findings)
+    if got != expected:
+        return False, (f"{got} denials, run record says {expected} -- "
+                       f"policies changed, or stopped firing")
+    return True, f"{got} denials across {len(r.by_policy())} distinct policies"
 
 
 def c_golden_converges():
@@ -98,18 +123,72 @@ def c_kube_linter_clean():
 def c_no_output_patching():
     """The agent must only ever change inputs.
 
-    Asserts the remediation layer touches ServiceRequest fields and nothing
-    else -- if a future change starts editing rendered YAML, this fails.
+    The earlier version of this check inspected `{d.field for d in decisions}`
+    -- the remediation layer's own account of what it changed -- and never
+    looked at the rendered documents at all. A remediation step that quietly
+    stamped every rendered object still passed it, because the decision records
+    stayed clean. Self-reported provenance is not provenance.
+
+    This asks the question four ways, none of which the agent can answer by
+    describing itself:
+
+      0. the request fields that actually moved are exactly the ones the
+         decisions declare -- an undeclared change to a legitimate input is
+         still a silent edit;
+      1. no rendered document the agent was shown comes back mutated;
+      2. every byte of the next artefact is reproducible from a ServiceRequest
+         rebuilt out of nothing but its own declared scalar fields -- so no
+         patch can ride along on the request object either;
+      3. the artefact did in fact change, so the rest is not vacuous.
     """
+    import copy
     import agent, gates, renderer
     req = agent.parse_intent(REQUEST)
     spec, docs = renderer.golden_path(req, "prod")
     r = gates.run_all(docs, score=spec)
+
+    before = copy.deepcopy(docs)
     updated, decisions = agent.remediate(req, r.findings, "prod")
+
     fields = {d.field for d in decisions}
-    valid = fields <= set(vars(req).keys())
-    return valid, (f"{len(decisions)} change(s), all to Score inputs: "
-                   f"{', '.join(sorted(fields)) or 'none'}")
+    if not fields <= set(vars(req).keys()):
+        stray = ", ".join(sorted(fields - set(vars(req).keys())))
+        return False, f"decision(s) name something that is not a Score input: {stray}"
+
+    # 0. The inputs that actually moved are exactly the ones the agent declared.
+    #    An undeclared input change is a silent edit even though the field is a
+    #    legitimate one -- it is the difference between "changed the retention
+    #    window and said so" and "also rewrote the description".
+    moved = {k for k, v in vars(updated).items() if vars(req).get(k) != v}
+    if moved != fields:
+        undeclared = ", ".join(sorted(moved - fields)) or "none"
+        phantom = ", ".join(sorted(fields - moved)) or "none"
+        return False, (f"declared changes do not match actual ones "
+                       f"(undeclared: {undeclared}; claimed but unchanged: {phantom})")
+
+    # 1. The documents handed to the agent are exactly as they were.
+    if renderer.dump(docs) != renderer.dump(before):
+        return False, "remediate() mutated the rendered documents it was shown"
+
+    # 2. Rebuild the request from its own scalar fields and re-render. Anything
+    #    the agent attached to the object rather than declaring as an input is
+    #    dropped by the rebuild, and the two renders diverge.
+    carried = renderer.dump(renderer.golden_path(updated, "prod")[1])
+    rebuilt = renderer.ServiceRequest(**{k: copy.deepcopy(v)
+                                         for k, v in vars(updated).items()})
+    fresh = renderer.dump(renderer.golden_path(rebuilt, "prod")[1])
+    if carried != fresh:
+        return False, ("the next artefact is not reproducible from the declared "
+                       "inputs alone; state is riding on the request object")
+
+    # 3. Guard the guard: if remediation stopped changing anything, the two
+    #    comparisons above would hold trivially.
+    if not decisions or carried == renderer.dump(docs):
+        return False, "remediation produced no change; the comparisons prove nothing"
+
+    return True, (f"{len(decisions)} change(s), all to Score inputs "
+                  f"({', '.join(sorted(fields))}); {len(docs)} rendered objects "
+                  f"unmutated and reproducible from those inputs alone")
 
 
 def c_authz_agent_denied():
@@ -123,8 +202,13 @@ def c_authz_agent_denied():
     names = {t["name"] for t in listed["result"]["tools"]}
     denied = call["result"].get("isError") is True
     withheld = "platform.approve_promotion" not in names
-    return denied and withheld, (
-        f"{len(names)}/14 tools listed; approve_promotion withheld and refused")
+    if not (denied and withheld):
+        return False, (
+            "approve_promotion "
+            + ("was refused" if denied else "WAS NOT REFUSED")
+            + " and "
+            + ("was withheld from tools/list" if withheld else "IS LISTED"))
+    return True, f"{len(names)}/{len(platform_mcp.TOOLS)} tools listed; approve_promotion withheld and refused"
 
 
 def c_authz_human_allowed():
@@ -134,8 +218,10 @@ def c_authz_human_allowed():
     call = s.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
         "name": "platform.approve_promotion",
         "arguments": {"service": "payments-ledger", "stage": "prod"}}})
-    return call["result"].get("isError") is not True, \
-        "release-manager holds delivery:approve and the call succeeds"
+    if call["result"].get("isError") is True:
+        text = (call["result"].get("content") or [{}])[0].get("text", "")
+        return False, f"release-manager was refused: {text[:120]}"
+    return True, "release-manager holds delivery:approve and the call succeeds"
 
 
 def c_identity_scoping():
@@ -144,8 +230,21 @@ def c_identity_scoping():
     counts = {}
     for name in ("platform-agent", "drift-agent", "cost-reviewer", "release-manager"):
         counts[name] = len(platform_mcp.Session(resolve_identity(name)).visible_tools())
-    distinct = len(set(counts.values())) > 1
-    return distinct, " · ".join(f"{k} {v}/14" for k, v in counts.items())
+    # "more than one distinct count" is satisfied by almost any wiring, working
+    # or broken. What the check is really claiming is an ordering: a read-only
+    # reviewer sees fewer tools than a general agent, which sees fewer than the
+    # human who can approve a promotion -- and nobody but that human sees all.
+    total = len(platform_mcp.TOOLS)
+    order = ["cost-reviewer", "drift-agent", "platform-agent", "release-manager"]
+    detail = " · ".join(f"{k} {counts[k]}/{total}" for k in order)
+    ascending = all(counts[a] < counts[b] for a, b in zip(order, order[1:]))
+    if not ascending:
+        return False, f"tool visibility is not ordered by privilege: {detail}"
+    if counts["release-manager"] != total:
+        return False, f"the approving human cannot see every tool: {detail}"
+    if max(counts[k] for k in order[:-1]) >= total:
+        return False, f"a non-approving identity sees every tool: {detail}"
+    return True, detail
 
 
 def c_mcp_protocol():
@@ -165,19 +264,28 @@ def c_mcp_protocol():
         capture_output=True, text=True, timeout=120, cwd=ROOT)
     out = {json.loads(l).get("id"): json.loads(l)
            for l in proc.stdout.splitlines() if l.strip()}
-    ok = (out.get(1, {}).get("result", {}).get("protocolVersion") == "2025-06-18"
-          and len(out.get(2, {}).get("result", {}).get("tools", [])) > 0
-          and out.get(3, {}).get("result", {}).get("isError") is False
-          and len(out.get(4, {}).get("result", {}).get("resources", [])) > 0)
-    return ok, "initialize · tools/list · tools/call · resources/list over stdio"
+    stages = {
+        "initialize": out.get(1, {}).get("result", {}).get("protocolVersion") == "2025-06-18",
+        "tools/list": len(out.get(2, {}).get("result", {}).get("tools", [])) > 0,
+        "tools/call": out.get(3, {}).get("result", {}).get("isError") is False,
+        "resources/list": len(out.get(4, {}).get("result", {}).get("resources", [])) > 0,
+    }
+    failed = [k for k, v in stages.items() if not v]
+    if failed:
+        return False, f"no valid response to: {', '.join(failed)}"
+    return True, " · ".join(stages) + " over stdio"
 
 
 def c_mcp_origin():
     """The local HTTP transport must reject cross-origin browsers."""
     import platform_mcp
-    return (platform_mcp._origin_allowed("http://localhost:3000")
-            and not platform_mcp._origin_allowed("https://evil.example")), \
-        "localhost accepted, foreign origin rejected (DNS-rebinding guard)"
+    local = platform_mcp._origin_allowed("http://localhost:3000")
+    foreign = platform_mcp._origin_allowed("https://evil.example")
+    if not local:
+        return False, "the guard rejects localhost; the local transport is unusable"
+    if foreign:
+        return False, "https://evil.example was ACCEPTED -- the DNS-rebinding guard is open"
+    return True, "localhost accepted, foreign origin rejected (DNS-rebinding guard)"
 
 
 def c_pci_rules_fire():
@@ -250,17 +358,28 @@ def c_reproducible():
                                        "prod")["totalMonthlyCostUsd"],
         "costAfter": est["totalMonthlyCostUsd"],
         "objectCount": len(docs),
+        # Every other property here is a scalar somebody chose to record. A
+        # digest of the rendered bytes is the one that notices a change nobody
+        # chose to look for -- a label dropped, a probe retimed, a field
+        # reordered. Without it "reproduces exactly" meant "the six numbers we
+        # happened to write down still match".
+        "manifestSha256": hashlib.sha256(renderer.dump(docs).encode()).hexdigest(),
     }
     mismatched = [k for k, v in actual.items() if prev.get(k) != v]
     if mismatched:
+        if mismatched == ["manifestSha256"]:
+            return False, ("every recorded number still matches but the rendered "
+                           "manifests differ byte for byte; regenerate "
+                           "outputs/ with ./run.sh demo")
         return False, "run record drifted: " + ", ".join(
             f"{k} {prev.get(k)!r} != {v!r}" for k, v in actual.items()
             if k in mismatched)
-    return True, (f"all 6 recorded properties reproduce "
+    return True, (f"all {len(actual)} recorded properties reproduce "
                   f"({actual['vibeDenyCount']} denials, "
                   f"{actual['goldenPathIterations']} iterations, "
                   f"${actual['costBefore']:,.2f} -> ${actual['costAfter']:,.2f}, "
-                  f"{actual['objectCount']} objects)")
+                  f"{actual['objectCount']} objects, "
+                  f"manifests sha256:{actual['manifestSha256'][:12]})")
 
 
 
