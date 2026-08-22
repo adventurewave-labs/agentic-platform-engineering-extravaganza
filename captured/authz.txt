@@ -1,3 +1,4 @@
+➜  northwind $ ./run.sh act 3
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
@@ -48,3 +49,4 @@
     ← 1 golden path(s)
       golden-path-service-postgres
         HTTP service + Postgres (Northwind golden path)
+➜  northwind $ 

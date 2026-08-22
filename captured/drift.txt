@@ -1,3 +1,4 @@
+➜  northwind $ ./run.sh act 8
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
@@ -10,7 +11,7 @@
   a Tuesday.
 
   ⟶ mcp platform.detect_drift(service="payments-ledger", environment="prod") as drift-agent
-  ✔ comparing observed state against git
+  ⠋ comparing observed state against git     ⠙ comparing observed state against git     ⠹ comparing observed state against git     ⠸ comparing observed state against git     ⠼ comparing observed state against git     ⠴ comparing observed state against git     ⠦ comparing observed state against git     ⠧ comparing observed state against git     ⠇ comparing observed state against git     ⠏ comparing observed state against git     ⠋ comparing observed state against git     ⠙ comparing observed state against git     ⠹ comparing observed state against git     ⠸ comparing observed state against git     ⠼ comparing observed state against git     ⠴ comparing observed state against git     ⠦ comparing observed state against git     ⠧ comparing observed state against git                                                                                                        ✔ comparing observed state against git
     ← OutOfSync — 4 field(s) diverged since 2026-07-23
 
   ▍ CRITICAL backupRetentionDays   30 in git → 7 in cluster
@@ -50,3 +51,4 @@
   just fix it, even if you asked. Everything it believes becomes a
   diff a human merges — so when it is wrong, and it will be, the
   git history is still the truth.
+➜  northwind $ 
