@@ -117,12 +117,12 @@
     "es": "mutaciones al cl&uacute;ster que cualquier agente puede ejecutar"
   },
   "t027": {
-    "en": "90-second cinematic demo",
-    "es": "demo cinematogr&aacute;fica de 90 segundos"
+    "en": "A real recording &mdash; 20 seconds, four acts",
+    "es": "Una grabaci&oacute;n real &mdash; 20 segundos, cuatro actos"
   },
   "t028": {
-    "en": "One request, eight acts, nothing pre-recorded.",
-    "es": "Una solicitud, ocho actos, nada pregrabado."
+    "en": "One request, eight acts, every verdict computed live.",
+    "es": "Una petici&oacute;n, ocho actos, cada veredicto calculado en vivo."
   },
   "t029": {
     "en": "Every policy verdict below came from running the real <code>conftest</code> binary against the real Rego in <code>policy/</code>. Every manifest came from the real <code>score-k8s</code> binary and the provisioner set in <code>platform/</code>. Run it twice and the numbers are identical &mdash; that is what a control plane is supposed to give you.",
@@ -617,8 +617,8 @@
     "es": "Origen del patr&oacute;n MCP con autorizaci&oacute;n usado aqu&iacute;"
   },
   "t152": {
-    "en": "<span class=\"pill ok\">2 MCP servers, 3 in-tree agents</span>",
-    "es": "<span class=\"pill ok\">2 servidores MCP, 3 agentes en el repo</span>"
+    "en": "<span class=\"pill ok\">3 MCP servers, 3 in-tree agents</span>",
+    "es": "<span class=\"pill ok\">3 servidores MCP, 3 agentes en el repo</span>"
   },
   "t153": {
     "en": "Optional scanners and IaC toolchain",
@@ -677,8 +677,8 @@
     "es": "1 &#183; GitHub Codespaces"
   },
   "t167": {
-    "en": "The dev container installs the one Python dependency, fetches the pinned binaries and runs the acceptance suite before handing you a prompt &mdash; so the first thing you see is 14/14 passing.",
-    "es": "El dev container instala la &uacute;nica dependencia de Python, descarga los binarios fijados y corre la suite de aceptaci&oacute;n antes de darte un prompt &mdash; as&iacute; que lo primero que ves es 14/14 en verde."
+    "en": "The dev container installs the one Python dependency, fetches the pinned binaries, runs the unit tests and then the acceptance suite before handing you a prompt &mdash; so the first thing you see is 81 passing and 15/15.",
+    "es": "El dev container instala la &uacute;nica dependencia de Python, descarga los binarios fijados, corre las pruebas unitarias y luego la suite de aceptaci&oacute;n antes de darte un prompt &mdash; as&iacute; lo primero que ves es 81 en verde y 15/15."
   },
   "t168": {
     "en": "2 &#183; Local",
@@ -817,36 +817,36 @@
     "es": "Cifras de costo"
   },
   "t202": {
-    "en": "<span class=\"pill warn\">static rate card</span>",
-    "es": "<span class=\"pill warn\">tarifario est&aacute;tico</span>"
+    "en": "<span class=\"pill warn\">static rate card by default</span>",
+    "es": "<span class=\"pill warn\">tarifario est&aacute;tico por defecto</span>"
   },
   "t203": {
-    "en": "A checked-in table in <code>src/costing.py</code>, so there is no account requirement. The schema is an Infracost subset &mdash; swap in <code>infracost breakdown --format json</code> and the Rego does not change.",
-    "es": "Una tabla versionada en <code>src/costing.py</code>, para que no haga falta ninguna cuenta. El esquema es un subconjunto de Infracost &mdash; sustituye por <code>infracost breakdown --format json</code> y el Rego no cambia."
+    "en": "A checked-in table in <code>src/costing.py</code> by default, so there is no account requirement and the artefacts stay byte-reproducible. The swap is wired rather than asserted: <code>NORTHWIND_COST_SOURCE=infracost</code> re-prices the database and load-balancer lines against real cloud rates via <code>src/sources/infracost.py</code>, and every estimate carries a <code>costSource</code> so a rate-card number is never mistaken for a priced one. The Rego does not change &mdash; that was the claim.",
+    "es": "Una tabla fija en <code>src/costing.py</code> por defecto, as&iacute; no hace falta cuenta y los artefactos siguen siendo reproducibles byte a byte. El cambio est&aacute; cableado, no s&oacute;lo afirmado: <code>NORTHWIND_COST_SOURCE=infracost</code> vuelve a cotizar las l&iacute;neas de base de datos y balanceador contra tarifas reales de nube v&iacute;a <code>src/sources/infracost.py</code>, y cada estimaci&oacute;n lleva un <code>costSource</code> para que un n&uacute;mero de tabla nunca se confunda con uno cotizado. El Rego no cambia &mdash; esa era la afirmaci&oacute;n."
   },
   "t204": {
     "en": "Drift observation",
     "es": "Observaci&oacute;n de deriva"
   },
   "t205": {
-    "en": "<span class=\"pill warn\">fixture</span>",
-    "es": "<span class=\"pill warn\">fixture</span>"
+    "en": "<span class=\"pill warn\">fixture by default</span>",
+    "es": "<span class=\"pill warn\">fixture por defecto</span>"
   },
   "t206": {
-    "en": "<code>platform/observed-state.yaml</code>. Detection, attribution and the proposed patch are real code over that shape; in a live estate you would feed it from Argo CD's resource tree.",
-    "es": "<code>platform/observed-state.yaml</code>. La detecci&oacute;n, la atribuci&oacute;n y el parche propuesto son c&oacute;digo real sobre esa forma; en un parque real lo alimentar&iacute;as desde el &aacute;rbol de recursos de Argo CD."
+    "en": "<code>platform/observed-state.yaml</code> by default. Detection, attribution and the proposed patch are real code over that shape. <code>NORTHWIND_DRIFT_SOURCE=argocd</code> swaps the fixture for <code>src/sources/argocd.py</code>, which reads Argo CD's <code>managed-resources</code> for the desired/observed pair and <code>metadata.managedFields</code> for attribution &mdash; and reports a <em>field manager</em>, not a person, because that is all a control plane actually knows.",
+    "es": "<code>platform/observed-state.yaml</code> por defecto. La detecci&oacute;n, la atribuci&oacute;n y el parche propuesto son c&oacute;digo real sobre esa forma. <code>NORTHWIND_DRIFT_SOURCE=argocd</code> cambia el fixture por <code>src/sources/argocd.py</code>, que lee <code>managed-resources</code> de Argo CD para el par deseado/observado y <code>metadata.managedFields</code> para la atribuci&oacute;n &mdash; y reporta un <em>field manager</em>, no una persona, porque es todo lo que un control plane realmente sabe."
   },
   "t207": {
     "en": "Kubernetes cluster",
     "es": "Cl&uacute;ster de Kubernetes"
   },
   "t208": {
-    "en": "<span class=\"pill no\">not present</span>",
-    "es": "<span class=\"pill no\">no presente</span>"
+    "en": "<span class=\"pill warn\">not in the demo; real in CI</span>",
+    "es": "<span class=\"pill warn\">no en la demo; real en CI</span>"
   },
   "t209": {
-    "en": "Nothing is applied anywhere. The manifests are rendered and evaluated, which is where every claim here lives. They are valid against a real cluster.",
-    "es": "No se aplica nada en ning&uacute;n lado. Los manifiestos se renderizan y se eval&uacute;an, que es donde vive cada afirmaci&oacute;n de esta p&aacute;gina. Son v&aacute;lidos contra un cl&uacute;ster real."
+    "en": "<code>./run.sh demo</code> applies nothing anywhere. But &ldquo;valid against a real cluster&rdquo; is no longer left as an assertion: <code>.github/workflows/cluster.yaml</code> stands up a pinned kind cluster, installs the platform API as a real CRD, and puts the committed manifests through the actual API server &mdash; schema validation, admission, defaulting &mdash; then asserts the controllers acted. It also runs the negative control: the same API server <strong>accepts the unguided manifests too</strong>, all 42 violations of them.",
+    "es": "<code>./run.sh demo</code> no aplica nada en ning&uacute;n lado. Pero &ldquo;v&aacute;lido contra un cl&uacute;ster real&rdquo; ya no se deja como afirmaci&oacute;n: <code>.github/workflows/cluster.yaml</code> levanta un cl&uacute;ster kind fijado, instala la API de plataforma como un CRD real, y pasa los manifiestos commiteados por el API server de verdad &mdash; validaci&oacute;n de esquema, admisi&oacute;n, defaulting &mdash; y luego verifica que los controladores actuaron. Tambi&eacute;n corre el control negativo: ese mismo API server <strong>acepta tambi&eacute;n los manifiestos sin plataforma</strong>, con sus 42 violaciones incluidas."
   },
   "t210": {
     "en": "Cloud provisioning",
