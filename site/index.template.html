@@ -252,7 +252,7 @@ footer a{color:var(--muted)}
   <div class="stats">
     <div class="stat"><div class="n red">42</div><div data-i18n="t022" class="k">policy violations with no platform in the way</div></div>
     <div class="stat"><div class="n green">0</div><div data-i18n="t023" class="k">after the golden path, in 3 real iterations</div></div>
-    <div class="stat"><div class="n amber">11 d</div><div data-i18n="t024" class="k">the ticket trail this replaces, across 6 teams</div></div>
+    <div class="stat"><div class="n amber">11 d</div><div data-i18n="t024" class="k">the illustrative ticket trail this replaces, across 6 teams</div></div>
     <div class="stat"><div class="n violet">$602</div><div data-i18n="t025" class="k">per month the FinOps gate caught, on one service</div></div>
     <div class="stat"><div class="n cyan">0</div><div data-i18n="t026" class="k">cluster mutations any agent is able to perform</div></div>
   </div>
@@ -425,7 +425,7 @@ footer a{color:var(--muted)}
   <div data-i18n="t083" class="kicker">Open Policy Agent &#183; Conftest 0.69.0 &#183; Apache-2.0</div>
   <h2 data-i18n="t084">The policy gate, and the agent that closes it.</h2>
   <p data-i18n="t085" class="sub">
-    25 controls across four bundles &mdash; 34 <code>deny</code>/<code>warn</code> rule bodies &mdash;
+    17 controls across three bundles &mdash; 34 <code>deny</code>/<code>warn</code> rule bodies &mdash;
     all real Rego. Every message carries a policy id and an explicit remediation after
     <code>-&gt;</code>. That second half is what makes the loop agentic rather than merely a linter:
     the agent parses it, changes a Score parameter, and the whole artefact is regenerated.
@@ -439,42 +439,7 @@ footer a{color:var(--muted)}
   <div class="term">
     <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
       <span class="t">./run.sh act 5</span><span data-i18n="t087" class="badge-real">REAL OUTPUT</span></div>
-    <pre><span class="p">&#9613; ITERATION 1</span>   <span class="c">$960.82/mo vs $400.00 budget</span>
-   <span class="c">1.</span> <span class="r">NW-PCI-003</span>  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day
-                  PCI floor
-      <span class="c">fix &#8594;</span> <span class="n">set spec.parameters.backupRetentionDays&gt;=30</span>
-   <span class="c">2.</span> <span class="r">NW-FIN-001</span>  payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of
-                  $400.00/mo by $560.82
-      <span class="c">fix &#8594;</span> <span class="n">right-size the largest line item or request a budget increase from the cost-center</span>
-            owner
-   <span class="c">3.</span> <span class="r">NW-FIN-003</span>  payments-ledger/prod: resource "payments-ledger-postgres" is $820.67/mo &mdash; 85% of
-                  the whole service budget
-      <span class="c">fix &#8594;</span> <span class="n">single line items over 70% need an explicit exception annotation from the cost-center</span>
-            owner
-
-    <span class="k">agent &#8594;</span> <span class="c">2 input change(s), then re-render from source</span>
-      <span class="c">&#183;</span> <span class="b">db_backup_retention_days</span> <span class="r">7</span> <span class="c">&#8594;</span> <span class="g">30</span>
-        PCI requires a 30-day minimum recovery window
-      <span class="c">&#183;</span> <span class="b">db_instance_class</span> <span class="r">db.r6g.xlarge</span> <span class="c">&#8594;</span> <span class="g">db.t4g.large</span>
-        largest reducible line item; db.r6g.xlarge -&gt; db.t4g.large stays inside the cost-centre
-        envelope
-
-  <span class="p">&#9613; ITERATION 2</span>   <span class="c">$463.15/mo vs $400.00 budget</span>
-   <span class="c">1.</span> <span class="r">NW-FIN-001</span>  payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of
-                  $400.00/mo by $63.15
-      <span class="c">fix &#8594;</span> <span class="n">right-size the largest line item or request a budget increase from the cost-center</span>
-            owner
-
-    <span class="k">agent &#8594;</span> <span class="c">1 input change(s), then re-render from source</span>
-      <span class="c">&#183;</span> <span class="b">db_instance_class</span> <span class="r">db.t4g.large</span> <span class="c">&#8594;</span> <span class="g">db.t4g.medium</span>
-        largest reducible line item; db.t4g.large -&gt; db.t4g.medium stays inside the cost-centre
-        envelope
-
-  <span class="p">&#9613; ITERATION 3</span>   <span class="c">$359.15/mo vs $400.00 budget</span>
-    <span class="g">&#10004; 0 denials across 4 gates</span>
-
-
-    <span class="g">PASSED &mdash; 0 denials</span>    <span class="c">converged in 3 iterations</span></pre>
+    <pre>__ACT5_TRANSCRIPT__</pre>
   </div>
 
   <ul class="why">
@@ -501,7 +466,7 @@ footer a{color:var(--muted)}
     <div class="pg-steps" id="pgSteps"></div>
     <div class="pg-out">
       <div class="pg-bar">
-        <span class="cmd">$ conftest test --policy policy/ manifests.yaml</span>
+        <span class="cmd" id="pgCmd"></span>
         <span class="meter"><i id="pgMeter" style="width:100%"></i></span>
         <span class="badge fail" id="pgBadge">42 denials</span>
       </div>
@@ -536,24 +501,7 @@ footer a{color:var(--muted)}
     <div class="term">
       <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
         <span class="t">./run.sh tools platform-agent</span><span data-i18n="t099" class="badge-real">REAL OUTPUT</span></div>
-      <pre><span class="c">identity: agent:platform-agent  (12/14 tools visible)</span>
-
-    catalog.get_entity                 <span class="c">catalog:read</span>
-    catalog.query                      <span class="c">catalog:read</span>
-    catalog.refresh_entity             <span class="c">catalog:refresh</span>
-  <span class="n">!</span> catalog.register                   <span class="c">catalog:write</span>
-    platform.estimate_cost             <span class="c">finops:read</span>
-    platform.evaluate_policy           <span class="c">policy:evaluate</span>
-  <span class="n">!</span> platform.open_pull_request         <span class="c">delivery:propose</span>
-    platform.plan_promotion            <span class="c">delivery:plan</span>
-    platform.render_workload           <span class="c">platform:render</span>
-  <span class="n">!</span> scaffolder.execute                 <span class="c">scaffolder:execute</span>
-    scaffolder.get_template_parameters <span class="c">scaffolder:read</span>
-    scaffolder.list_templates          <span class="c">scaffolder:read</span>
-
-  <span class="c">withheld from this identity:</span>
-    <span class="r">x platform.approve_promotion       identity lacks delivery:approve</span>
-    <span class="r">x platform.detect_drift            identity lacks observability:read</span></pre>
+      <pre>__TOOLS_PLATFORM_AGENT__</pre>
     </div>
 
     <div class="term">
@@ -647,20 +595,7 @@ footer a{color:var(--muted)}
       <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
         <span class="t" data-i18n="t227">rendered by platform/northwind.provisioners.yaml</span>
         <span data-i18n="t109" class="badge-real">REAL RENDER</span></div>
-      <pre><span class="k">apiVersion</span>: platform.northwind.io/v1alpha1
-<span class="k">kind</span>: <span class="b">SQLInstance</span>
-<span class="k">spec</span>:
-  <span class="k">crossplane</span>:
-    <span class="k">compositionRef</span>:
-      <span class="k">name</span>: sqlinstance.postgres.northwind.io
-  <span class="k">parameters</span>:
-    <span class="k">storageEncrypted</span>: <span class="g">true</span>
-    <span class="k">publiclyAccessible</span>: <span class="g">false</span>
-    <span class="k">backupRetentionDays</span>: <span class="n">30</span>
-    <span class="k">region</span>: <span class="s">eu-west-1</span>
-    <span class="k">instanceClass</span>: <span class="s">db.t4g.medium</span>
-    <span class="k">costCenter</span>: <span class="s">CC-4471</span>
-    <span class="k">passwordSecretRef</span>: <span class="c">{ name: ..., key: password }</span></pre>
+      <pre>__SQLINSTANCE_RENDER__</pre>
     </div>
   </div>
 
@@ -752,7 +687,7 @@ footer a{color:var(--muted)}
         <td data-i18n="t145"><span class="pill no">no official MCP server</span></td></tr>
       <tr><td><a href="https://github.com/backstage/backstage">Backstage</a></td>
         <td data-i18n="t146">Catalog + Software Template shape; <code>AiResource</code></td>
-        <td class="mono">Apache-2.0</td><td class="mono">v1.54.0</td>
+        <td class="mono">Apache-2.0</td><td class="mono">v1.54.3</td>
         <td data-i18n="t147"><span class="pill ok">first-party MCP Actions backend</span></td></tr>
       <tr><td><a href="https://github.com/argoproj/argo-cd">Argo CD</a></td>
         <td data-i18n="t148">Reconciles the merged change</td>
@@ -812,7 +747,7 @@ footer a{color:var(--muted)}
     <div>
       <h3 data-i18n="t166" style="margin-bottom:12px">1 &#183; GitHub Codespaces</h3>
       <p data-i18n="t167" class="sub" style="font-size:14px;margin-top:0">
-        The dev container installs the one Python dependency, fetches the pinned binaries, runs the unit tests and then the acceptance suite before handing you a prompt &mdash; so the first thing you see is 81 passing and 15/15.
+        The dev container installs the one Python dependency, fetches the pinned binaries, runs the unit tests and then the acceptance suite before handing you a prompt &mdash; so the first thing you see is 120 passing and 15/15.
       </p>
       <p style="margin-top:16px">
         <a class="btn p" href="https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1">
@@ -821,7 +756,7 @@ footer a{color:var(--muted)}
       <pre style="margin-top:16px"><span class="c"># what the container does before you get a prompt</span>
 pip install -r requirements.txt
 ./bin/setup.sh --all      <span class="c"># pinned upstream binaries</span>
-./run.sh test             <span class="c"># 81 unit tests</span>
+./run.sh test             <span class="c"># 120 unit tests</span>
 ./run.sh verify           <span class="c"># 15/15</span></pre>
 
       <h3 data-i18n="t168" style="margin:30px 0 12px">2 &#183; Local</h3>
@@ -953,7 +888,7 @@ claude mcp add --transport http \
   </div>
   <p data-i18n="t224">Northwind Retail is fictional. The policy bundle, the provisioner set, the MCP server and every
   verdict on this page are not. MIT licensed; upstream tools keep their own licenses.</p>
-  <p data-i18n="t225" class="stamp">// built with real tools &#183; no mocks &#183; no screenshots &nbsp; 2026.08.20</p>
+  <p data-i18n="t225" class="stamp">// built with real tools &#183; no mocks &#183; no screenshots &nbsp; __BUILD_STAMP__</p>
 </div></footer>
 
 <script>
@@ -1049,6 +984,12 @@ const stepsEl = document.getElementById('pgSteps');
 const listEl = document.getElementById('pgList');
 const badgeEl = document.getElementById('pgBadge');
 const meterEl = document.getElementById('pgMeter');
+
+/* The command line above the denial list is the one src/build_playground.py
+   actually ran, carried in the data next to the count it produced. It used to
+   be typed into the HTML by hand and named only conftest, while the badge
+   beside it counted conftest and kube-linter together. */
+document.getElementById('pgCmd').textContent = '$ ' + PG.gateCommand;
 let level = 0;
 
 function buildSteps() {
