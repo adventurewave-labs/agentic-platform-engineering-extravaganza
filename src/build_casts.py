@@ -1,29 +1,53 @@
 #!/usr/bin/env python3
 """
-Build asciinema casts (and GIFs, if `agg` is present) from real demo runs.
+Record the demo as a real terminal session, then render it to a GIF.
 
-The demo is executed for real and its stdout is captured verbatim; what you see
-in a GIF is byte-for-byte what the tools printed.
+WHAT "REAL" MEANS HERE
+----------------------
+This is a genuine PTY recording. A pseudo-terminal is allocated, an interactive
+bash runs inside it, the command is typed into it keystroke by keystroke, and
+every byte the terminal emits is captured with the timestamp it actually
+arrived. That is precisely what `asciinema rec` does when a human records a
+demo; the only difference is who is doing the typing.
 
-Two things *are* synthesised, and it is worth saying so plainly: the per-line
-timings (the capture runs at --speed 0, so a cast would otherwise dump 2000
-lines into one frame), and the `./run.sh demo` prompt at the top (the capture
-actually invokes `python3 src/goldenpath.py` directly). Neither changes a
-single character of output. The highlight reel is a *selection* of acts from
-one capture -- lines are dropped, never rewritten -- so it cannot claim
-anything the full run did not.
+Nothing is synthesised. In particular:
 
-    ./run.sh record            # all casts + GIFs
-    ./run.sh record wow        # just the headline cast
+  * The timings are wall-clock. The demo paces itself (`src/ui.py`), and the
+    cast preserves that pacing as it happened rather than assigning a delay per
+    line after the fact.
+  * The shell prompt is a real prompt from a real shell, not a drawn one.
+  * The highlight reel is a real run of `./run.sh demo --acts 2,3,5,7
+    --scorecard` -- a command you can type yourself -- not a full run with
+    lines cut out of it afterwards.
+  * Every policy verdict on screen came from the pinned `conftest` binary
+    during that recording.
+
+The one thing the *renderer* does is play the result back faster than real
+time (`agg --speed`), and trim dead air longer than a second and a half
+(`--idle-time-limit`). Both are playback settings on an unmodified recording,
+they are declared per cast in GIF_TUNING below, and neither can change a
+character of what was recorded.
+
+    ./run.sh record                # every cast + GIF
+    ./run.sh record highlight      # just the hero
+    ./run.sh record --render-only  # re-render the GIFs from the committed casts
 """
 
 from __future__ import annotations
 
+import fcntl
 import json
 import os
+import pty
+import re
+import select
 import shutil
+import signal
+import struct
 import subprocess
 import sys
+import termios
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,179 +57,227 @@ CAPTURED = ROOT / "captured"
 
 COLS, ROWS = 100, 32
 
-# The headline cut. Same bytes as the full run -- these are literally slices of
-# one capture, not a re-enactment -- but only the acts that carry the argument,
-# so the hero GIF stays watchable and stays under GitHub's inline budget.
-HIGHLIGHT_ACTS = ["II", "III", "V", "VII", "SCORECARD"]
+# An OSC title sequence in PS1. Invisible when rendered, trivially findable in
+# the byte stream -- which is how the recorder knows the shell is back at a
+# prompt and the command has finished.
+MARK = "\033]0;NWPROMPT\007"
+PROMPT_PS1 = (r'\[\033]0;NWPROMPT\007\]'
+              r'\[\033[38;5;84m\]\xe2\x9e\x9c\[\033[0m\]  '
+              r'\[\033[38;5;44m\]northwind\[\033[0m\] '
+              r'\[\033[38;5;245m\]$\[\033[0m\] ')
 
 CASTS = {
     "highlight": {
-        "title": "Agentic Platform Engineering — the argument in 90 seconds",
-        "argv": ["--speed", "0"],
+        "title": "Agentic Platform Engineering — the argument in four acts",
+        "command": "./run.sh demo --acts 2,3,5,7 --scorecard",
         "cols": 100, "rows": 32,
-        "acts": HIGHLIGHT_ACTS,
     },
     "wow": {
         "title": "Agentic Platform Engineering — the whole story",
-        "argv": ["--speed", "0"],
+        "command": "./run.sh demo",
         "cols": 100, "rows": 32,
     },
     "policy_gate": {
         "title": "The policy gate: an agent reading real OPA denials and fixing the cause",
-        "argv": ["--act", "5", "--speed", "0"],
+        "command": "./run.sh act 5",
         "cols": 100, "rows": 30,
     },
     "authz": {
         "title": "Authorization: the tool an agent is never told about",
-        "argv": ["--act", "3", "--speed", "0"],
+        "command": "./run.sh act 3",
         "cols": 100, "rows": 30,
     },
     "render": {
         "title": "score.yaml to a Crossplane composite, via the platform's own provisioner",
-        "argv": ["--act", "4", "--speed", "0"],
+        "command": "./run.sh act 4",
         "cols": 100, "rows": 30,
     },
     "drift": {
         "title": "Day 2: drift detection with attribution, and a diff instead of an apply",
-        "argv": ["--act", "8", "--speed", "0"],
+        "command": "./run.sh act 8",
         "cols": 100, "rows": 30,
     },
 }
 
-
-def capture(argv: list[str], cols: int) -> str:
-    env = dict(os.environ)
-    env["COLUMNS"] = str(cols)
-    env["NORTHWIND_SPEED"] = "0"
-    env.pop("NO_COLOR", None)
-    env["PATH"] = f"{ROOT / 'bin'}:{env.get('PATH', '')}"
-    proc = subprocess.run(
-        [sys.executable, str(ROOT / "src" / "goldenpath.py"), *argv],
-        capture_output=True, text=True, env=env, cwd=ROOT, timeout=600,
-    )
-    if proc.returncode != 0:
-        sys.stderr.write(proc.stderr[-3000:])
-        raise SystemExit(f"demo exited {proc.returncode}")
-    return proc.stdout
-
-
-def delay_for(line: str) -> float:
-    """How long to linger on a line. Structure gets a beat; body flows."""
-    plain = strip_ansi(line).strip()
-    if not plain:
-        return 0.10
-    if plain.startswith("━━━"):          # act header
-        return 0.85
-    if plain.startswith(("╭", "╰", "═══")):
-        return 0.18
-    if plain.startswith(("PASSED", "BLOCKED", "DENIED")) or "PASSED" in plain[:20]:
-        return 1.10
-    if plain.startswith("▍"):            # iteration marker
-        return 0.55
-    if plain[:3].strip().rstrip(".").isdigit():   # a numbered finding
-        return 0.22
-    if plain.startswith(("⟶", "←", "✔", "✘", "▲", "›")):
-        return 0.30
-    if plain.startswith("fix →"):
-        return 0.22
-    return 0.085 + min(len(plain), 90) * 0.0016
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[a-zA-Z]|\x1b\][^\a]*\a|\x1b[()][AB012]|\r")
 
 
 def strip_ansi(text: str) -> str:
-    out, skip = [], False
-    for ch in text:
-        if ch == "\033":
-            skip = True
-        elif skip and ch == "m":
-            skip = False
-        elif not skip:
-            out.append(ch)
-    return "".join(out)
+    return ANSI_RE.sub("", text)
 
 
-ACT_MARK = "\u2501\u2501\u2501"  # the act rule
+def _set_winsize(fd: int, rows: int, cols: int) -> None:
+    fcntl.ioctl(fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
 
 
-def select_acts(text: str, acts: list[str]) -> str:
-    """Keep the banner plus the named acts, dropping everything else.
+def record(command: str, cols: int, rows: int, timeout: float = 900.0
+           ) -> list[tuple[float, str]]:
+    """Run `command` in an interactive bash on a real pty and capture the output.
 
-    Pure selection over one real capture. No line is rewritten, so the
-    highlight reel cannot say anything the full run did not.
+    Returns [(elapsed_seconds, chunk)], the raw byte stream decoded as UTF-8,
+    exactly as the terminal received it.
     """
-    lines = text.splitlines()
-    out: list[str] = []
-    keeping = True          # the opening banner
-    seen_any_act = False
-    for line in lines:
-        plain = strip_ansi(line)
-        label = None
-        if plain.startswith(ACT_MARK):
-            if " ACT " in plain:
-                label = plain.split(" ACT ", 1)[1].split(" ", 1)[0].strip()
-            elif " SCORECARD " in plain:
-                # The closing section is not numbered; it is still selectable.
-                label = "SCORECARD"
-        if label is not None:
-            seen_any_act = True
-            keeping = label in acts
-            if keeping:
-                out.append("")
-        if keeping:
-            out.append(line)
-        elif not seen_any_act:
-            out.append(line)
-    return "\n".join(out)
+    rcfile = ROOT / "workspace" / ".recorder-bashrc"
+    rcfile.parent.mkdir(exist_ok=True)
+    rcfile.write_text(
+        "unset HISTFILE\nset +o history\nstty -echoctl 2>/dev/null\n"
+        f"PS1=$'{PROMPT_PS1}'\n"
+    )
+
+    env = dict(os.environ)
+    env.update({
+        "TERM": "xterm-256color", "COLUMNS": str(cols), "LINES": str(rows),
+        "PATH": f"{ROOT / 'bin'}:{env.get('PATH', '')}",
+        "PYTHONPATH": f"{ROOT / 'src'}:{env.get('PYTHONPATH', '')}",
+        "PS1": "", "PROMPT_COMMAND": "",
+    })
+    env.pop("NO_COLOR", None)
+    env.pop("NORTHWIND_SPEED", None)   # record at the demo's natural pace
+
+    master, slave = pty.openpty()
+    _set_winsize(slave, rows, cols)
+    proc = subprocess.Popen(
+        # --noprofile, but NOT --norc: --norc would make bash ignore --rcfile,
+        # the prompt would never be set, and the recorder would wait forever
+        # for a marker that never arrives.
+        ["bash", "--noprofile", "--rcfile", str(rcfile), "-i"],
+        stdin=slave, stdout=slave, stderr=slave, env=env, cwd=str(ROOT),
+        preexec_fn=os.setsid, close_fds=True,
+    )
+    os.close(slave)
+
+    events: list[tuple[float, str]] = []
+    buffer = ""
+    marks = 0
+    typed = False
+    start = None
+    deadline = time.monotonic() + timeout
+    prompt_deadline = time.monotonic() + 20.0
+    pending = ""
+
+    def drain(block: float) -> str:
+        nonlocal pending
+        r, _, _ = select.select([master], [], [], block)
+        if not r:
+            return ""
+        try:
+            data = os.read(master, 65536)
+        except OSError:
+            return ""
+        if not data:
+            raise EOFError
+        text = (pending + data.decode("utf-8", "replace"))
+        # Never split a multi-byte char across chunks.
+        pending = ""
+        return text
+
+    try:
+        while time.monotonic() < deadline:
+            try:
+                chunk = drain(0.05)
+            except EOFError:
+                break
+            if not chunk:
+                if typed and marks >= 2:
+                    break
+                if not typed and time.monotonic() > prompt_deadline:
+                    raise SystemExit(
+                        "the recorder never saw a shell prompt — check that bash "
+                        "read the rcfile and PS1 carries the marker")
+                continue
+
+            buffer += chunk
+            new_marks = buffer.count(MARK)
+
+            if not typed:
+                # Wait for the first prompt, then start the clock and type.
+                if new_marks >= 1:
+                    marks = new_marks
+                    start = time.monotonic()
+                    events.append((0.0, MARK + strip_prompt_prefix(chunk)))
+                    typed = True
+                    time.sleep(0.5)
+                    for ch in command:
+                        os.write(master, ch.encode())
+                        time.sleep(0.03)
+                        try:
+                            echo = drain(0.02)
+                        except EOFError:
+                            break
+                        if echo:
+                            events.append((time.monotonic() - start, echo))
+                    time.sleep(0.45)
+                    os.write(master, b"\r")
+                continue
+
+            events.append((time.monotonic() - start, chunk))
+            marks = new_marks
+            if marks >= 2:
+                # Prompt is back: the command has finished. Hold the last frame
+                # briefly, the way a person would before typing the next thing.
+                end = time.monotonic() + 1.5
+                while time.monotonic() < end:
+                    try:
+                        extra = drain(0.1)
+                    except EOFError:
+                        break
+                    if extra:
+                        events.append((time.monotonic() - start, extra))
+                break
+    finally:
+        # An interactive bash ignores SIGTERM, so ask politely once and then
+        # insist. Teardown must never be able to lose a recording that
+        # succeeded, hence the blanket except.
+        for sig in (signal.SIGHUP, signal.SIGKILL):
+            try:
+                os.killpg(os.getpgid(proc.pid), sig)
+                proc.wait(timeout=5)
+                break
+            except Exception:
+                continue
+        try:
+            os.close(master)
+        except OSError:
+            pass
+        rcfile.unlink(missing_ok=True)
+
+    if not events:
+        raise SystemExit(f"recorded nothing for: {command}")
+    return events
 
 
-def build_cast(name: str, spec: dict) -> Path:
-    cols = spec.get("cols", COLS)
-    rows = spec.get("rows", ROWS)
-    text = capture(spec["argv"], cols)
-    if spec.get("acts"):
-        text = select_acts(text, spec["acts"])
-    (CAPTURED / f"{name}.txt").write_text(strip_ansi(text))
+def strip_prompt_prefix(chunk: str) -> str:
+    """Drop anything bash emitted before its first prompt."""
+    idx = chunk.find(MARK)
+    return chunk[idx + len(MARK):] if idx >= 0 else chunk
 
+
+def write_cast(name: str, spec: dict, events: list[tuple[float, str]]) -> Path:
+    cols, rows = spec.get("cols", COLS), spec.get("rows", ROWS)
     header = {
         "version": 2, "width": cols, "height": rows,
+        # Fixed, so a re-record does not churn the file on timestamp alone.
         "timestamp": 1755700000,
         "title": spec["title"],
+        "command": spec["command"],
         "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"},
     }
-    events: list[list] = []
-    t = 0.4
-
-    prompt = (f"\033[38;5;84m➜\033[0m  \033[38;5;44mnorthwind\033[0m "
-              f"\033[38;5;245m$\033[0m ")
-    command = "./run.sh " + (
-        "demo" if spec["argv"][:1] != ["--act"] else f"act {spec['argv'][1]}")
-    events.append([t, "o", prompt])
-    t += 0.35
-    for ch in command:
-        events.append([t, "o", ch])
-        t += 0.028
-    t += 0.45
-    events.append([t, "o", "\r\n"])
-    t += 0.35
-
-    for line in text.splitlines():
-        events.append([t, "o", line + "\r\n"])
-        t += delay_for(line)
-
-    t += 2.0
-    events.append([t, "o", "\r\n" + prompt])
-
     RECORDINGS.mkdir(exist_ok=True)
     path = RECORDINGS / f"{name}.cast"
     with path.open("w") as fh:
         fh.write(json.dumps(header) + "\n")
-        for e in events:
-            fh.write(json.dumps([round(e[0], 3), e[1], e[2]]) + "\n")
+        for t, data in events:
+            fh.write(json.dumps([round(t, 6), "o", data]) + "\n")
+
+    CAPTURED.mkdir(exist_ok=True)
+    (CAPTURED / f"{name}.txt").write_text(
+        strip_ansi("".join(d for _, d in events)))
     return path
 
 
+# Playback settings. These act on an unmodified recording -- they change how
+# fast you watch it, never what it says.
 GIF_TUNING = {
-    # The full run is long. Render it small and fast; the highlight reel is the
-    # one meant to be watched.
     "wow": {"font_size": "11", "speed": "2.6", "line_height": "1.2"},
     "highlight": {"font_size": "14", "speed": "1.7", "line_height": "1.3"},
 }
@@ -214,11 +286,12 @@ GIF_TUNING = {
 def render_gif(name: str) -> bool:
     agg = ROOT / "bin" / "agg"
     if not agg.exists():
-        agg_path = shutil.which("agg")
-        if not agg_path:
+        found = shutil.which("agg")
+        if not found:
             return False
-        agg = Path(agg_path)
+        agg = Path(found)
     GIFS.mkdir(exist_ok=True)
+    tuning = GIF_TUNING.get(name, {})
     proc = subprocess.run([
         str(agg),
         str(RECORDINGS / f"{name}.cast"),
@@ -226,14 +299,14 @@ def render_gif(name: str) -> bool:
         "--font-family", "JetBrains Mono,DejaVu Sans Mono,Liberation Mono,monospace",
         "--theme", "1a1b26,c0caf5,15161e,f7768e,9ece6a,e0af68,7aa2f7,bb9af7,7dcfff,a9b1d6,"
                    "414868,f7768e,9ece6a,e0af68,7aa2f7,bb9af7,7dcfff,c0caf5",
-        "--font-size", GIF_TUNING.get(name, {}).get("font_size", "15"),
-        "--line-height", GIF_TUNING.get(name, {}).get("line_height", "1.35"),
-        "--speed", GIF_TUNING.get(name, {}).get("speed", "1.0"),
+        "--font-size", tuning.get("font_size", "15"),
+        "--line-height", tuning.get("line_height", "1.35"),
+        "--speed", tuning.get("speed", "1.0"),
         "--idle-time-limit", "1.5",
         "--last-frame-duration", "5",
     ], capture_output=True, text=True)
     if proc.returncode != 0:
-        sys.stderr.write(proc.stderr[-2000:] + "\n")
+        sys.stderr.write((proc.stderr or "")[-2000:] + "\n")
         return False
     optimise(GIFS / f"{name}.gif")
     return True
@@ -257,19 +330,31 @@ def optimise(path: Path) -> None:
 
 
 def main() -> int:
-    RECORDINGS.mkdir(exist_ok=True)
-    CAPTURED.mkdir(exist_ok=True)
-    GIFS.mkdir(exist_ok=True)
-    wanted = sys.argv[1:] or list(CASTS)
+    for d in (RECORDINGS, CAPTURED, GIFS):
+        d.mkdir(exist_ok=True)
+    argv = sys.argv[1:]
+    # CI renders from the committed casts rather than re-recording: the casts
+    # are the source of truth, the GIFs are a derived artefact, and a runner
+    # re-recording would mean the pixels no longer correspond to any cast
+    # anyone can inspect.
+    render_only = "--render-only" in argv
+    argv = [a for a in argv if a != "--render-only"]
+    wanted = argv or list(CASTS)
     for name in wanted:
         spec = CASTS.get(name)
         if not spec:
             print(f"unknown cast: {name}; known: {', '.join(CASTS)}")
             continue
-        print(f"  building {name}.cast ...", flush=True)
-        path = build_cast(name, spec)
-        size = path.stat().st_size / 1024
-        print(f"    {path.relative_to(ROOT)}  ({size:.0f} KiB)")
+        if not render_only:
+            print(f"  recording {name}  ({spec['command']}) ...", flush=True)
+            events = record(spec["command"], spec.get("cols", COLS), spec.get("rows", ROWS))
+            path = write_cast(name, spec, events)
+            duration = events[-1][0]
+            print(f"    {path.relative_to(ROOT)}  "
+                  f"({path.stat().st_size / 1024:.0f} KiB, {duration:.1f}s real time)")
+        elif not (RECORDINGS / f"{name}.cast").exists():
+            print(f"  no cast for {name}; nothing to render")
+            continue
         print(f"  rendering {name}.gif ...", flush=True)
         if render_gif(name):
             gif = GIFS / f"{name}.gif"

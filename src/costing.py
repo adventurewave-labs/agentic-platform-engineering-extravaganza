@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -137,7 +138,7 @@ def estimate(req, environment: str, previous_monthly_cost: float = 0.0) -> dict[
     })
 
     total = round(sum(r["monthlyCostUsd"] for r in resources), 2)
-    return {
+    document = {
         "service": req.name,
         "environment": environment,
         "costCenter": req.cost_center,
@@ -145,8 +146,25 @@ def estimate(req, environment: str, previous_monthly_cost: float = 0.0) -> dict[
         "totalMonthlyCostUsd": total,
         "previousMonthlyCostUsd": float(previous_monthly_cost),
         "currency": "USD",
+        "costSource": "rate-card",
         "resources": resources,
     }
+
+    # NORTHWIND_COST_SOURCE=infracost re-prices the lines Infracost can price
+    # against real cloud rates. The document shape is unchanged, which is the
+    # claim this repository makes about its FinOps gate -- so it is wired up
+    # rather than merely asserted. It is off by default because a demo whose
+    # committed artefacts must reproduce byte-for-byte cannot depend on a live
+    # price API.
+    if os.environ.get("NORTHWIND_COST_SOURCE", "").strip().lower() == "infracost":
+        from sources import infracost
+        try:
+            return infracost.apply(document, req.db_region)
+        except infracost.InfracostError as exc:
+            print(f"warning: infracost unavailable ({exc}); using the rate card",
+                  file=sys.stderr)
+
+    return document
 
 
 def estimate_all(req, previous: dict[str, float] | None = None) -> dict[str, Any]:

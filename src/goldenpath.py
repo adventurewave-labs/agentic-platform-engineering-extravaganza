@@ -4,6 +4,7 @@ The demo. Eight acts and a scorecard, one request, no hand-waving.
 
     python3 src/goldenpath.py                       # full run
     python3 src/goldenpath.py --act 5               # one act
+    python3 src/goldenpath.py --acts 2,3,5,7 --scorecard   # the argument, in four acts
     python3 src/goldenpath.py --speed 0 --no-color  # CI / capture mode
     python3 src/goldenpath.py --backend llm         # use any OpenAI-compatible model
 
@@ -646,7 +647,11 @@ def scorecard(vibe: dict, turns: list[agent.Turn], before: dict, after: dict,
 def main() -> int:
     ap = argparse.ArgumentParser(description="Agentic platform engineering demo")
     ap.add_argument("--act", type=int, choices=range(1, 9), metavar="N",
-                    help="run a single act (1-8); the scorecard needs a full run")
+                    help="run a single act (1-8)")
+    ap.add_argument("--acts", metavar="N,N,...",
+                    help="run a subset of acts, e.g. --acts 2,3,5,7")
+    ap.add_argument("--scorecard", action="store_true",
+                    help="print the scorecard after a partial run (needs act 5)")
     ap.add_argument("--speed", type=float, help="0 for instant, 1 for normal")
     ap.add_argument("--no-color", action="store_true")
     ap.add_argument("--backend", default="deterministic",
@@ -675,35 +680,63 @@ def main() -> int:
         "one request · eight acts · every verdict from a real OPA evaluation",
     )
 
-    single = args.act
+    # `selected is None` means the whole run. A subset still computes
+    # everything the acts it *does* show depend on -- the quiet branches below
+    # are the same code the acts call -- so a partial run is a real run of a
+    # smaller set, not a re-enactment of a larger one.
+    if args.acts:
+        try:
+            selected = {int(n) for n in args.acts.replace(" ", "").split(",") if n}
+        except ValueError:
+            ui.write("  --acts takes a comma-separated list of act numbers, e.g. 2,3,5,7")
+            return 2
+        if not selected <= set(range(1, 9)):
+            ui.write("  --acts must name acts between 1 and 8")
+            return 2
+    elif args.act:
+        selected = {args.act}
+    else:
+        selected = None
+
+    # The scorecard reports the remediation iteration count, which only exists
+    # if the remediation loop actually ran. Printing it after a run that
+    # skipped act 5 would report a real-looking zero, so refuse instead.
+    show_scorecard = selected is None or args.scorecard
+    if args.scorecard and selected is not None and 5 not in selected:
+        ui.write("  --scorecard needs act 5; it is what produces the iteration count")
+        return 2
+
+    def runs(n: int) -> bool:
+        return selected is None or n in selected
+
     req = agent.parse_intent(REQUEST)
     original = req
 
-    if single in (None, 1):
+    if runs(1):
         act_one()
-    if single in (None, 2):
+    if runs(2):
         vibe = act_two()
     else:
         vibe = gates.run_all(renderer.vibe_manifests(req)).as_dict()
-    if single in (None, 3):
+    if runs(3):
         act_three()
-    if single in (None, 4):
+    if runs(4):
         act_four(req)
-    if single in (None, 5, 6, 7):
+    if runs(5) or runs(6) or runs(7):
         final, turns, est = act_five(req, args.backend)
     else:
         final, turns, est = req, [], costing.estimate(req, "prod")
-    if single in (None, 6):
+    if runs(6):
         act_six(original, final)
-    if single in (None, 7):
+    if runs(7):
         act_seven(final, est)
-    if single in (None, 8):
+    if runs(8):
         drift = act_eight()
     else:
         drift = driftd.detect("payments-ledger", "prod")
 
     record = None
-    if single is None:
+    if show_scorecard:
         record = scorecard(
             vibe, turns,
             costing.estimate(original, "prod"),
@@ -716,6 +749,11 @@ def main() -> int:
         record["toolVersions"] = {k: all_versions[k] for k in
                                   ("conftest", "score-k8s", "kube-linter")}
         record["finalRequest"] = json.loads(final.to_json())
+
+    # Only a full run writes outputs/. A partial run is a real run, but it is
+    # not *the* run the committed artefacts represent, and letting it overwrite
+    # them would make `verify` depend on which acts someone last watched.
+    if selected is None:
         (OUTPUTS / "run-record.json").write_text(json.dumps(record, indent=2))
         (OUTPUTS / "vibe-policy-report.json").write_text(json.dumps(vibe, indent=2))
         (OUTPUTS / "drift-report.json").write_text(json.dumps(drift, indent=2))

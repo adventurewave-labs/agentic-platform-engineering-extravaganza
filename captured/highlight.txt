@@ -1,16 +1,16 @@
+➜  northwind $ ./run.sh demo --acts 2,3,5,7 --scorecard
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
 │ one request · eight acts · every verdict from a real OPA evaluation                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-
 ━━━ ACT II  Skip the platform: let the model write the YAML ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   The obvious move in 2026: hand the sentence to a capable model and
   ask for Kubernetes manifests. No platform, no golden path, no gate.
 
-  ✔ 3 manifests generated: Deployment, Service, StatefulSet
+  ⠋ generating manifests from the prompt     ⠙ generating manifests from the prompt     ⠹ generating manifests from the prompt     ⠸ generating manifests from the prompt     ⠼ generating manifests from the prompt     ⠴ generating manifests from the prompt     ⠦ generating manifests from the prompt     ⠧ generating manifests from the prompt     ⠇ generating manifests from the prompt     ⠏ generating manifests from the prompt     ⠋ generating manifests from the prompt     ⠙ generating manifests from the prompt     ⠹ generating manifests from the prompt     ⠸ generating manifests from the prompt     ⠼ generating manifests from the prompt     ⠴ generating manifests from the prompt     ⠦ generating manifests from the prompt     ⠧ generating manifests from the prompt     ⠇ generating manifests from the prompt     ⠏ generating manifests from the prompt                                                                                                        ✔ 3 manifests generated: Deployment, Service, StatefulSet
 
 ╭─ what came back ─────────────────────────────────────────────────────────────────────────────────╮
 │   image:     payments-ledger:latest                                                              │
@@ -23,7 +23,7 @@
   It parses. It applies. It would pass a review from anyone
   who was not looking hard. Run it past the policy bundle.
 
-  ✔ conftest test --policy policy/kubernetes
+  ⠋ conftest test --policy policy/kubernetes     ⠙ conftest test --policy policy/kubernetes     ⠹ conftest test --policy policy/kubernetes     ⠸ conftest test --policy policy/kubernetes     ⠼ conftest test --policy policy/kubernetes     ⠴ conftest test --policy policy/kubernetes     ⠦ conftest test --policy policy/kubernetes     ⠧ conftest test --policy policy/kubernetes     ⠇ conftest test --policy policy/kubernetes     ⠏ conftest test --policy policy/kubernetes     ⠋ conftest test --policy policy/kubernetes     ⠙ conftest test --policy policy/kubernetes     ⠹ conftest test --policy policy/kubernetes     ⠸ conftest test --policy policy/kubernetes     ⠼ conftest test --policy policy/kubernetes     ⠴ conftest test --policy policy/kubernetes     ⠦ conftest test --policy policy/kubernetes     ⠧ conftest test --policy policy/kubernetes                                                                                                        ✔ conftest test --policy policy/kubernetes
 
    1. NW-K8S-001  Deployment/payments-ledger container "payments-ledger": image
                   "payments-ledger:latest" is not immutably pinned
@@ -56,7 +56,6 @@
   Nothing in the prompt told it what PCI means at Northwind, which
   registry is approved, or that this cost centre has $400 a month.
   That knowledge is not in any model. It is in a platform.
-
 
 ━━━ ACT III  The same request, through the platform API ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -102,7 +101,6 @@
     ← 1 golden path(s)
       golden-path-service-postgres
         HTTP service + Postgres (Northwind golden path)
-
 
 ━━━ ACT V  The gate: what the platform cannot decide for you ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -153,7 +151,6 @@
   comes back silently on the next render — that is how automated
   remediation becomes worse than none.
 
-
 ━━━ ACT VII  Delivery: propose, and stop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ⟶ mcp platform.plan_promotion(service="payments-ledger", toStage="prod") as platform-agent
@@ -192,12 +189,11 @@
   ⟶ mcp platform.approve_promotion(service="payments-ledger", stage="prod") as release-manager
     ← approved by user:release-manager — Kargo freight promoted to prod
 
-
 ━━━ SCORECARD  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   METRIC                                  BEFORE           AFTER             DELTA          
   ──────────────────────────────────────────────────────────────────────────────────────────
-  time to a reviewable change             11 working days  11.3s             queue removed  
+  time to a reviewable change             11 working days  18.2s             queue removed  
   team handoffs                           6                1 (the approval)  −5             
   policy violations without the platform  42               0                 −100%          
   remediation iterations                  —                3                 converged      
@@ -223,5 +219,4 @@
   any of this is safe to turn on.
 
 ════════════════════════════════════════════════════════════════════════════════════════════════════
-
-  run record written to outputs/
+➜  northwind $ 

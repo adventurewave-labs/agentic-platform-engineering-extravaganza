@@ -1,3 +1,4 @@
+➜  northwind $ ./run.sh demo
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
@@ -29,7 +30,7 @@
   The obvious move in 2026: hand the sentence to a capable model and
   ask for Kubernetes manifests. No platform, no golden path, no gate.
 
-  ✔ 3 manifests generated: Deployment, Service, StatefulSet
+  ⠋ generating manifests from the prompt     ⠙ generating manifests from the prompt     ⠹ generating manifests from the prompt     ⠸ generating manifests from the prompt     ⠼ generating manifests from the prompt     ⠴ generating manifests from the prompt     ⠦ generating manifests from the prompt     ⠧ generating manifests from the prompt     ⠇ generating manifests from the prompt     ⠏ generating manifests from the prompt     ⠋ generating manifests from the prompt     ⠙ generating manifests from the prompt     ⠹ generating manifests from the prompt     ⠸ generating manifests from the prompt     ⠼ generating manifests from the prompt     ⠴ generating manifests from the prompt     ⠦ generating manifests from the prompt     ⠧ generating manifests from the prompt     ⠇ generating manifests from the prompt     ⠏ generating manifests from the prompt                                                                                                        ✔ 3 manifests generated: Deployment, Service, StatefulSet
 
 ╭─ what came back ─────────────────────────────────────────────────────────────────────────────────╮
 │   image:     payments-ledger:latest                                                              │
@@ -42,7 +43,7 @@
   It parses. It applies. It would pass a review from anyone
   who was not looking hard. Run it past the policy bundle.
 
-  ✔ conftest test --policy policy/kubernetes
+  ⠋ conftest test --policy policy/kubernetes     ⠙ conftest test --policy policy/kubernetes     ⠹ conftest test --policy policy/kubernetes     ⠸ conftest test --policy policy/kubernetes     ⠼ conftest test --policy policy/kubernetes     ⠴ conftest test --policy policy/kubernetes     ⠦ conftest test --policy policy/kubernetes     ⠧ conftest test --policy policy/kubernetes     ⠇ conftest test --policy policy/kubernetes     ⠏ conftest test --policy policy/kubernetes     ⠋ conftest test --policy policy/kubernetes     ⠙ conftest test --policy policy/kubernetes     ⠹ conftest test --policy policy/kubernetes     ⠸ conftest test --policy policy/kubernetes     ⠼ conftest test --policy policy/kubernetes     ⠴ conftest test --policy policy/kubernetes     ⠦ conftest test --policy policy/kubernetes     ⠧ conftest test --policy policy/kubernetes                                                                                                        ✔ conftest test --policy policy/kubernetes
 
    1. NW-K8S-001  Deployment/payments-ledger container "payments-ledger": image
                   "payments-ledger:latest" is not immutably pinned
@@ -140,7 +141,7 @@
   The amber values are the agent’s judgement calls. Hold that thought.
 
   ⟶ mcp scaffolder.execute(template="golden-path-service-postgres")
-  ✔ score-k8s generate  (real binary, Northwind provisioner set)
+  ⠋ score-k8s generate  (real binary, Northwind provisioner set)     ⠙ score-k8s generate  (real binary, Northwind provisioner set)     ⠹ score-k8s generate  (real binary, Northwind provisioner set)     ⠸ score-k8s generate  (real binary, Northwind provisioner set)     ⠼ score-k8s generate  (real binary, Northwind provisioner set)     ⠴ score-k8s generate  (real binary, Northwind provisioner set)     ⠦ score-k8s generate  (real binary, Northwind provisioner set)     ⠧ score-k8s generate  (real binary, Northwind provisioner set)     ⠇ score-k8s generate  (real binary, Northwind provisioner set)     ⠏ score-k8s generate  (real binary, Northwind provisioner set)     ⠋ score-k8s generate  (real binary, Northwind provisioner set)     ⠙ score-k8s generate  (real binary, Northwind provisioner set)     ⠹ score-k8s generate  (real binary, Northwind provisioner set)     ⠸ score-k8s generate  (real binary, Northwind provisioner set)     ⠼ score-k8s generate  (real binary, Northwind provisioner set)     ⠴ score-k8s generate  (real binary, Northwind provisioner set)     ⠦ score-k8s generate  (real binary, Northwind provisioner set)     ⠧ score-k8s generate  (real binary, Northwind provisioner set)     ⠇ score-k8s generate  (real binary, Northwind provisioner set)     ⠏ score-k8s generate  (real binary, Northwind provisioner set)     ⠋ score-k8s generate  (real binary, Northwind provisioner set)     ⠙ score-k8s generate  (real binary, Northwind provisioner set)     ⠹ score-k8s generate  (real binary, Northwind provisioner set)                                                                                                        ✔ score-k8s generate  (real binary, Northwind provisioner set)
     ← rendered 1x Deployment, 1x NetworkPolicy, 1x PodDisruptionBudget, 1x SQLInstance, 1x Secret,
       1x Service, 1x ServiceAccount
 
@@ -291,7 +292,7 @@
   a Tuesday.
 
   ⟶ mcp platform.detect_drift(service="payments-ledger", environment="prod") as drift-agent
-  ✔ comparing observed state against git
+  ⠋ comparing observed state against git     ⠙ comparing observed state against git     ⠹ comparing observed state against git     ⠸ comparing observed state against git     ⠼ comparing observed state against git     ⠴ comparing observed state against git     ⠦ comparing observed state against git     ⠧ comparing observed state against git     ⠇ comparing observed state against git     ⠏ comparing observed state against git     ⠋ comparing observed state against git     ⠙ comparing observed state against git     ⠹ comparing observed state against git     ⠸ comparing observed state against git     ⠼ comparing observed state against git     ⠴ comparing observed state against git     ⠦ comparing observed state against git     ⠧ comparing observed state against git                                                                                                        ✔ comparing observed state against git
     ← OutOfSync — 4 field(s) diverged since 2026-07-23
 
   ▍ CRITICAL backupRetentionDays   30 in git → 7 in cluster
@@ -336,7 +337,7 @@
 
   METRIC                                  BEFORE           AFTER             DELTA          
   ──────────────────────────────────────────────────────────────────────────────────────────
-  time to a reviewable change             11 working days  1.3s              queue removed  
+  time to a reviewable change             11 working days  32.2s             queue removed  
   team handoffs                           6                1 (the approval)  −5             
   policy violations without the platform  42               0                 −100%          
   remediation iterations                  —                3                 converged      
@@ -364,3 +365,4 @@
 ════════════════════════════════════════════════════════════════════════════════════════════════════
 
   run record written to outputs/
+➜  northwind $ 

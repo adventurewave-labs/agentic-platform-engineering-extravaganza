@@ -8,7 +8,12 @@
 # It will fail if: a policy changes and the committed run record is not
 # regenerated, the golden path stops converging, the platform's rendered output
 # picks up a kube-linter finding, an agent identity gains the ability to approve
-# production, or the MCP server stops speaking the protocol.
+# production, the MCP server stops speaking the protocol, or the `--backend llm`
+# path stops reaching the same answer as the deterministic one.
+#
+# The companion `cluster` workflow puts the same manifests through a real
+# Kubernetes API server; this one deliberately needs no cluster, so it is also
+# exactly what runs on a laptop.
 
 name: verify
 
@@ -59,6 +64,11 @@ jobs:
 
       - name: Report the exact versions in play
         run: bash ./run.sh versions
+
+      # Unit tests before the system checks, because a unit failure names the
+      # function and a system failure only names the symptom.
+      - name: Unit tests
+        run: bash ./run.sh test
 
       - name: Verify
         run: bash ./run.sh verify

@@ -1,0 +1,215 @@
+# The manifests are valid against a real Kubernetes API server.
+#
+# The README's honesty table used to say the cluster was "not present" and that
+# the rendered manifests "are valid against a real cluster". The first half was
+# true and the second half was an assertion. This job removes the assertion.
+#
+# It stands up a real kind cluster at a pinned node image, installs the platform
+# API as a CustomResourceDefinition, and puts the committed manifests through
+# the actual API server -- schema validation, admission, defaulting, the lot.
+#
+# It also runs the negative control, which is the more interesting half: the
+# *unguided* manifests from Act II are put through the same API server, and the
+# job asserts that it accepts them. Forty-two policy violations, and Kubernetes
+# is perfectly happy. That is the entire argument of this repository, executed
+# against a real control plane rather than claimed in a README.
+
+name: cluster
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, for the same reason verify runs weekly: the failure this catches
+    # is an upstream change under a demo that claims to be reproducible.
+    - cron: "41 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cluster-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  KIND_VERSION: v0.32.0
+  # Pinned by digest, not by tag: kind's own release notes warn that the plain
+  # tag is not guaranteed to match the release.
+  KIND_NODE_IMAGE: kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
+  KUBECTL_VERSION: v1.36.4
+  NAMESPACE: payments-prod
+
+jobs:
+  cluster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install --no-cache-dir PyYAML==6.0.2
+
+      - name: Cache the pinned upstream binaries
+        uses: actions/cache@v4
+        with:
+          path: bin
+          key: tools-${{ runner.os }}-${{ hashFiles('bin/setup.sh') }}
+
+      - name: Fetch the pinned upstream binaries
+        run: bash ./bin/setup.sh
+
+      # Into a runner-owned directory rather than /usr/local/bin. The files
+      # there are root-owned on a GitHub runner, so curl can overwrite them
+      # while chmod cannot touch them, and the job dies on a confusing
+      # "Operation not permitted" several steps before anything interesting
+      # happens. kind comes from its GitHub release rather than the redirector,
+      # so the pin and the artefact are the same thing.
+      - name: Install kind and kubectl at pinned versions
+        run: |
+          set -euo pipefail
+          BIN="${RUNNER_TEMP}/tools"
+          mkdir -p "${BIN}"
+          curl -fsSLo "${BIN}/kind" \
+            "https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-linux-amd64"
+          curl -fsSLo "${BIN}/kubectl" \
+            "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x "${BIN}/kind" "${BIN}/kubectl"
+          echo "${BIN}" >> "${GITHUB_PATH}"
+          "${BIN}/kind" version
+          "${BIN}/kubectl" version --client
+
+      - name: Create the cluster
+        run: |
+          kind create cluster --name northwind --image "${KIND_NODE_IMAGE}" --wait 120s
+          kubectl cluster-info
+          kubectl get nodes -o wide
+
+      - name: Install the platform API (SQLInstance CRD)
+        run: |
+          kubectl apply -f platform/crds/sqlinstance.yaml
+          kubectl wait --for=condition=Established \
+            crd/sqlinstances.platform.northwind.io --timeout=60s
+
+      - name: Create the namespace the manifests target
+        run: kubectl create namespace "${NAMESPACE}"
+
+      # Server-side dry run is the real thing: the API server parses, validates
+      # against the OpenAPI schema, runs admission, and applies defaulting --
+      # it just does not persist. A manifest that survives this is a manifest
+      # the cluster would have taken.
+      - name: The golden path's manifests survive server-side validation
+        run: |
+          kubectl apply --server-side --dry-run=server \
+            --field-manager=northwind-platform \
+            -f outputs/final-manifests.yaml
+
+      - name: Apply them for real
+        run: |
+          kubectl apply --server-side --field-manager=northwind-platform \
+            -f outputs/final-manifests.yaml
+
+      # Note what is deliberately NOT asserted: pod readiness. The image
+      # reference is fictional, so the pods will never pull. Claiming a green
+      # rollout would be exactly the kind of overstatement this repository
+      # exists to argue against. What is asserted is everything the control
+      # plane genuinely did: it accepted all seven objects, and its controllers
+      # acted on them.
+      - name: Every object was accepted, and the controllers acted
+        run: |
+          set -euo pipefail
+          for ref in \
+            serviceaccount/payments-ledger \
+            networkpolicy/payments-ledger-default-deny \
+            poddisruptionbudget/payments-ledger \
+            sqlinstance/nw-payments-ledger-prod \
+            secret/nw-db-6b7dbc6f-1b90-faba-e51d-03539eacd311 \
+            service/payments-ledger \
+            deployment/payments-ledger ; do
+              kubectl -n "${NAMESPACE}" get "${ref}" >/dev/null
+              echo "  accepted  ${ref}"
+          done
+
+          want=$(kubectl -n "${NAMESPACE}" get deployment/payments-ledger \
+                   -o jsonpath='{.spec.replicas}')
+          [ "${want}" = "6" ] || { echo "::error::expected 6 replicas, got ${want}"; exit 1; }
+
+          # The deployment controller minted a ReplicaSet, which is the proof
+          # the object is live rather than merely stored.
+          kubectl -n "${NAMESPACE}" wait --for=jsonpath='{.status.replicas}'=6 \
+            deployment/payments-ledger --timeout=120s
+          rs=$(kubectl -n "${NAMESPACE}" get rs \
+                 -l app.kubernetes.io/name=payments-ledger \
+                 -o jsonpath='{.items[0].metadata.name}')
+          echo "  reconciled  replicaset/${rs}"
+
+          # The CRD's schema is a real contract, so the composite kept its
+          # parameters through a round trip rather than being preserved blindly.
+          got=$(kubectl -n "${NAMESPACE}" get sqlinstance/nw-payments-ledger-prod \
+                  -o jsonpath='{.spec.parameters.backupRetentionDays}')
+          [ "${got}" = "30" ] || { echo "::error::backupRetentionDays came back ${got}"; exit 1; }
+          echo "  schema round-trip  backupRetentionDays=${got}"
+
+      # The CRD validates. Prove it rejects nonsense, or the step above is a
+      # formality that would pass against a preserve-unknown-fields schema.
+      - name: The platform API rejects a malformed composite
+        run: |
+          set -euo pipefail
+          if kubectl -n "${NAMESPACE}" apply --dry-run=server -f - <<'EOF' 2>/dev/null
+          apiVersion: platform.northwind.io/v1alpha1
+          kind: SQLInstance
+          metadata:
+            name: malformed
+          spec:
+            parameters:
+              engine: mysql
+              instanceClass: db.t4g.medium
+              region: eu-west-1
+              storageGb: 5
+              backupRetentionDays: 400
+              storageEncrypted: "yes"
+          EOF
+          then
+            echo "::error::the API server accepted a malformed SQLInstance"
+            exit 1
+          fi
+          echo "  rejected  a malformed composite, as it should"
+
+      # The point of the whole repository, executed against a real API server:
+      # Kubernetes has no opinion about any of the 42 policy violations.
+      # Validity and compliance are different properties, and only one of them
+      # has a control plane enforcing it out of the box.
+      - name: The negative control — Kubernetes accepts the unguided manifests too
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python3 - > /tmp/unguided.yaml <<'PY'
+          import agent, renderer
+          req = agent.parse_intent(
+              "service called payments-ledger PCI EU high volume postgres "
+              "staging and prod")
+          print(renderer.dump(renderer.vibe_manifests(req)))
+          PY
+          kubectl create namespace unguided
+          kubectl -n unguided apply --server-side --dry-run=server \
+            --field-manager=unguided -f /tmp/unguided.yaml
+          echo
+          echo "  The API server accepted every one of them."
+          PYTHONPATH=src python3 - <<'PY'
+          import agent, gates, renderer
+          req = agent.parse_intent(
+              "service called payments-ledger PCI EU high volume postgres "
+              "staging and prod")
+          report = gates.run_all(renderer.vibe_manifests(req))
+          print(f"  The policy bundle found {len(report.findings)} denials "
+                f"across {len(report.by_policy())} rules in the same YAML.")
+          PY
+
+      - name: Tear down
+        if: always()
+        run: kind delete cluster --name northwind || true

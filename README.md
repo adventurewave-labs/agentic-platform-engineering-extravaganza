@@ -5,13 +5,14 @@
 [![Conftest 0.69.0](https://img.shields.io/badge/Conftest-0.69.0-fbbf24.svg)](https://github.com/open-policy-agent/conftest)
 [![Score k8s 0.16.0](https://img.shields.io/badge/score--k8s-0.16.0-2dd4bf.svg)](https://github.com/score-spec/score-k8s)
 [![MCP 2025-06-18](https://img.shields.io/badge/MCP-2025--06--18-22d3ee.svg)](https://modelcontextprotocol.io)
-[![Verify: 14 checks](https://img.shields.io/badge/verify-14%20checks-4ade80.svg)](src/build_report.py)
+[![Verify: 15 checks](https://img.shields.io/badge/verify-15%20checks-4ade80.svg)](src/build_report.py)
+[![Cluster: kind v1.36.1](https://img.shields.io/badge/cluster-kind%20v1.36.1-326ce5.svg)](.github/workflows/cluster.yaml)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/adventurewave-labs/agentic-platform-engineering-extravaganza?quickstart=1)
 [![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fadventurewave-labs%2Fagentic-platform-engineering-extravaganza)
 
 > Hand a capable model one sentence — *"a PCI-scope payments service with a Postgres database,
 > EU residency, staging and prod"* — and it returns Kubernetes manifests that apply cleanly and
-> fail **42 policy checks**. Route the same sentence through a golden path, a provisioner set, a
+> fail **42 policy checks across 12 rules**. Route the same sentence through a golden path, a provisioner set, a
 > policy bundle and an authorization model, and it converges to **zero** in three iterations,
 > inside budget, with a human still holding the production approval.
 >
@@ -89,7 +90,8 @@ cd agentic-platform-engineering-extravaganza
 
 ./run.sh setup     # fetch the pinned upstream binaries (conftest, score-k8s, kube-linter)
 ./run.sh demo      # the full run: eight acts and a scorecard
-./run.sh verify    # 14 acceptance checks against real tool output
+./run.sh verify    # 15 acceptance checks against real tool output
+./run.sh test      # 68 unit tests, stdlib only, no extra dependencies
 ```
 
 `run.sh` checks your Python version and installs the one dependency it needs if it is
@@ -99,6 +101,7 @@ Other entry points:
 
 ```bash
 ./run.sh act 5                 # just the policy gate and the remediation loop
+./run.sh demo --acts 2,3,5,7 --scorecard   # the argument, without the setup
 ./run.sh tools cost-reviewer   # the MCP tool list a read-only agent receives
 ./run.sh gate outputs/final-manifests.yaml
 ./run.sh mcp 8099              # the platform MCP server, streamable HTTP
@@ -254,8 +257,9 @@ gone for fifteen days. Detected, attributed, and proposed as a diff — never ap
 
 ![Drift detection with attribution](gifs/drift.gif)
 
-The complete eight-act run is [`gifs/wow.gif`](gifs/wow.gif) (7.5 MB). Every `.cast` is in
-[`recordings/`](recordings/) and plays with `asciinema play recordings/wow.cast`.
+The complete eight-act run is [`gifs/wow.gif`](gifs/wow.gif) (1.1 MB). Every `.cast` is in
+[`recordings/`](recordings/) and plays with `asciinema play recordings/wow.cast` — and because
+these are genuine PTY captures, the playback timing is the timing the demo actually had.
 
 ---
 
@@ -439,7 +443,7 @@ artefacts at pinned versions — nothing is vendored or reimplemented.
 | [Backstage](https://github.com/backstage/backstage) | catalog + Software Template shape; `AiResource` | Apache-2.0 | v1.54.0 | **first-party MCP Actions backend** |
 | [Argo CD](https://github.com/argoproj/argo-cd) | reconciles the merged change | Apache-2.0 | v3.5.1 | [`argoproj-labs/mcp-for-argocd`](https://github.com/argoproj-labs/mcp-for-argocd) |
 | [Kargo](https://github.com/akuity/kargo) | promotion path with a human gate | Apache-2.0 | v1.11.2 | ⚠️ MCP proposal closed `not_planned` |
-| [OpenChoreo](https://github.com/openchoreo/openchoreo) | source of the authz-gated MCP pattern | Apache-2.0 | v1.2.2 | **2 MCP servers, 3 in-tree agents** |
+| [OpenChoreo](https://github.com/openchoreo/openchoreo) | source of the authz-gated MCP pattern | Apache-2.0 | v1.2.3 | **3 MCP servers, 3 in-tree agents** |
 | [Trivy](https://github.com/aquasecurity/trivy) / [Checkov](https://github.com/bridgecrewio/checkov) / [OpenTofu](https://github.com/opentofu/opentofu) | optional scanners and IaC toolchain | Apache-2.0 / MPL-2.0 | 0.74.0 / 3.3.13 / 1.12.6 | optional |
 
 **Deliberately excluded, with reasons** — because a survey that only lists winners is not a survey:
@@ -474,20 +478,28 @@ A demo that overstates itself is worse than no demo. The line, drawn honestly:
 | kube-linter | ✅ **real** | an independent linter nobody here tuned. It found four genuine defects in the platform defaults during development — missing `containerPort`, no anti-affinity, an unresolvable ServiceAccount reference, and an unset `unhealthyPodEvictionPolicy`. All four were fixed **in the platform**, not worked around in the demo. |
 | MCP server | ✅ **real** | MCP 2025-06-18, stdio + streamable HTTP. `./run.sh verify` exercises `initialize`, `tools/list`, `tools/call` and `resources/list`. |
 | Authorization | ✅ **real** | enforced in code at `tools/list` and `tools/call`, not by prompt instruction. |
-| The agent's reasoner | ⚠️ **deterministic by default** | denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. `--backend llm` swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI itself); the loop is unchanged. **That it makes no difference to the outcome is the argument.** |
+| The agent's reasoner | ⚠️ **deterministic by default** | denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. `--backend llm` swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI itself); the loop is unchanged. **That it makes no difference to the outcome is the argument** — and T15 is that argument executed: it drives the loop through the LLM code path against a recorded transcript and asserts it lands on the same manifests and the same `$359.15`. |
 | Intent extraction | ⚠️ **regex** | prose → structured request. A model does this better on messy input and worse on reproducibility. One function, replaced by `--backend`. |
-| Kubernetes cluster | ❌ **not present** | nothing is applied anywhere. The manifests are rendered and evaluated, which is where every claim here lives. They are valid against a real cluster. |
+| Kubernetes cluster | ⚠️ **not in the demo; real in CI** | `./run.sh demo` applies nothing anywhere — every claim it makes lives in rendering and evaluation. But "valid against a real cluster" is not left as an assertion: [`.github/workflows/cluster.yaml`](.github/workflows/cluster.yaml) stands up a pinned kind cluster, installs the platform API as a [CRD](platform/crds/sqlinstance.yaml), and puts the committed manifests through the real API server — schema validation, admission, defaulting — then asserts the controllers acted on them. It also runs the negative control: the same API server **accepts the unguided manifests too**, all 42 violations of them. |
 | Cloud provisioning | ❌ **not present** | the `SQLInstance` is a real Crossplane-shaped composite; no Composition is installed, no cloud account is touched. |
-| Cost figures | ⚠️ **static rate card** | a checked-in table in `src/costing.py`, so there is no account requirement. The schema is an Infracost subset — swap in `infracost breakdown --format json` and the Rego does not change. |
-| Drift observation | ⚠️ **fixture** | `platform/observed-state.yaml`. Detection, attribution and the proposed patch are real code over that shape; in a live estate you would feed it from Argo CD's resource tree. |
+| Cost figures | ⚠️ **static rate card by default** | a checked-in table in `src/costing.py`, so there is no account requirement and the artefacts stay byte-reproducible. "Swap in Infracost and the Rego does not change" is wired rather than asserted: `NORTHWIND_COST_SOURCE=infracost` re-prices the database and load-balancer lines against real cloud rates via [`src/sources/infracost.py`](src/sources/infracost.py), and every estimate carries a `costSource` so a rate-card number is never mistaken for a priced one. |
+| Drift observation | ⚠️ **fixture by default** | `platform/observed-state.yaml`. Detection, attribution and the proposed patch are real code over that shape. `NORTHWIND_DRIFT_SOURCE=argocd` swaps the fixture for [`src/sources/argocd.py`](src/sources/argocd.py), which reads Argo CD's `managed-resources` for the desired/observed pair and `metadata.managedFields` for attribution — and reports a *field manager*, not a person, because that is all a control plane actually knows. |
+| The GIFs | ✅ **real recordings** | genuine PTY captures. A pseudo-terminal is allocated, the command is typed into a real interactive shell, and every byte is timestamped as it arrives — the same thing `asciinema rec` does, minus the human hand. Wall-clock timings, a real prompt, and the hero reel is a real run of `./run.sh demo --acts 2,3,5,7 --scorecard` rather than a full run with lines cut out. `agg` plays them back faster than life and trims dead air over 1.5s; both are declared in [`src/build_casts.py`](src/build_casts.py) and neither can change a character of what was recorded. |
 | Northwind Retail | ❌ **fictional** | the company, the teams, the ticket numbers. The pain is not. |
 
-`./run.sh verify` runs **14 acceptance checks** and is the thing to trust rather than this table: the toolchain
+`./run.sh verify` runs **15 acceptance checks** and is the thing to trust rather than this table: the toolchain
 is present, the Rego compiles, the unguided path is still rejected (≥20 findings), the golden path
 still converges to zero, kube-linter still finds nothing in the platform's output, the agent still
-cannot approve production while a human still can, the MCP protocol still answers, and the committed
-run record still reproduces exactly (the unguided finding count and its per-policy breakdown, the
-iteration count, the cost before and after, and the rendered object count).
+cannot approve production while a human still can, the MCP protocol still answers, the LLM backend
+still reaches the same answer as the deterministic one, and the committed run record still reproduces
+exactly (the unguided finding count and its per-policy breakdown, the iteration count, the cost before
+and after, and the rendered object count).
+
+`./run.sh test` runs **68 unit tests** underneath that — stdlib `unittest`, no new dependency. They
+cover the branches the worked example never reaches: the intent extractor's whole surface, the
+staging-only FinOps rules, an unmappable denial, a model that replies with prose instead of JSON, a
+model that invents a field, and the Argo CD adapter's normalisation without an Argo CD. A system
+check tells you the demo broke; a unit test tells you which function did it.
 
 ---
 
@@ -508,6 +520,7 @@ iteration count, the cost before and after, and the rendered object count).
 ├── platform/
 │   ├── northwind.provisioners.yaml     ← and this second: what "postgres" means here
 │   ├── observed-state.yaml             the day-2 drift fixture
+│   ├── crds/sqlinstance.yaml           the platform API as a real CRD, for the cluster job
 │   └── catalog/
 │       ├── org.yaml                    Groups, Users, cost centres, budgets
 │       ├── systems.yaml                Components, Resources, the platform API
@@ -523,10 +536,12 @@ iteration count, the cost before and after, and the rendered object count).
 │   ├── agent.py                        intent extraction, remediation, LLM backends
 │   ├── costing.py                      Infracost-shaped estimates
 │   ├── driftd.py                       the day-2 drift agent
+│   ├── sources/argocd.py               live observed state, instead of the fixture
+│   ├── sources/infracost.py            real cloud prices, instead of the rate card
 │   ├── goldenpath.py                   the eight-act orchestrator
 │   ├── ui.py                           terminal presentation
-│   ├── build_report.py                 the 14 acceptance checks, timed
-│   ├── build_casts.py                  asciinema casts + GIFs from real runs
+│   ├── build_report.py                 the 15 acceptance checks, timed
+│   ├── build_casts.py                  records a real PTY session, renders the GIF
 │   ├── build_playground.py             real gate results for the interactive page
 │   └── build_site.py                   renders index.html from the template
 │
@@ -535,13 +550,22 @@ iteration count, the cost before and after, and the rendered object count).
 │   ├── final-score.yaml                the developer-facing contract
 │   ├── final-manifests.yaml            7 objects, 0 denials
 │   ├── kargo-pipeline.yaml             Warehouse → staging → prod
-│   ├── verify-report.json              the 14 checks, with real durations
+│   ├── verify-report.json              the 15 checks, with real durations
 │   └── playground.json                 recorded conftest output for the page
+│
+├── tests/                              68 unit tests + the fake OpenAI endpoint
+│   ├── fake_llm.py                     replays a recorded transcript; no key, no spend
+│   └── test_agent.py  test_gates.py  test_costing.py  test_drift.py
+│
+├── .github/workflows/
+│   ├── verify.yaml                     the 15 checks + the unit tests, on a clean checkout
+│   └── cluster.yaml                    a real kind cluster, and the negative control
 │
 ├── recordings/  gifs/  captured/       demo assets, all regenerable
 ├── .devcontainer/                      one-click GitHub Codespaces
 ├── bin/setup.sh                        fetches the pinned upstream binaries
 ├── run.sh  Makefile  requirements.txt  entry points
+├── LICENSE  NOTICE                    MIT; upstream licenses enumerated separately
 └── Dockerfile  docker-compose.yml  vercel.json
 ```
 
@@ -621,7 +645,8 @@ easy to get wrong:
 ## License
 
 MIT — see [LICENSE](LICENSE). The upstream tools retain their own licenses (Apache-2.0 throughout,
-except OpenTofu at MPL-2.0) and none of them are vendored here.
+except OpenTofu at MPL-2.0) and none of them are vendored here; they are enumerated in
+[NOTICE](NOTICE).
 
 Northwind Retail is fictional. The policy bundle, the provisioner set, the MCP server and every
 verdict in this README are not.

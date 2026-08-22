@@ -1,3 +1,4 @@
+➜  northwind $ ./run.sh act 4
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
@@ -23,7 +24,7 @@
   The amber values are the agent’s judgement calls. Hold that thought.
 
   ⟶ mcp scaffolder.execute(template="golden-path-service-postgres")
-  ✔ score-k8s generate  (real binary, Northwind provisioner set)
+  ⠋ score-k8s generate  (real binary, Northwind provisioner set)     ⠙ score-k8s generate  (real binary, Northwind provisioner set)     ⠹ score-k8s generate  (real binary, Northwind provisioner set)     ⠸ score-k8s generate  (real binary, Northwind provisioner set)     ⠼ score-k8s generate  (real binary, Northwind provisioner set)     ⠴ score-k8s generate  (real binary, Northwind provisioner set)     ⠦ score-k8s generate  (real binary, Northwind provisioner set)     ⠧ score-k8s generate  (real binary, Northwind provisioner set)     ⠇ score-k8s generate  (real binary, Northwind provisioner set)     ⠏ score-k8s generate  (real binary, Northwind provisioner set)     ⠋ score-k8s generate  (real binary, Northwind provisioner set)     ⠙ score-k8s generate  (real binary, Northwind provisioner set)     ⠹ score-k8s generate  (real binary, Northwind provisioner set)     ⠸ score-k8s generate  (real binary, Northwind provisioner set)     ⠼ score-k8s generate  (real binary, Northwind provisioner set)     ⠴ score-k8s generate  (real binary, Northwind provisioner set)     ⠦ score-k8s generate  (real binary, Northwind provisioner set)     ⠧ score-k8s generate  (real binary, Northwind provisioner set)     ⠇ score-k8s generate  (real binary, Northwind provisioner set)     ⠏ score-k8s generate  (real binary, Northwind provisioner set)     ⠋ score-k8s generate  (real binary, Northwind provisioner set)     ⠙ score-k8s generate  (real binary, Northwind provisioner set)     ⠹ score-k8s generate  (real binary, Northwind provisioner set)                                                                                                        ✔ score-k8s generate  (real binary, Northwind provisioner set)
     ← rendered 1x Deployment, 1x NetworkPolicy, 1x PodDisruptionBudget, 1x SQLInstance, 1x Secret,
       1x Service, 1x ServiceAccount
 
@@ -53,3 +54,4 @@
 
   Every violation from Act II that had one correct answer is
   now structurally impossible. No model was consulted.
+➜  northwind $ 

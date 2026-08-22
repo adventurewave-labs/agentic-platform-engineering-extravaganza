@@ -224,6 +224,60 @@ def c_reproducible():
     return same, f"committed run record matches ({prev['vibeDenyCount']} denials)"
 
 
+def c_llm_backend_loop():
+    """The `--backend llm` path must converge too, not just the default one.
+
+    The README's load-bearing claim about the LLM backend is that the loop is
+    unchanged and the outcome is the same -- "a good platform makes the model
+    boring". Nothing exercised that until this check: every other check runs the
+    deterministic reasoner, so `LLMBackend.remediate` could regress silently and
+    verify would stay green.
+
+    `tests/fake_llm.py` serves the two OpenAI-compatible endpoints the client
+    calls and replays a recorded transcript, wrapped in prose the way a real
+    model replies. That means this exercises the parts this repository actually
+    owns -- availability probe, wire format, JSON extraction, field mapping,
+    convergence -- without a key, a network call or a token of spend. It does
+    not assert that any given model is good at the task, which is not this
+    repository's claim to make.
+    """
+    import os
+    sys.path.insert(0, str(ROOT / "tests"))
+    import agent, costing, gates, renderer
+    from fake_llm import serve
+
+    with serve() as (base_url, handler):
+        previous = {k: os.environ.get(k) for k in
+                    ("NORTHWIND_LLM_BASE_URL", "NORTHWIND_LLM_MODEL", "NORTHWIND_LLM_API_KEY")}
+        os.environ["NORTHWIND_LLM_BASE_URL"] = base_url
+        os.environ["NORTHWIND_LLM_MODEL"] = "recorded-transcript"
+        os.environ.pop("NORTHWIND_LLM_API_KEY", None)
+        try:
+            reason, label = agent.get_reasoner("llm")
+            if "deterministic" in label:
+                return False, f"fell back to the deterministic reasoner: {label}"
+            req = agent.parse_intent(REQUEST)
+            for i in range(1, 6):
+                spec, docs = renderer.golden_path(req, "prod")
+                est = costing.estimate(req, "prod")
+                r = gates.run_all(docs, score=spec, cost=est)
+                if r.passed:
+                    return bool(handler.calls), (
+                        f"0 denials after {i} iterations via the LLM code path, "
+                        f"${est['totalMonthlyCostUsd']:,.2f}/mo, "
+                        f"{len(handler.calls)} model call(s)")
+                req, decisions = reason(req, r.findings, "prod")
+                if not decisions:
+                    return False, f"the model proposed no change at iteration {i}"
+            return False, "did not converge through the LLM backend"
+        finally:
+            for k, v in previous.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+
 REQUEST = ("service called payments-ledger PCI EU high volume postgres "
            "staging and prod")
 
@@ -242,6 +296,7 @@ CHECKS = [
     ("T12", "MCP HTTP transport validates Origin", c_mcp_origin),
     ("T13", "Rendering twice is byte-identical", c_deterministic_render),
     ("T14", "Committed artefacts reproduce exactly", c_reproducible),
+    ("T15", "The LLM backend converges too", c_llm_backend_loop),
 ]
 
 

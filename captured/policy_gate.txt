@@ -1,3 +1,4 @@
+➜  northwind $ ./run.sh act 5
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
@@ -52,3 +53,4 @@
   artefact was regenerated. Patch the output instead and the finding
   comes back silently on the next render — that is how automated
   remediation becomes worse than none.
+➜  northwind $ 

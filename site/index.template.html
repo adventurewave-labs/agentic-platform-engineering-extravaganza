@@ -269,9 +269,8 @@ footer a{color:var(--muted)}
   </p>
 
   <figure>
-    <img src="gifs/highlight.gif" alt="Terminal recording: 42 policy violations without a platform, converging to zero through the golden path" loading="lazy">
-    <figcaption data-i18n="t030">Acts II, III, V, VII and the scorecard. The full eight-act run is
-      <a href="gifs/wow.gif">gifs/wow.gif</a>; every cast is in <code>recordings/</code>.</figcaption>
+    <img src="gifs/highlight.gif" alt="Real terminal recording: 42 policy violations without a platform, converging to zero through the golden path" loading="lazy">
+    <figcaption data-i18n="t030">A real recording of <code>./run.sh demo --acts 2,3,5,7 --scorecard</code>. The full eight-act run is <a href="gifs/wow.gif">gifs/wow.gif</a>; every cast is in <code>recordings/</code>.</figcaption>
   </figure>
 
   <div class="cards">
@@ -818,7 +817,7 @@ cd agentic-platform-engineering-extravaganza
 
 ./run.sh setup   <span class="c"># pinned upstream binaries</span>
 ./run.sh demo    <span class="c"># eight acts and a scorecard</span>
-./run.sh verify  <span class="c"># 14 acceptance checks</span></pre>
+./run.sh verify  <span class="c"># 15 acceptance checks</span></pre>
     </div>
 
     <div>
@@ -869,7 +868,7 @@ claude mcp add --transport http \
       <tr><td data-i18n="t189" class="mono">Authorization</td><td data-i18n="t190"><span class="pill ok">real</span></td>
         <td data-i18n="t191">Enforced in code at <code>tools/list</code> and <code>tools/call</code>, not by prompt instruction.</td></tr>
       <tr><td data-i18n="t192" class="mono">GIFs and casts</td><td data-i18n="t193"><span class="pill ok">real</span></td>
-        <td data-i18n="t194">Rendered from asciinema casts of actual runs via <code>agg</code>. Line timings are synthesised so playback is readable, and the shell prompt shown is added by the cast builder; not one character of tool output is edited. The highlight reel is a selection of acts from one capture &mdash; lines dropped, never rewritten.</td></tr>
+        <td data-i18n="t194">Genuine PTY recordings. A pseudo-terminal is allocated, the command is typed into a real interactive shell, and every byte is timestamped as it arrives &mdash; what <code>asciinema rec</code> does, minus the human hand. Wall-clock timings, a real shell prompt, and the highlight reel is a real run of a real command rather than a full run with lines cut out of it. <code>agg</code> plays back faster than life and trims dead air over 1.5s; both are declared in <code>src/build_casts.py</code> and neither can change a character of what was recorded.</td></tr>
       <tr><td data-i18n="t195" class="mono">The agent's reasoner</td><td data-i18n="t196"><span class="pill warn">deterministic by default</span></td>
         <td data-i18n="t197">Denials are parsed and mapped to Score parameter changes by rules, so the demo reproduces exactly with no API key. <code>--backend llm</code> swaps in a real model against any OpenAI-compatible endpoint (Ollama, vLLM, OpenRouter, Z.AI, OpenAI); the loop is unchanged. That it makes no difference to the outcome is the point.</td></tr>
       <tr><td data-i18n="t198" class="mono">Intent extraction</td><td data-i18n="t199"><span class="pill warn">regex</span></td>
@@ -890,7 +889,7 @@ claude mcp add --transport http \
 
   <div class="callout">
     <p data-i18n="t216"><strong>Do not trust this table &mdash; run the suite.</strong> <code>./run.sh verify</code>
-    executes all 14 checks against the real binaries in about eight seconds, and GitHub Actions runs
+    executes all 15 checks against the real binaries in a few seconds, and GitHub Actions runs
     the same thing on a clean checkout on every push.</p>
   </div>
 </div></section>
