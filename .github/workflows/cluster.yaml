@@ -65,16 +65,25 @@ jobs:
       - name: Fetch the pinned upstream binaries
         run: bash ./bin/setup.sh
 
+      # Into a runner-owned directory rather than /usr/local/bin. The files
+      # there are root-owned on a GitHub runner, so curl can overwrite them
+      # while chmod cannot touch them, and the job dies on a confusing
+      # "Operation not permitted" several steps before anything interesting
+      # happens. kind comes from its GitHub release rather than the redirector,
+      # so the pin and the artefact are the same thing.
       - name: Install kind and kubectl at pinned versions
         run: |
           set -euo pipefail
-          curl -fsSLo /usr/local/bin/kind \
-            "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64"
-          curl -fsSLo /usr/local/bin/kubectl \
+          BIN="${RUNNER_TEMP}/tools"
+          mkdir -p "${BIN}"
+          curl -fsSLo "${BIN}/kind" \
+            "https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-linux-amd64"
+          curl -fsSLo "${BIN}/kubectl" \
             "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          chmod +x /usr/local/bin/kind /usr/local/bin/kubectl
-          kind version
-          kubectl version --client
+          chmod +x "${BIN}/kind" "${BIN}/kubectl"
+          echo "${BIN}" >> "${GITHUB_PATH}"
+          "${BIN}/kind" version
+          "${BIN}/kubectl" version --client
 
       - name: Create the cluster
         run: |
