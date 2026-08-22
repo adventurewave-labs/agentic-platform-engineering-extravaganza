@@ -133,6 +133,27 @@ def _extract(obj: dict[str, Any] | None) -> dict[str, Any]:
     return {k: v for k, v in out.items() if v is not None or k == "networkPolicy"}
 
 
+def _fieldsv1_keys(node: Any) -> set[str]:
+    """Every key in a fieldsV1 tree, as keys.
+
+    This used to be `json.dumps(fieldsV1)` and a substring test, which is wrong
+    for a reason that only shows up on real objects: "f:image" is a substring of
+    "f:imagePullPolicy". Any controller that owned imagePullPolicy -- which the
+    kubelet and most admission webhooks do -- was credited with owning the image
+    tag, so a drift report could name the wrong manager for the single field it
+    most matters for.
+    """
+    keys: set[str] = set()
+    if isinstance(node, dict):
+        for k, v in node.items():
+            keys.add(k)
+            keys |= _fieldsv1_keys(v)
+    elif isinstance(node, list):
+        for v in node:
+            keys |= _fieldsv1_keys(v)
+    return keys
+
+
 def _managers(obj: dict[str, Any] | None) -> dict[str, dict[str, str]]:
     """field -> {manager, time} from metadata.managedFields.
 
@@ -146,12 +167,12 @@ def _managers(obj: dict[str, Any] | None) -> dict[str, dict[str, str]]:
     for entry in (obj.get("metadata") or {}).get("managedFields") or []:
         manager = entry.get("manager", "unknown")
         when = entry.get("time", "unknown")
-        fields = json.dumps(entry.get("fieldsV1") or {})
+        owned = _fieldsv1_keys(entry.get("fieldsV1") or {})
         for path, name in (("f:replicas", "replicas"),
                            ("f:image", "image"),
                            ("f:automountServiceAccountToken", "automountServiceAccountToken"),
                            ("f:backupRetentionDays", "backupRetentionDays")):
-            if path in fields:
+            if path in owned:
                 out[name] = {"manager": manager, "time": when}
     return out
 
