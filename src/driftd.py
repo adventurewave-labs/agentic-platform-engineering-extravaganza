@@ -19,14 +19,23 @@ cluster. It cannot "just fix it". Everything it proposes lands as a diff a
 human merges, which means the git history stays the truth and the audit trail
 survives the agent being wrong.
 
-In a live estate you would wire the observation half to Argo CD's
-`get_application_resource_tree` (via argoproj-labs/mcp-for-argocd, Apache-2.0)
-or to the Flux Operator MCP server, and the reasoning half to k8sgpt or
-HolmesGPT. The verdict layer -- this file -- does not change.
+In a live estate you wire the observation half to Argo CD and the reasoning
+half to k8sgpt or HolmesGPT. The verdict layer -- this file -- does not change,
+and `src/sources/argocd.py` is that claim made concrete rather than asserted:
+
+    export NORTHWIND_DRIFT_SOURCE=argocd
+    export ARGOCD_SERVER=... ARGOCD_TOKEN=...
+    ./run.sh drift payments-ledger
+
+It reads `/managed-resources` for the desired/observed pair and
+`metadata.managedFields` for attribution, then hands this file the same shape
+the fixture has. It is off by default because a check that needs a running Argo
+CD is not a check that runs on someone else's laptop.
 """
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -40,7 +49,24 @@ OBSERVED = ROOT / "platform" / "observed-state.yaml"
 SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 
 
-def _load_observed() -> dict[str, Any]:
+def _load_observed(service: str = "", environment: str = "prod") -> dict[str, Any]:
+    """The fixture by default; a live control plane when asked.
+
+    NORTHWIND_DRIFT_SOURCE=argocd swaps the fixture for `src/sources/argocd.py`,
+    which reads Argo CD's managed-resources endpoint and normalises it to this
+    same shape. Nothing below this function changes -- that is the whole reason
+    the adapter is shaped this way. A live read that fails says so and falls
+    back, because a drift agent that goes silent when its source is unreachable
+    is worse than one that admits it.
+    """
+    source = os.environ.get("NORTHWIND_DRIFT_SOURCE", "").strip().lower()
+    if source in ("argocd", "argo-cd"):
+        from sources import argocd
+        try:
+            return argocd.load(service, environment)
+        except argocd.ArgoCDError as exc:
+            print(f"warning: argocd source unavailable ({exc}); "
+                  f"falling back to the fixture", file=sys.stderr)
     if not OBSERVED.exists():
         return {}
     return yaml.safe_load(OBSERVED.read_text()) or {}
@@ -48,7 +74,7 @@ def _load_observed() -> dict[str, Any]:
 
 def detect(service: str, environment: str = "prod") -> dict[str, Any]:
     """Return every way observed state diverges from desired state."""
-    observed = _load_observed()
+    observed = _load_observed(service, environment)
     key = f"{service}/{environment}"
     record = (observed.get("workloads") or {}).get(key)
     if not record:
