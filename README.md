@@ -101,6 +101,7 @@ Other entry points:
 
 ```bash
 ./run.sh act 5                 # just the policy gate and the remediation loop
+./run.sh demo --acts 2,3,5,7 --scorecard   # the argument, without the setup
 ./run.sh tools cost-reviewer   # the MCP tool list a read-only agent receives
 ./run.sh gate outputs/final-manifests.yaml
 ./run.sh mcp 8099              # the platform MCP server, streamable HTTP
@@ -256,8 +257,9 @@ gone for fifteen days. Detected, attributed, and proposed as a diff — never ap
 
 ![Drift detection with attribution](gifs/drift.gif)
 
-The complete eight-act run is [`gifs/wow.gif`](gifs/wow.gif) (7.5 MB). Every `.cast` is in
-[`recordings/`](recordings/) and plays with `asciinema play recordings/wow.cast`.
+The complete eight-act run is [`gifs/wow.gif`](gifs/wow.gif) (1.1 MB). Every `.cast` is in
+[`recordings/`](recordings/) and plays with `asciinema play recordings/wow.cast` — and because
+these are genuine PTY captures, the playback timing is the timing the demo actually had.
 
 ---
 
@@ -482,6 +484,7 @@ A demo that overstates itself is worse than no demo. The line, drawn honestly:
 | Cloud provisioning | ❌ **not present** | the `SQLInstance` is a real Crossplane-shaped composite; no Composition is installed, no cloud account is touched. |
 | Cost figures | ⚠️ **static rate card by default** | a checked-in table in `src/costing.py`, so there is no account requirement and the artefacts stay byte-reproducible. "Swap in Infracost and the Rego does not change" is wired rather than asserted: `NORTHWIND_COST_SOURCE=infracost` re-prices the database and load-balancer lines against real cloud rates via [`src/sources/infracost.py`](src/sources/infracost.py), and every estimate carries a `costSource` so a rate-card number is never mistaken for a priced one. |
 | Drift observation | ⚠️ **fixture by default** | `platform/observed-state.yaml`. Detection, attribution and the proposed patch are real code over that shape. `NORTHWIND_DRIFT_SOURCE=argocd` swaps the fixture for [`src/sources/argocd.py`](src/sources/argocd.py), which reads Argo CD's `managed-resources` for the desired/observed pair and `metadata.managedFields` for attribution — and reports a *field manager*, not a person, because that is all a control plane actually knows. |
+| The GIFs | ✅ **real recordings** | genuine PTY captures. A pseudo-terminal is allocated, the command is typed into a real interactive shell, and every byte is timestamped as it arrives — the same thing `asciinema rec` does, minus the human hand. Wall-clock timings, a real prompt, and the hero reel is a real run of `./run.sh demo --acts 2,3,5,7 --scorecard` rather than a full run with lines cut out. `agg` plays them back faster than life and trims dead air over 1.5s; both are declared in [`src/build_casts.py`](src/build_casts.py) and neither can change a character of what was recorded. |
 | Northwind Retail | ❌ **fictional** | the company, the teams, the ticket numbers. The pain is not. |
 
 `./run.sh verify` runs **15 acceptance checks** and is the thing to trust rather than this table: the toolchain
@@ -538,7 +541,7 @@ check tells you the demo broke; a unit test tells you which function did it.
 │   ├── goldenpath.py                   the eight-act orchestrator
 │   ├── ui.py                           terminal presentation
 │   ├── build_report.py                 the 15 acceptance checks, timed
-│   ├── build_casts.py                  asciinema casts + GIFs from real runs
+│   ├── build_casts.py                  records a real PTY session, renders the GIF
 │   ├── build_playground.py             real gate results for the interactive page
 │   └── build_site.py                   renders index.html from the template
 │
