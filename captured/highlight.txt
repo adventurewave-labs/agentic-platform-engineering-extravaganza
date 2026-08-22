@@ -193,7 +193,7 @@
 
   METRIC                                  BEFORE           AFTER             DELTA          
   ──────────────────────────────────────────────────────────────────────────────────────────
-  time to a reviewable change             11 working days  18.2s             queue removed  
+  time to a reviewable change             11 working days  1.3s              queue removed  
   team handoffs                           6                1 (the approval)  −5             
   policy violations without the platform  42               0                 −100%          
   remediation iterations                  —                3                 converged      
