@@ -9,7 +9,8 @@
 #   ./run.sh gate [file]  run the policy bundle against a manifest file
 #   ./run.sh drift        run the day-2 drift agent
 #   ./run.sh site         serve the showcase page on :8080
-#   ./run.sh verify       run the 13 acceptance checks against real tool output
+#   ./run.sh verify       run the 15 acceptance checks against real tool output
+#   ./run.sh test         run the unit tests (stdlib unittest, no extra deps)
 #   ./run.sh record       rebuild the asciinema casts and GIFs
 #   ./run.sh versions     print the exact upstream tool versions in play
 #
@@ -116,9 +117,11 @@ cmd_drift()   { "$PY" "$ROOT/src/driftd.py" "${@:-payments-ledger}"; }
 cmd_site()    { cd "$ROOT" && echo "http://localhost:8080" && "$PY" -m http.server 8080 --bind "${NORTHWIND_BIND:-127.0.0.1}"; }
 cmd_record()  { need_tools; "$PY" "$ROOT/src/build_casts.py" "$@"; }
 cmd_verify()  { need_tools; "$PY" "$ROOT/src/build_report.py"; }
+cmd_test()    { preflight; PYTHONPATH="$ROOT/src:$ROOT/tests" \
+                "$PY" -m unittest discover -s "$ROOT/tests" -t "$ROOT" "$@"; }
 
 cmd_help() {
-  sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 case "${1:-demo}" in
@@ -131,6 +134,7 @@ case "${1:-demo}" in
   drift)    shift; cmd_drift "$@" ;;
   site)     shift; cmd_site "$@" ;;
   verify)   shift; cmd_verify "$@" ;;
+  test)     shift; cmd_test "$@" ;;
   record)   shift; cmd_record "$@" ;;
   versions) shift; cmd_versions "$@" ;;
   help|-h|--help) cmd_help ;;

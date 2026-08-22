@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-.PHONY: help setup demo verify site mcp tools drift gate record site-build clean versions docker
+.PHONY: help setup demo verify test site mcp tools drift gate record site-build clean versions docker
 
 help: ## show this help
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -14,8 +14,11 @@ setup: ## fetch the pinned upstream binaries (conftest, score-k8s, kube-linter, 
 demo: ## run the eight-act demo
 	@./run.sh demo
 
-verify: ## run the 14 acceptance checks against real tool output
+verify: ## run the 15 acceptance checks against real tool output
 	@./run.sh verify
+
+test: ## run the unit tests (stdlib unittest, no extra dependencies)
+	@./run.sh test
 
 versions: ## print the exact upstream tool versions in play
 	@./run.sh versions
