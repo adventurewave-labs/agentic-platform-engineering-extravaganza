@@ -22,6 +22,7 @@
   "driftFields": 4,
   "agentClusterMutations": 0,
   "objectCount": 7,
+  "manifestSha256": "2a173417f98b7c3ea1c16efe7f6fb2f3a0f794a7bd8cbff332cc8606c472015c",
   "toolVersions": {
     "conftest": "Conftest: 0.69.0",
     "score-k8s": "score-k8s 0.16.0 (go1.26.4 - linux/amd64)",

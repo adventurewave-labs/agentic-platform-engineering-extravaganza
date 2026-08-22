@@ -1,5 +1,11 @@
 {
   "request": "service called payments-ledger PCI EU high volume postgres staging and prod",
+  "gateCommand": "./run.sh gate outputs/unguided-manifests.yaml",
+  "gateCommandDenyCount": 42,
+  "gateCommandTools": [
+    "conftest",
+    "kube-linter"
+  ],
   "stages": [
     {
       "key": "raw",
