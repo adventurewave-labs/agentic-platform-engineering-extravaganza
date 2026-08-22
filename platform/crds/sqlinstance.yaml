@@ -1,0 +1,122 @@
+# The platform API, as a CustomResourceDefinition.
+#
+# `SQLInstance` is what a developer's `resources: {db: {type: postgres}}` in a
+# Score file becomes. In a real estate this CRD is established by a Crossplane
+# CompositeResourceDefinition and reconciled by a Composition into a managed
+# database. Neither is installed here.
+#
+# This file exists so the claim "the manifests are valid against a real
+# cluster" can be *checked* rather than asserted: .github/workflows/cluster.yaml
+# stands up a kind cluster, applies this, and then puts the committed manifests
+# through the real API server -- schema validation, admission, defaulting and
+# all. Without the CRD the API server would reject the composite for a reason
+# that says nothing about whether the manifest is correct.
+#
+# The schema is deliberately the real contract -- required fields, enums,
+# minimums -- and not `x-kubernetes-preserve-unknown-fields: true`. A CRD that
+# validates nothing would make the cluster check a formality, which is the
+# failure mode this whole repository argues against.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: sqlinstances.platform.northwind.io
+spec:
+  group: platform.northwind.io
+  scope: Namespaced
+  names:
+    kind: SQLInstance
+    listKind: SQLInstanceList
+    plural: sqlinstances
+    singular: sqlinstance
+    shortNames: [sqli]
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Engine
+          type: string
+          jsonPath: .spec.parameters.engine
+        - name: Class
+          type: string
+          jsonPath: .spec.parameters.instanceClass
+        - name: Region
+          type: string
+          jsonPath: .spec.parameters.region
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [parameters]
+              properties:
+                crossplane:
+                  type: object
+                  properties:
+                    compositionRef:
+                      type: object
+                      required: [name]
+                      properties:
+                        name:
+                          type: string
+                parameters:
+                  type: object
+                  required:
+                    - engine
+                    - instanceClass
+                    - region
+                    - storageGb
+                    - backupRetentionDays
+                    - storageEncrypted
+                  properties:
+                    engine:
+                      type: string
+                      enum: [postgres]
+                    engineVersion:
+                      type: string
+                    databaseName:
+                      type: string
+                    masterUsername:
+                      type: string
+                    instanceClass:
+                      type: string
+                    region:
+                      type: string
+                    storageGb:
+                      type: integer
+                      minimum: 20
+                    # The PCI floor is enforced by policy, not by the schema --
+                    # the schema's job is to reject nonsense, the policy's job
+                    # is to reject the merely non-compliant. Conflating them
+                    # would put a compliance control somewhere no auditor
+                    # thinks to look.
+                    backupRetentionDays:
+                      type: integer
+                      minimum: 0
+                      maximum: 35
+                    multiAz:
+                      type: boolean
+                    storageEncrypted:
+                      type: boolean
+                    publiclyAccessible:
+                      type: boolean
+                    costCenter:
+                      type: string
+                    passwordSecretRef:
+                      type: object
+                      required: [name, key]
+                      properties:
+                        name:
+                          type: string
+                        key:
+                          type: string
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
