@@ -20,6 +20,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import agent  # noqa: E402
@@ -185,8 +187,22 @@ def main() -> int:
     print(f"  {'goldenPath':14} {len(final.findings):>3} denials "
           f"after {iterations} iteration(s)", file=sys.stderr)
 
+    # The page shows a command line above the denial list. It used to be a
+    # hand-written string that named conftest alone, beside a badge counting
+    # conftest *and* kube-linter -- a caption for a command nobody had run.
+    # Write the file that command takes, record the command here, and let the
+    # page render it from this data instead of from someone's memory.
+    unguided = ROOT / "outputs" / "unguided-manifests.yaml"
+    unguided.write_text("".join(
+        "---\n" + yaml.safe_dump(d, sort_keys=False)
+        for d in renderer.vibe_manifests(req)))
+    gate_command = f"./run.sh gate {unguided.relative_to(ROOT)}"
+
     payload = {
         "request": REQUEST,
+        "gateCommand": gate_command,
+        "gateCommandDenyCount": stages[0]["denyCount"],
+        "gateCommandTools": sorted({f["tool"] for f in stages[0]["findings"]}),
         "stages": stages,
         "goldenPath": {
             "denyCount": len(final.findings),

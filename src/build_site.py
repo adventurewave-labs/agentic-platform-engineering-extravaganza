@@ -18,12 +18,20 @@ language and something else in the other.
 
 from __future__ import annotations
 
+import html
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import ansi2html  # noqa: E402
 TEMPLATE = ROOT / "site" / "index.template.html"
 OUT = ROOT / "index.html"
 DATA = ROOT / "outputs" / "playground.json"
@@ -38,20 +46,20 @@ def _norm(s: str) -> str:
     return " ".join(s.split())
 
 
-def _inner(html: str, key: str) -> str:
+def _inner(markup: str, key: str) -> str:
     """The inner HTML of the single element carrying data-i18n="key"."""
-    at = html.index(f'data-i18n="{key}"')
-    tag_open = html.rindex("<", 0, at)
-    tag = html[tag_open + 1:].split(None, 1)[0]
-    start = html.index(">", at) + 1
+    at = markup.index(f'data-i18n="{key}"')
+    tag_open = markup.rindex("<", 0, at)
+    tag = markup[tag_open + 1:].split(None, 1)[0]
+    start = markup.index(">", at) + 1
     depth, pos = 1, start
     while depth:
-        nxt = re.compile(f"</?{re.escape(tag)}[ >]").search(html, pos)
+        nxt = re.compile(f"</?{re.escape(tag)}[ >]").search(markup, pos)
         if not nxt:
             raise ValueError(f"unterminated <{tag}> for {key}")
         depth += -1 if nxt.group().startswith("</") else 1
         pos = nxt.end()
-    return html[start:html.rindex("<", start, pos)]
+    return markup[start:markup.rindex("<", start, pos)]
 
 
 def check_translations(html: str, es: dict) -> list[str]:
@@ -80,6 +88,105 @@ def check_translations(html: str, es: dict) -> list[str]:
                 f"       in page:  {have[:90]}"
             )
     return problems
+
+
+
+# ---------------------------------------------------------------------------
+# Blocks the page used to carry as hand-written HTML
+# ---------------------------------------------------------------------------
+#
+# Three blocks on the page were marked up by hand and badged "REAL OUTPUT" or
+# "REAL RENDER": the Act V transcript, the per-identity tool list, and a
+# rendered SQLInstance. Every value in them had been copied from a real run, so
+# they were true when pasted -- and two had already drifted by the time anyone
+# checked. The transcript had lost the indentation on its continuation lines,
+# and the SQLInstance was showing 7 of its 13 parameters with the metadata
+# deleted and the secret name replaced by "...".
+#
+# They are now produced here, at build time, by running the program. The badge
+# describes the build step instead of asserting someone's care.
+
+def _run(args: list[str]) -> str:
+    """Run one of the repo's own commands and return its ANSI output."""
+    env = dict(os.environ, NORTHWIND_SPEED="0", PYTHONPATH=str(ROOT / "src"))
+    proc = subprocess.run([sys.executable, *args], cwd=ROOT, env=env,
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"{' '.join(args)} exited {proc.returncode}; the page cannot show "
+            f"output from a command that failed.\n{proc.stderr[-800:]}")
+    return proc.stdout
+
+
+def _highlight_yaml(text: str) -> str:
+    """Colour a YAML document with the classes the page's stylesheet defines.
+
+    Only the shapes real rendered manifests produce: `key:`, `- item`, scalars,
+    and comments. Anything it does not recognise is escaped and left plain,
+    which is the safe direction -- an unstyled line is still a true line.
+    """
+    out = []
+    for line in text.rstrip("\n").split("\n"):
+        indent = line[:len(line) - len(line.lstrip())]
+        body = line[len(indent):]
+        m = re.match(r"^(-\s+)?([A-Za-z0-9_.\-/]+):(\s*)(.*)$", body)
+        if not m:
+            out.append(indent + html.escape(body))
+            continue
+        dash, key, gap, value = m.groups()
+        chunk = indent + (f'<span class="c">{html.escape(dash)}</span>' if dash else "")
+        chunk += f'<span class="k">{html.escape(key)}</span>:{gap}'
+        if value:
+            if value in ("true", "false"):
+                cls = "g"
+            elif re.fullmatch(r"-?\d+(\.\d+)?", value):
+                cls = "n"
+            else:
+                cls = "s"
+            chunk += f'<span class="{cls}">{html.escape(value)}</span>'
+        out.append(chunk)
+    return "\n".join(out)
+
+
+def build_stamp() -> str:
+    """What the footer attests to, taken from the committed run record.
+
+    This was a hand-typed date. A date is the one thing on this page that
+    cannot be reproduced from committed state -- CI rebuilds index.html and
+    diffs it against the commit, so any stamp read from the clock or from
+    `git log` turns into a spurious failure the first time a merge commit
+    carries a different date than the page was built with. It also attested to
+    nothing in particular.
+
+    The short digest of the rendered manifests is deterministic, is checked by
+    T14, and says something a reader can act on: the page was built from that
+    exact artefact.
+    """
+    record = json.loads((ROOT / "outputs" / "run-record.json").read_text())
+    digest = record.get("manifestSha256", "")
+    if not digest:
+        raise RuntimeError(
+            "outputs/run-record.json has no manifestSha256; run ./run.sh demo")
+    return f"manifests sha256:{digest[:12]}"
+
+
+def act5_transcript() -> str:
+    return ansi2html.convert(_run(["src/goldenpath.py", "--acts", "5"]).rstrip("\n"))
+
+
+def tools_for(identity: str) -> str:
+    return ansi2html.convert(_run(["src/platform_mcp.py", "--list-tools", "--identity", identity]).rstrip("\n"))
+
+
+def sqlinstance_render() -> str:
+    """The SQLInstance exactly as outputs/final-manifests.yaml holds it."""
+    manifests = ROOT / "outputs" / "final-manifests.yaml"
+    docs = [d for d in yaml.safe_load_all(manifests.read_text()) if d]
+    found = [d for d in docs if d.get("kind") == "SQLInstance"]
+    if len(found) != 1:
+        raise RuntimeError(
+            f"expected exactly one SQLInstance in {manifests.name}, found {len(found)}")
+    return _highlight_yaml(yaml.safe_dump(found[0], sort_keys=False))
 
 
 def main() -> int:
@@ -125,6 +232,9 @@ def main() -> int:
             for s in payload["stages"]
         ],
         "goldenPath": payload["goldenPath"],
+        # The command the page prints above the denial list, recorded by
+        # build_playground.py from the invocation that produced the count.
+        "gateCommand": payload["gateCommand"],
     }
     report = json.loads(REPORT.read_text())
     slim_report = {
@@ -142,13 +252,23 @@ def main() -> int:
     slim_es = {k: {"es": v["es"]} for k, v in es.items() if not k.startswith("_")}
     slim_es["_dynamic"] = es["_dynamic"]
 
-    html = (template
+    page = (template
+            .replace("__ACT5_TRANSCRIPT__", act5_transcript())
+            .replace("__TOOLS_PLATFORM_AGENT__", tools_for("platform-agent"))
+            .replace("__SQLINSTANCE_RENDER__", sqlinstance_render())
             .replace("__PLAYGROUND__", json.dumps(slim, separators=(",", ":")))
             .replace("__REPORT__", json.dumps(slim_report, separators=(",", ":")))
             .replace("__I18N_ES__", json.dumps(slim_es, separators=(",", ":"),
                                                ensure_ascii=False)))
-    OUT.write_text(html)
-    print(f"  wrote {OUT.relative_to(ROOT)}  ({len(html) // 1024} KiB)"
+    # Last, so it reaches the copy inside the injected Spanish payload too.
+    page = page.replace("__BUILD_STAMP__", build_stamp())
+    for placeholder in ("__BUILD_STAMP__", "__ACT5_TRANSCRIPT__", "__TOOLS_PLATFORM_AGENT__",
+                        "__SQLINSTANCE_RENDER__", "__PLAYGROUND__", "__REPORT__"):
+        if placeholder in page:
+            print(f"{placeholder} was never substituted", file=sys.stderr)
+            return 1
+    OUT.write_text(page)
+    print(f"  wrote {OUT.relative_to(ROOT)}  ({len(page) // 1024} KiB)"
           f"  · en + es, {len(slim_es) - 1} strings")
     return 0
 

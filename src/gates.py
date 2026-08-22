@@ -114,6 +114,26 @@ class GateResult:
         }
 
 
+class PolicyEngineError(RuntimeError):
+    """A gate's underlying tool could not evaluate the input at all.
+
+    This is deliberately not a GateResult. "The engine refused to run" is not a
+    policy verdict, and it must never be reachable from the code path that
+    produces one.
+
+    Both tools set the same trap. conftest and kube-linter each exit non-zero
+    for a denial *and* for a bundle or file they could not load, and each writes
+    the load error to stderr, leaving stdout empty. Reading only stdout turns
+    a policy engine that never ran into a clean bill of health: before this
+    existed, dropping one uncompilable .rego into policy/kubernetes/ made a
+    privileged, root, hostNetwork, :latest Deployment -- fifteen denials with
+    the bundle intact -- come back `passed=True, skipped=False`.
+
+    The discriminator is whether the tool produced a parseable report. Without
+    one there is no verdict to report, so we raise instead of inventing one.
+    """
+
+
 # ---------------------------------------------------------------------------
 # conftest / OPA
 # ---------------------------------------------------------------------------
@@ -154,20 +174,32 @@ def conftest(
         fh.write(body)
         path = fh.name
 
-    proc = subprocess.run(
-        [binary, "test", "--policy", str(POLICY / policy_subdir),
-         "--parser", parser, "--output", "json", "--no-color", path],
-        capture_output=True, text=True,
-    )
-    Path(path).unlink(missing_ok=True)
+    try:
+        proc = subprocess.run(
+            [binary, "test", "--policy", str(POLICY / policy_subdir),
+             "--parser", parser, "--output", "json", "--no-color", path],
+            capture_output=True, text=True,
+        )
+    finally:
+        Path(path).unlink(missing_ok=True)
+
+    stdout = proc.stdout.strip()
+    try:
+        results = json.loads(stdout) if stdout else None
+    except json.JSONDecodeError:
+        results = None
+
+    # No result array => the bundle never evaluated. See PolicyEngineError.
+    if not isinstance(results, list):
+        detail = (proc.stderr or proc.stdout).strip().splitlines()
+        raise PolicyEngineError(
+            f"{name}: conftest exited {proc.returncode} without a result array "
+            f"while evaluating policy/{policy_subdir}. "
+            + (detail[0] if detail else "no output on stdout or stderr")
+        )
 
     findings: list[Finding] = []
     warnings: list[Finding] = []
-    try:
-        results = json.loads(proc.stdout or "[]")
-    except json.JSONDecodeError:
-        return GateResult(name=name, passed=False, raw=proc.stdout + proc.stderr,
-                          tool_version=_conftest_version())
 
     for block in results:
         for f in block.get("failures") or []:
@@ -216,22 +248,34 @@ def kube_linter(docs: list[dict[str, Any]]) -> GateResult:
             [binary, "lint", "--format", "json", str(path)],
             capture_output=True, text=True,
         )
-    findings: list[Finding] = []
+    stdout = proc.stdout.strip()
     try:
-        data = json.loads(proc.stdout or "{}")
-        for r in data.get("Reports") or []:
-            check = r.get("Check", "unknown")
-            obj = r.get("Object", {}).get("K8sObject", {})
-            gvk = obj.get("GroupVersionKind", {}).get("Kind", "")
-            nm = obj.get("Name", "")
-            msg = r.get("Diagnostic", {}).get("Message", "")
-            findings.append(Finding(
-                policy_id=f"KL-{check}",
-                message=f"{gvk}/{nm}: {msg}",
-                severity="deny", tool="kube-linter", subject=f"{gvk}/{nm}",
-            ))
+        data = json.loads(stdout) if stdout else None
     except json.JSONDecodeError:
-        pass
+        data = None
+
+    # The same trap conftest sets, and for the same reason: kube-linter exits 1
+    # both for "found 8 lint errors" and for "could not read that path", and the
+    # error goes to stderr. Swallowing a decode failure here turned a linter
+    # that never ran into a clean bill of health.
+    if not isinstance(data, dict) or "Checks" not in data:
+        detail = (proc.stderr or proc.stdout).strip().splitlines()
+        raise PolicyEngineError(
+            f"kube-linter exited {proc.returncode} without a report object. "
+            + (detail[0] if detail else "no output on stdout or stderr"))
+
+    findings: list[Finding] = []
+    for r in data.get("Reports") or []:
+        check = r.get("Check", "unknown")
+        obj = r.get("Object", {}).get("K8sObject", {})
+        gvk = obj.get("GroupVersionKind", {}).get("Kind", "")
+        nm = obj.get("Name", "")
+        msg = r.get("Diagnostic", {}).get("Message", "")
+        findings.append(Finding(
+            policy_id=f"KL-{check}",
+            message=f"{gvk}/{nm}: {msg}",
+            severity="deny", tool="kube-linter", subject=f"{gvk}/{nm}",
+        ))
     version = subprocess.run([binary, "version"], capture_output=True, text=True).stdout.strip()
     return GateResult(
         name="kube-linter", passed=not findings, findings=findings,
