@@ -139,6 +139,39 @@ class TestRunRecordFigures(unittest.TestCase):
             self.assertIn(f"${value:,.2f}", read(README),
                           f"README no longer quotes ${value:,.2f} from the run record")
 
+    def test_no_document_quotes_a_monthly_figure_the_model_does_not_produce(self):
+        """Containment is only half the question.
+
+        The test above asks whether the right numbers are present. It cannot
+        see a *wrong* one sitting next to them -- a stale "$1,010.44/mo" from
+        two rate-card revisions ago would satisfy it completely. So every
+        dollars-per-month figure in the prose is collected and checked against
+        the set the committed artefacts actually contain.
+        """
+        allowed = {f"${self.rec['costBefore']:,.2f}", f"${self.rec['costAfter']:,.2f}",
+                   f"${self.rec['costBefore'] - self.rec['costAfter']:,.2f}"}
+        for path in (ROOT / "outputs/final-cost.json", ROOT / "outputs/drift-report.json"):
+            for m in re.finditer(r"\$([\d,]+(?:\.\d\d)?)", path.read_text()):
+                allowed.add("$" + m.group(1))
+        allowed |= {"$400.00", "$400"}          # the budget, from the ServiceRequest
+        # Prose rounds: "$602/mo saved" for $601.67 is a fair way to write it,
+        # so every allowed figure is also allowed to the nearest dollar. What
+        # stays caught is a number with no derivation at all.
+        for fig in list(allowed):
+            try:
+                allowed.add(f"${round(float(fig.lstrip('$').replace(',', ''))):,}")
+            except ValueError:
+                pass
+        wrong = []
+        for path in (README, TEMPLATE):
+            text = read(path)
+            for m in re.finditer(r"(\$[\d,]+(?:\.\d\d)?)\s*/\s*mo", text):
+                if m.group(1) not in allowed:
+                    line = text[:m.start()].count("\n") + 1
+                    wrong.append(f"{path.name}:{line} quotes {m.group(1)}/mo, "
+                                 f"which no committed artefact contains")
+        self.assertEqual(wrong, [], "cost drift:\n  " + "\n  ".join(wrong))
+
     def test_iteration_count(self):
         n = self.rec["goldenPathIterations"]
         for m in re.finditer(r"converge[ds]? (?:to zero )?in (\d+) iterations", read(TEMPLATE)):
@@ -216,3 +249,314 @@ class TestNoDanglingPaths(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNoHandWrittenTerminalBlocks(unittest.TestCase):
+    """Blocks badged "REAL OUTPUT" / "REAL RENDER" must be generated, not typed.
+
+    Three of them used to be hand-marked-up HTML. Every value in them had been
+    copied from a real run, which is what made the problem hard to see: they
+    were accurate on the day they were pasted and wrong later. The Act V
+    transcript had lost the indentation on its continuation lines; the
+    SQLInstance was showing 7 of its 13 parameters with the metadata removed
+    and the secret name replaced by an ellipsis, under a badge reading REAL
+    RENDER.
+
+    The template now carries placeholders and `build_site.py` fills them from
+    the program's own output, so the only way to regress is to delete a
+    placeholder -- which is what this notices.
+    """
+
+    PLACEHOLDERS = ("__ACT5_TRANSCRIPT__", "__TOOLS_PLATFORM_AGENT__",
+                    "__SQLINSTANCE_RENDER__")
+
+    def test_the_template_carries_placeholders_not_markup(self):
+        template = read(TEMPLATE)
+        for name in self.PLACEHOLDERS:
+            self.assertIn(name, template,
+                          f"{name} is gone from the template -- has a generated "
+                          f"block been replaced by hand-written HTML again?")
+
+    def test_every_real_badge_sits_on_a_generated_block(self):
+        """A REAL OUTPUT / REAL RENDER badge on a block that is not generated
+        is exactly the failure this class exists for, so the badges are counted
+        rather than trusted."""
+        template = read(TEMPLATE)
+        badged = re.findall(
+            r'badge-real">(?:REAL OUTPUT|REAL RENDER)</span></div>\s*<pre>([^<]*)',
+            template)
+        for body in badged:
+            self.assertIn(body.strip(), self.PLACEHOLDERS,
+                          f"a REAL badge sits above hand-written content: "
+                          f"{body.strip()[:60]!r}")
+
+
+class TestGeneratedBlocksMatchTheirCommands(unittest.TestCase):
+    """And the generated blocks must still equal what the commands print.
+
+    The test above only checks the wiring. This one runs the commands.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.page = ROOT / "index.html"
+        if not cls.page.exists():
+            raise unittest.SkipTest("index.html not built; run ./run.sh site")
+        import sys
+        sys.path.insert(0, str(ROOT / "src"))
+
+    @staticmethod
+    def _block(page: str, marker: str) -> str:
+        import html as H
+        i = page.index(marker)
+        a = page.index("<pre>", i) + 5
+        b = page.index("</pre>", a)
+        return H.unescape(re.sub(r"<[^>]+>", "", page[a:b]))
+
+    def _run(self, args):
+        import os
+        import subprocess
+        import sys
+        env = dict(os.environ, NORTHWIND_SPEED="0", PYTHONPATH=str(ROOT / "src"))
+        proc = subprocess.run([sys.executable, *args], cwd=ROOT, env=env,
+                              capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-600:])
+        return proc.stdout.rstrip("\n")
+
+    def test_act_five_transcript_is_the_programs_own_output(self):
+        import ansi2html
+        page = read(self.page)
+        live = ansi2html.strip(self._run(["src/goldenpath.py", "--acts", "5"]))
+        self.assertEqual(self._block(page, "./run.sh act 5"), live,
+                         "the Act V block on the page is not what ./run.sh act 5 prints")
+
+    def test_the_tool_list_is_the_servers_own_output(self):
+        import ansi2html
+        page = read(self.page)
+        live = ansi2html.strip(self._run(
+            ["src/platform_mcp.py", "--list-tools", "--identity", "platform-agent"]))
+        self.assertEqual(self._block(page, "./run.sh tools platform-agent"), live)
+
+    def test_the_sqlinstance_is_the_whole_rendered_object(self):
+        import yaml
+        page = read(self.page)
+        docs = [d for d in yaml.safe_load_all(
+            (ROOT / "outputs/final-manifests.yaml").read_text()) if d]
+        sql = [d for d in docs if d.get("kind") == "SQLInstance"]
+        self.assertEqual(len(sql), 1)
+        shown = self._block(page, "rendered by platform/northwind.provisioners.yaml")
+        self.assertEqual(shown, yaml.safe_dump(sql[0], sort_keys=False).rstrip("\n"),
+                         "the SQLInstance on the page is not the rendered object")
+        # The specific ways the hand-written version was wrong.
+        self.assertIn("metadata:", shown)
+        self.assertNotIn("...", shown)
+        params = shown.split("  parameters:\n", 1)[1]
+        self.assertEqual(len(re.findall(r"^    \w[\w.\-]*:", params, re.M)),
+                         len(sql[0]["spec"]["parameters"]),
+                         "the page is not showing every rendered parameter")
+
+
+class TestPolicyBundleCounts(unittest.TestCase):
+    """The README and the page both describe the size of the Rego.
+
+    They said "25 controls across four bundles". There are three bundles and
+    seventeen controls. The 34 rule bodies were right. Nobody had counted in a
+    while, and nothing was counting for them.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        policy = ROOT / "policy"
+        cls.bundles = sorted(d.name for d in policy.iterdir()
+                             if d.is_dir() and any(d.glob("*.rego")))
+        text = "\n".join(f.read_text() for f in policy.rglob("*.rego"))
+        cls.controls = sorted(set(re.findall(r"NW-[A-Z]+-\d+", text)))
+        cls.bodies = sum(1 for f in policy.rglob("*.rego")
+                         for line in f.read_text().splitlines()
+                         if line.startswith(("deny contains", "warn contains")))
+
+    WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
+
+    def test_documents_agree_on_the_bundle_count(self):
+        expected = {str(len(self.bundles)), self.WORDS[len(self.bundles)]}
+        for path in (README, TEMPLATE, I18N):
+            for m in re.finditer(r"across (\w+) bundles", read(path)):
+                self.assertIn(m.group(1), expected,
+                              f"{path.name} says {m.group(1)} bundles, "
+                              f"policy/ has {len(self.bundles)}: {self.bundles}")
+
+    NUMBERS = {
+        "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+        "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+        "nineteen": 19, "twenty": 20, "twenty-five": 25, "thirty": 30,
+    }
+
+    def test_documents_agree_on_the_control_count(self):
+        """The README spells the number out and the page writes digits, so both
+        forms are read -- the word form is how "Twenty-five" survived a review
+        that corrected the digits elsewhere."""
+        for path in (README, TEMPLATE, I18N):
+            for m in re.finditer(r"([A-Za-z-]+|\d+) controls across", read(path)):
+                token = m.group(1)
+                n = int(token) if token.isdigit() else self.NUMBERS.get(token.lower())
+                self.assertIsNotNone(
+                    n, f"{path.name} writes the control count as {token!r}; add it "
+                       f"to TestPolicyBundleCounts.NUMBERS so it stays checked")
+                self.assertEqual(n, len(self.controls),
+                                 f"{path.name} says {token} controls, "
+                                 f"policy/ defines {len(self.controls)}")
+
+    def test_documents_agree_on_the_rule_body_count(self):
+        for path in (README, TEMPLATE, I18N):
+            for m in re.finditer(r"(\d+) <code>deny</code>|(\d+) `deny`", read(path)):
+                n = int(m.group(1) or m.group(2))
+                self.assertEqual(n, self.bodies,
+                                 f"{path.name} says {n} rule bodies, policy/ has "
+                                 f"{self.bodies}")
+
+
+class TestHeroStatTiles(unittest.TestCase):
+    """The five numbers at the top of the page, which nothing was watching.
+
+    `test_denial_count` looks for "42 policy violations" as adjacent text. The
+    tiles split the number and its label across two <div>s, so the regex never
+    matched them and the largest, most prominent numbers on the page were the
+    only unguarded ones. They happened to be right. That is not the same thing.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rec = json.loads((ROOT / "outputs/run-record.json").read_text())
+        page = read(TEMPLATE)
+        block = page[page.index('<div class="stats">'):]
+        block = block[:block.index("</div>\n</div>")]
+        cls.tiles = re.findall(
+            r'<div class="n [a-z]+">([^<]+)</div><div[^>]*class="k">([^<]+)</div>',
+            block)
+
+    def test_all_five_tiles_are_found(self):
+        self.assertEqual(len(self.tiles), 5, f"parsed {len(self.tiles)}: {self.tiles}")
+
+    def test_the_denial_tile_matches_the_run_record(self):
+        value = next(v for v, k in self.tiles if "policy violations" in k)
+        self.assertEqual(int(value), self.rec["vibeDenyCount"])
+
+    def test_the_iteration_tile_matches_the_run_record(self):
+        label = next(k for v, k in self.tiles if "iterations" in k)
+        n = int(re.search(r"(\d+) real iterations", label).group(1))
+        self.assertEqual(n, self.rec["goldenPathIterations"])
+
+    def test_the_savings_tile_matches_the_run_record(self):
+        value = next(v for v, k in self.tiles if "FinOps gate caught" in k)
+        saved = self.rec["costBefore"] - self.rec["costAfter"]
+        self.assertEqual(int(value.lstrip("$")), round(saved),
+                         f"tile says {value}, record implies ${saved:,.2f}")
+
+
+class TestPinnedToolVersions(unittest.TestCase):
+    """`bin/setup.sh` decides which tool versions exist; the documents repeat
+    them. Nothing read setup.sh, so the pins and the prose could diverge."""
+
+    SETUP = ROOT / "bin/setup.sh"
+
+    @classmethod
+    def setUpClass(cls):
+        text = cls.SETUP.read_text()
+        cls.pins = {m.group(1).lower(): m.group(2) for m in re.finditer(
+            r"^(\w+)_VERSION=\"?v?([0-9][0-9A-Za-z.\-]*)\"?", text, re.M)}
+        if not cls.pins:
+            raise unittest.SkipTest("no *_VERSION pins found in bin/setup.sh")
+
+    def test_pins_were_parsed(self):
+        self.assertGreaterEqual(len(self.pins), 3, self.pins)
+
+    def test_no_document_quotes_a_version_setup_does_not_pin(self):
+        wrong = []
+        for tool, pinned in self.pins.items():
+            for path in (README, TEMPLATE):
+                text = read(path)
+                for m in re.finditer(
+                        rf"{re.escape(tool)}[^0-9\n]{{0,24}}v?(\d+\.\d+\.\d+)",
+                        text, re.I):
+                    if m.group(1) != pinned:
+                        line = text[:m.start()].count("\n") + 1
+                        wrong.append(f"{path.name}:{line} says {tool} "
+                                     f"{m.group(1)}, setup.sh pins {pinned}")
+        self.assertEqual(wrong, [], "tool-version drift:\n  " + "\n  ".join(wrong))
+
+
+class TestIllustrativeTicketTile(unittest.TestCase):
+    """The one hero tile that is not a measurement.
+
+    Four of the five numbers at the top of the page come from the run record.
+    This one comes from `goldenpath.TICKET_TRAIL`, whose own comment says the
+    per-step days are invented and only the shape is sourced. Rendered in the
+    same style as the other four, it read as measured. It now says
+    "illustrative" -- and its two numbers are still held to the code, because a
+    scenario being illustrative is not a licence for it to disagree with the
+    thing that prints it.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import goldenpath
+        cls.trail = goldenpath.TICKET_TRAIL
+        page = read(TEMPLATE)
+        block = page[page.index('<div class="stats">'):]
+        cls.block = block[:block.index("</div>\n</div>")]
+
+    def test_the_tile_does_not_present_itself_as_measured(self):
+        tile = next(t for t in self.block.split("<div class=\"stat\">")
+                    if "ticket trail" in t)
+        self.assertIn("illustrative", tile,
+                      "the ticket-trail tile is styled like the four measured "
+                      "stats; it must say what it is")
+
+    def test_the_days_match_the_trail(self):
+        days = sum(t[3] for t in self.trail)
+        m = re.search(r'<div class="n amber">(\d+) d</div>', self.block)
+        self.assertIsNotNone(m, "the ticket-trail tile changed shape")
+        self.assertEqual(int(m.group(1)), round(days),
+                         f"tile says {m.group(1)} days, TICKET_TRAIL sums to {days}")
+
+    def test_the_team_count_matches_the_trail(self):
+        teams = {t[2] for t in self.trail}
+        for path in (TEMPLATE, I18N):
+            for m in re.finditer(r"across (\d+) teams|en (\d+) equipos", read(path)):
+                n = int(m.group(1) or m.group(2))
+                self.assertEqual(n, len(teams),
+                                 f"{path.name} says {n} teams, TICKET_TRAIL names "
+                                 f"{len(teams)}: {sorted(teams)}")
+
+
+class TestTranslationKeyIntegrity(unittest.TestCase):
+    """Every data-i18n key on the page exists exactly once in the Spanish file.
+
+    `build_site.py` already refuses when the English text disagrees between the
+    two. It does not notice a *key* going missing or being defined twice --
+    json.loads keeps the last of a duplicate pair silently, so the page would
+    render the wrong paragraph under the right heading with nothing going red.
+    A careless find-and-replace on a number renamed t103 to t106 while this was
+    being written, which is how the gap was found.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import json as _json
+        pairs = _json.JSONDecoder(object_pairs_hook=lambda p: p).decode(read(I18N))
+        cls.keys = [k for k, _ in pairs if not k.startswith("_")]
+        cls.used = set(re.findall(r'data-i18n="([^"]+)"', read(TEMPLATE)))
+
+    def test_no_duplicate_keys(self):
+        import collections
+        dupes = [k for k, c in collections.Counter(self.keys).items() if c > 1]
+        self.assertEqual(dupes, [], f"duplicate i18n keys: {dupes}")
+
+    def test_every_key_the_page_uses_is_defined(self):
+        missing = sorted(self.used - set(self.keys))
+        self.assertEqual(missing, [], f"page uses undefined i18n keys: {missing}")
+
+    def test_no_defined_key_is_unused(self):
+        """An orphan is how a rename half-lands."""
+        orphans = sorted(set(self.keys) - self.used)
+        self.assertEqual(orphans, [], f"i18n keys nothing references: {orphans}")

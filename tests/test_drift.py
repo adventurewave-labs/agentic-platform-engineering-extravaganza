@@ -209,3 +209,49 @@ class TestArgoCDAdapter(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestManagedFieldAttribution(unittest.TestCase):
+    """Attribution must read managedFields as a tree, not as a haystack.
+
+    `_managers` used to `json.dumps` the fieldsV1 block and ask whether
+    "f:image" appeared anywhere in the resulting string. It does appear in
+    "f:imagePullPolicy" -- which the kubelet and most admission webhooks own on
+    every pod in a cluster. The drift report would then name the kubelet as the
+    manager that changed the image tag: the wrong answer, for the one field
+    where being wrong is worst, on every real object rather than a rare one.
+    """
+
+    def setUp(self):
+        from sources import argocd
+        self.argocd = argocd
+
+    @staticmethod
+    def _obj(*entries):
+        return {"metadata": {"managedFields": list(entries)}}
+
+    def test_image_pull_policy_does_not_claim_the_image_field(self):
+        obj = self._obj(
+            {"manager": "kubelet", "time": "t1", "fieldsV1": {
+                "f:spec": {"f:containers": {"k:{}": {"f:imagePullPolicy": {}}}}}},
+        )
+        self.assertNotIn("image", self.argocd._managers(obj))
+
+    def test_the_manager_that_owns_the_image_is_the_one_reported(self):
+        obj = self._obj(
+            {"manager": "kubelet", "time": "t1", "fieldsV1": {
+                "f:spec": {"f:containers": {"k:{}": {"f:imagePullPolicy": {}}}}}},
+            {"manager": "argocd-controller", "time": "t2", "fieldsV1": {
+                "f:spec": {"f:template": {"f:spec": {"f:containers": {
+                    "k:{}": {"f:image": {}}}}}}}},
+        )
+        self.assertEqual(self.argocd._managers(obj)["image"]["manager"],
+                         "argocd-controller")
+
+    def test_a_nested_key_is_still_found(self):
+        """The fix must not overcorrect into an exact top-level match: these
+        keys are always several levels down."""
+        obj = self._obj({"manager": "kubectl-scale", "time": "t3", "fieldsV1": {
+            "f:spec": {"f:replicas": {}}}})
+        self.assertEqual(self.argocd._managers(obj)["replicas"]["manager"],
+                         "kubectl-scale")

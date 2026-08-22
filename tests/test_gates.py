@@ -9,6 +9,7 @@ rather than only through the system run.
 """
 
 import unittest
+from pathlib import Path
 
 import context  # noqa: F401
 
@@ -145,3 +146,76 @@ class TestRealBundle(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEngineFailureIsNotAPass(unittest.TestCase):
+    """The gate must never report "clean" because the engine never ran.
+
+    conftest exits non-zero both for a policy denial and for a bundle that will
+    not compile, and it writes compile errors to stderr -- leaving stdout empty.
+    A wrapper that reads only stdout sees no findings and calls that a pass.
+    This is the regression test for that: an uncompilable rule is dropped into
+    the live bundle and the same manifest that earns 15 denials with the bundle
+    intact must not come back clean.
+    """
+
+    HOSTILE = [{
+        "apiVersion": "apps/v1", "kind": "Deployment",
+        "metadata": {"name": "hostile"},
+        "spec": {"template": {"spec": {
+            "hostNetwork": True,
+            "containers": [{
+                "name": "c", "image": "nginx:latest",
+                "securityContext": {"privileged": True, "runAsUser": 0},
+            }],
+        }}},
+    }]
+
+    @classmethod
+    def setUpClass(cls):
+        if gates._tool("conftest") is None:
+            raise unittest.SkipTest("conftest not installed; run ./bin/setup.sh")
+
+    def test_the_hostile_manifest_is_denied_while_the_bundle_compiles(self):
+        """Guards the guard: if this stops denying, the test below proves nothing."""
+        result = gates.evaluate_kubernetes(self.HOSTILE)
+        self.assertFalse(result.passed)
+        self.assertGreaterEqual(len(result.findings), 5)
+
+    def test_an_uncompilable_bundle_raises_instead_of_passing(self):
+        broken = gates.POLICY / "kubernetes" / "zzz_broken_fixture.rego"
+        broken.write_text("package main\ndeny[msg] { this is not valid rego ((\n")
+        try:
+            with self.assertRaises(gates.PolicyEngineError) as caught:
+                gates.evaluate_kubernetes(self.HOSTILE)
+        finally:
+            broken.unlink(missing_ok=True)
+        self.assertIn("without a result array", str(caught.exception))
+
+    def test_the_bundle_is_left_compiling_afterwards(self):
+        """The fixture above writes into the real policy directory. If its
+        cleanup ever regresses, every later run would be evaluating a broken
+        bundle -- so the removal is asserted, not assumed."""
+        self.assertFalse((gates.POLICY / "kubernetes" / "zzz_broken_fixture.rego").exists())
+        self.assertFalse(gates.evaluate_kubernetes(self.HOSTILE).passed)
+
+    def test_a_crashed_kube_linter_raises_instead_of_passing(self):
+        """kube-linter shares conftest's exit-code ambiguity: 1 means both
+        "found 8 lint errors" and "could not read that path". A stub that exits
+        the way a crash does must not be read as a clean lint."""
+        import subprocess as sp
+        import tempfile as tf
+
+        with tf.TemporaryDirectory() as tmp:
+            stub = Path(tmp) / "kube-linter"
+            stub.write_text(
+                "#!/bin/sh\necho 'Error: loading from path: no such file' >&2\nexit 1\n")
+            stub.chmod(0o755)
+            real = gates._tool
+            gates._tool = lambda n: str(stub) if n == "kube-linter" else real(n)
+            try:
+                with self.assertRaises(gates.PolicyEngineError) as caught:
+                    gates.kube_linter(self.HOSTILE)
+            finally:
+                gates._tool = real
+        self.assertIn("without a report object", str(caught.exception))
