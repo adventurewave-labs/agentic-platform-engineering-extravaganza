@@ -31,7 +31,7 @@ KUBE_LINTER_VERSION="0.8.3"
 OPA_VERSION="1.19.1"
 TRIVY_VERSION="0.74.0"
 TOFU_VERSION="1.12.6"
-AGG_VERSION="1.5.0"
+AGG_VERSION="1.9.0"
 
 case "$(uname -s)" in
   Linux)  OS=linux;  OS_TITLE=Linux ;;
