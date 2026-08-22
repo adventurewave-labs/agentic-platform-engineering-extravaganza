@@ -94,7 +94,7 @@ Then:
 git clone https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza
 cd agentic-platform-engineering-extravaganza
 
-./run.sh setup     # fetch the pinned upstream binaries (conftest, score-k8s, kube-linter)
+./run.sh setup     # fetch the pinned upstream binaries (conftest, opa, score-k8s, kube-linter)
 ./run.sh demo      # the full run: eight acts and a scorecard
 ./run.sh verify    # 15 acceptance checks against real tool output
 ./run.sh test      # 120 unit tests on stdlib unittest, no extra dependencies

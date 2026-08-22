@@ -62,7 +62,7 @@ preflight() {
 need_tools() {
   preflight
   local missing=0
-  for t in conftest score-k8s kube-linter; do
+  for t in conftest score-k8s kube-linter opa; do
     [ -x "$ROOT/bin/$t" ] || command -v "$t" >/dev/null 2>&1 || { missing=1; }
   done
   if [ "$missing" = 1 ]; then
