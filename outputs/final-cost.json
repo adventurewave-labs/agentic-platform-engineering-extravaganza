@@ -10,6 +10,7 @@
       "totalMonthlyCostUsd": 221.65,
       "previousMonthlyCostUsd": 0.0,
       "currency": "USD",
+      "costSource": "rate-card",
       "resources": [
         {
           "name": "payments-ledger-compute",
@@ -62,6 +63,7 @@
       "totalMonthlyCostUsd": 359.15,
       "previousMonthlyCostUsd": 0.0,
       "currency": "USD",
+      "costSource": "rate-card",
       "resources": [
         {
           "name": "payments-ledger-compute",
