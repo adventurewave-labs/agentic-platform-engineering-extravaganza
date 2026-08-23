@@ -196,7 +196,6 @@ footer a{color:var(--muted)}
   color:var(--muted);margin-bottom:10px;font-weight:500}
 .foot-grid li{list-style:none;margin-bottom:5px}
 .stamp{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:8px}
-
 /* ============ POLICY GATE PANEL — Touchpoint 3 (PRD §5) ============ */
 .pg-overlay {
   position: fixed; inset: 0; z-index: 100;
@@ -631,6 +630,396 @@ footer a{color:var(--muted)}
 }
 .pg-warmup[hidden] { display: none; }
 
+
+<!-- ==================== POLICY GATE PANEL — Touchpoint 3 (PRD §5) ==================== -->
+<div class="pg-overlay" id="pg-overlay" aria-hidden="true"></div>
+<aside class="pg-panel" id="pg-panel" role="dialog" aria-labelledby="pg-title" aria-hidden="true">
+  <div class="pg-panel-header">
+    <h2 id="pg-title">Policy Gate · evaluate a manifest</h2>
+    <span class="badge-real">REAL REGO · CONFTEST 0.69.0</span>
+    <button class="pg-close" id="pg-close" aria-label="Close panel" type="button">×</button>
+  </div>
+  <div class="pg-body">
+    <!-- Controls -->
+    <div class="pg-controls">
+      <div class="pg-control-group">
+        <label for="pg-template">Service template</label>
+        <select id="pg-template">
+          <option value="payments-ledger">payments-ledger (PCI EU payments service)</option>
+        </select>
+      </div>
+      <div class="pg-control-group">
+        <label for="pg-scenario">Scenario</label>
+        <select id="pg-scenario">
+          <option value="raw">Raw LLM output (no platform)</option>
+          <option value="golden_path">Golden path (platform-applied)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Compare toggle -->
+    <div class="pg-compare-row">
+      <label for="pg-compare-toggle">Compare raw vs golden side-by-side</label>
+      <div class="switch" id="pg-compare-switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <!-- YAML editor -->
+    <div class="pg-editor-wrap">
+      <div class="pg-editor-bar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <span class="title" id="pg-editor-title">manifest.yaml · template default</span>
+        <span class="cached-pill" id="pg-cached-pill" hidden>cached</span>
+      </div>
+      <textarea class="pg-editor" id="pg-editor" spellcheck="false" placeholder="# Paste a Kubernetes manifest here, or use the template default above."></textarea>
+    </div>
+
+    <!-- Evaluate -->
+    <div class="pg-evaluate-row">
+      <button class="pg-btn-evaluate" id="pg-evaluate-btn" type="button">
+        <span class="btn-label">⚡ Evaluate</span>
+      </button>
+      <span class="pg-eval-meta" id="pg-eval-meta"></span>
+    </div>
+
+    <div class="pg-warmup" id="pg-warmup" hidden>
+      Warming up serverless function — first evaluation may take a few seconds…
+    </div>
+
+    <div class="pg-error" id="pg-error" hidden>
+      <span id="pg-error-msg"></span>
+      <button type="button" id="pg-retry-btn">Retry</button>
+    </div>
+
+    <!-- Compare grid (only visible in compare mode) -->
+    <div class="pg-compare-grid" id="pg-compare-grid" hidden>
+      <div class="pg-compare-col raw">
+        <h4>● Raw LLM output</h4>
+        <div class="count" id="pg-raw-count">—</div>
+        <div class="delta-strip" id="pg-delta-strip" hidden>
+          ▼ <span id="pg-delta-text">— denials eliminated</span>
+        </div>
+      </div>
+      <div class="pg-compare-col golden">
+        <h4>● Golden path</h4>
+        <div class="count" id="pg-golden-count">—</div>
+      </div>
+    </div>
+
+    <!-- Summary (only visible in single-scenario mode) -->
+    <div class="pg-summary" id="pg-summary" hidden>
+      <div class="block">
+        <div class="count" id="pg-count">—</div>
+        <div class="count-label">denials</div>
+      </div>
+      <div class="right" id="pg-meta-right"></div>
+    </div>
+
+    <!-- Denial cards -->
+    <div class="pg-denials" id="pg-denials"></div>
+
+    <!-- Empty state (when 0 denials) -->
+    <div class="pg-empty" id="pg-empty" hidden>
+      <div class="ok">✓</div>
+      <div><strong>All clear.</strong> No policy denials.</div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // ===========================================================================
+  // Policy Gate Panel — Touchpoint 3 (PRD §5)
+  //
+  // Opens as an in-page slide-out panel when "Try the policy gate" is clicked.
+  // Drives POST /api/evaluate to run conftest against the YAML manifest.
+  //
+  // PRD §5.6 edge cases handled:
+  //   - Conftest timeout → partial results with warning
+  //   - Malicious YAML → sandboxed (Vercel serverless IS the sandbox)
+  //   - Empty manifest → client-side validation before sending
+  //   - Conftest unavailable → cached results with cached-pill label
+  // ===========================================================================
+  (function () {
+    const overlay = document.getElementById('pg-overlay');
+    const panel = document.getElementById('pg-panel');
+    const closeBtn = document.getElementById('pg-close');
+    const evalBtn = document.getElementById('pg-evaluate-btn');
+    const evalBtnLabel = evalBtn.querySelector('.btn-label');
+    const retryBtn = document.getElementById('pg-retry-btn');
+
+    const templateSel = document.getElementById('pg-template');
+    const scenarioSel = document.getElementById('pg-scenario');
+    const compareSwitch = document.getElementById('pg-compare-switch');
+    const editor = document.getElementById('pg-editor');
+    const editorTitle = document.getElementById('pg-editor-title');
+    const cachedPill = document.getElementById('pg-cached-pill');
+    const evalMeta = document.getElementById('pg-eval-meta');
+
+    const summary = document.getElementById('pg-summary');
+    const countEl = document.getElementById('pg-count');
+    const metaRight = document.getElementById('pg-meta-right');
+
+    const compareGrid = document.getElementById('pg-compare-grid');
+    const rawCount = document.getElementById('pg-raw-count');
+    const goldenCount = document.getElementById('pg-golden-count');
+    const deltaStrip = document.getElementById('pg-delta-strip');
+    const deltaText = document.getElementById('pg-delta-text');
+
+    const denialsEl = document.getElementById('pg-denials');
+    const emptyEl = document.getElementById('pg-empty');
+    const warmupEl = document.getElementById('pg-warmup');
+    const errorEl = document.getElementById('pg-error');
+    const errorMsg = document.getElementById('pg-error-msg');
+
+    let compareMode = false;
+    let inFlight = null;
+    let lastEval = null;
+
+    // ---- Open / close ----
+    function openPanel() {
+      overlay.classList.add('open');
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePanel() {
+      overlay.classList.remove('open');
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    overlay.addEventListener('click', closePanel);
+    closeBtn.addEventListener('click', closePanel);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+    });
+
+    // Intercept the "Try the policy gate" link to open the panel instead.
+    document.querySelectorAll('a[href="#policy"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPanel();
+      });
+    });
+
+    // ---- Compare toggle ----
+    function setCompareMode(on) {
+      compareMode = on;
+      compareSwitch.classList.toggle('on', on);
+      compareSwitch.setAttribute('aria-checked', String(on));
+      // In compare mode, hide the single-scenario summary + denials.
+      summary.hidden = on || !lastEval;
+      denialsEl.hidden = on;
+      emptyEl.hidden = on || (lastEval && lastEval.denial_count > 0);
+      compareGrid.hidden = !on;
+      // Disable scenario selector in compare mode (both are shown).
+      scenarioSel.disabled = on;
+    }
+    compareSwitch.addEventListener('click', () => setCompareMode(!compareMode));
+    compareSwitch.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        setCompareMode(!compareMode);
+      }
+    });
+
+    // ---- Load template default into editor when scenario/template changes ----
+    async function loadTemplateDefault() {
+      const tid = templateSel.value;
+      const scenario = scenarioSel.value;
+      // Show "loading" state.
+      editor.value = '# loading template default…';
+      editorTitle.textContent = `manifest.yaml · loading ${tid}/${scenario}…`;
+      try {
+        const res = await fetch(`/outputs/${scenario === 'golden_path' ? 'final-manifests' : 'unguided-manifests'}.yaml`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        editor.value = text;
+        editorTitle.textContent = `manifest.yaml · template default (${scenario})`;
+      } catch (err) {
+        // If the fetch fails (e.g. dev), leave the editor empty.
+        editor.value = '';
+        editorTitle.textContent = `manifest.yaml · (template default not loaded: ${err.message})`;
+      }
+    }
+    templateSel.addEventListener('change', loadTemplateDefault);
+    scenarioSel.addEventListener('change', loadTemplateDefault);
+
+    // ---- Error helpers ----
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorEl.hidden = false;
+    }
+    function hideError() {
+      errorEl.hidden = true;
+    }
+
+    // ---- Render denials ----
+    function renderDenials(denials) {
+      denialsEl.innerHTML = '';
+      denials.forEach((d, i) => {
+        const card = document.createElement('div');
+        card.className = `pg-denial-card ${d.severity}`;
+        card.style.animationDelay = `${i * 60}ms`;
+
+        const head = document.createElement('div');
+        head.className = 'head';
+        const pid = document.createElement('span');
+        pid.className = 'pid';
+        pid.textContent = d.policy_id;
+        const tool = document.createElement('span');
+        tool.className = 'tool';
+        tool.textContent = d.tool;
+        const subject = document.createElement('span');
+        subject.className = 'subject';
+        subject.textContent = d.subject;
+        head.appendChild(pid);
+        head.appendChild(tool);
+        head.appendChild(subject);
+        card.appendChild(head);
+
+        const message = document.createElement('div');
+        message.className = 'message';
+        message.textContent = d.message;
+        card.appendChild(message);
+
+        if (d.remediation) {
+          const rem = document.createElement('div');
+          rem.className = 'remediation';
+          rem.textContent = d.remediation;
+          card.appendChild(rem);
+        }
+
+        denialsEl.appendChild(card);
+      });
+    }
+
+    function renderSingleResult(data) {
+      lastEval = data;
+      const count = data.denial_count ?? 0;
+      countEl.textContent = count;
+      countEl.classList.toggle('zero', count === 0);
+
+      metaRight.innerHTML =
+        `engine: <code style="font-family:var(--mono);color:var(--text)">${data.engine || '?'}</code> · ` +
+        `${data.duration_ms ?? 0}ms · ` +
+        `<span style="color:${data.cached ? '#fbbf24' : 'var(--muted)'}">${data.cached ? 'CACHED' : 'live'}</span>`;
+      cachedPill.hidden = !data.cached;
+
+      summary.hidden = false;
+      emptyEl.hidden = count > 0;
+      denialsEl.hidden = false;
+      renderDenials(data.denials || []);
+
+      evalMeta.textContent = `eval ${data.eval_id ? data.eval_id.slice(0, 8) : '?'} · ${data.duration_ms ?? 0}ms`;
+    }
+
+    function renderCompareResult(data) {
+      lastEval = data.raw;  // For empty-state purposes.
+      const rawC = data.raw.denial_count ?? 0;
+      const goldC = data.golden.denial_count ?? 0;
+      const delta = rawC - goldC;
+
+      rawCount.textContent = rawC;
+      goldenCount.textContent = goldC;
+      if (delta > 0) {
+        deltaStrip.hidden = false;
+        deltaText.textContent = `${delta} denials eliminated by the golden path`;
+      } else {
+        deltaStrip.hidden = true;
+      }
+
+      // In compare mode, also render the raw scenario's denials below.
+      denialsEl.hidden = false;
+      renderDenials(data.raw.denials || []);
+      emptyEl.hidden = rawC > 0;
+
+      evalMeta.textContent = `compare eval ${data.eval_id ? data.eval_id.slice(0, 8) : '?'} · delta=${delta}`;
+    }
+
+    // ---- Evaluate ----
+    async function doEvaluate() {
+      hideError();
+
+      // PRD §5.6 case 3: empty manifest → validate client-side.
+      const manifest = editor.value.trim();
+      if (!manifest) {
+        showError('Manifest is empty. Paste a YAML manifest or pick a template, then Evaluate.');
+        return;
+      }
+
+      evalBtn.disabled = true;
+      evalBtnLabel.innerHTML = '<span class="spin"></span> Evaluating…';
+
+      const warmupTimer = setTimeout(() => {
+        warmupEl.hidden = false;
+      }, 2000);
+
+      try {
+        const controller = new AbortController();
+        inFlight = controller;
+        const timeoutId = setTimeout(() => controller.abort(), 30000);  // PRD §5.5: <5s p95
+
+        const body = {
+          manifest,
+          scenario: scenarioSel.value,
+          template_id: templateSel.value,
+          compare: compareMode,
+        };
+
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        clearTimeout(timeoutId);
+        clearTimeout(warmupTimer);
+        warmupEl.hidden = true;
+
+        if (inFlight !== controller) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        const data = await res.json();
+
+        if (data.error) {
+          showError(data.error);
+        } else if (compareMode) {
+          renderCompareResult(data);
+        } else {
+          renderSingleResult(data);
+        }
+
+        evalBtn.disabled = false;
+        evalBtnLabel.textContent = '⚡ Evaluate Again';
+        inFlight = null;
+      } catch (err) {
+        clearTimeout(warmupTimer);
+        warmupEl.hidden = true;
+        if (err.name === 'AbortError') {
+          showError('Evaluation timed out after 30s. The serverless function may be cold-starting — try again.');
+        } else {
+          showError('Evaluation failed: ' + (err.message || String(err)));
+        }
+        evalBtn.disabled = false;
+        evalBtnLabel.textContent = '⚡ Evaluate';
+        inFlight = null;
+      }
+    }
+
+    evalBtn.addEventListener('click', doEvaluate);
+    retryBtn.addEventListener('click', doEvaluate);
+
+    // Auto-load template default when panel opens for the first time.
+    let loadedDefaults = false;
+    const observer = new MutationObserver(() => {
+      if (panel.classList.contains('open') && !loadedDefaults) {
+        loadedDefaults = true;
+        loadTemplateDefault();
+      }
+    });
+    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  })();
+</script>
+
 </style>
 </head>
 <body>
@@ -875,59 +1264,59 @@ footer a{color:var(--muted)}
     <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
       <span class="t">./run.sh act 5</span><span data-i18n="t087" class="badge-real">REAL OUTPUT</span></div>
     <pre>
-<span style="color:#a78bfa">╭──────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span style="color:#a78bfa">│ </span><span style="font-weight:600"></span><span style="color:#a78bfa;font-weight:600">AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL</span>                                                 <span style="color:#a78bfa"> │</span>
-<span style="color:#a78bfa">│ </span><span style="color:#8b949e">one request · eight acts · every verdict from a real OPA evaluation</span>                             <span style="color:#a78bfa"> │</span>
-<span style="color:#a78bfa">╰──────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
+│ one request · eight acts · every verdict from a real OPA evaluation                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-<span style="color:#f0abfc">━━━</span><span style="background:#082f49"></span><span style="background:#082f49;font-weight:600"></span><span style="color:#e6edf3;background:#082f49;font-weight:600"> ACT V </span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">The gate: what the platform cannot decide for you</span> <span style="color:#6e7681">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+━━━ ACT V  The gate: what the platform cannot decide for you ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  <span style="color:#6e7681">reasoner:</span> <span style="color:#8b949e">deterministic reasoner (no model, fully reproducible)</span>
-  <span style="color:#6e7681">engine:  </span> <span style="color:#8b949e">conftest 0.69.0  ·  real Rego, real evaluation</span>
+  reasoner: deterministic reasoner (no model, fully reproducible)
+  engine:   conftest 0.69.0  ·  real Rego, real evaluation
 
-  <span style="color:#f0abfc">▍</span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">ITERATION 1</span>   <span style="color:#6e7681">$960.82/mo vs $400.00 budget</span>
-  <span style="color:#6e7681"> 1.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-PCI-003</span>  <span style="color:#e6edf3">SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day</span>
-                  <span style="color:#e6edf3">PCI floor</span>
-      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">set spec.parameters.backupRetentionDays&gt;=30</span>
-  <span style="color:#6e7681"> 2.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-FIN-001</span>  <span style="color:#e6edf3">payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of</span>
-                  <span style="color:#e6edf3">$400.00/mo by $560.82</span>
-      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">right-size the largest line item or request a budget increase from the cost-center</span>
-            <span style="color:#fbbf24">owner</span>
-  <span style="color:#6e7681"> 3.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-FIN-003</span>  <span style="color:#e6edf3">payments-ledger/prod: resource &quot;payments-ledger-postgres&quot; is $820.67/mo — 85% of</span>
-                  <span style="color:#e6edf3">the whole service budget</span>
-      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">single line items over 70% need an explicit exception annotation from the cost-center</span>
-            <span style="color:#fbbf24">owner</span>
+  ▍ ITERATION 1   $960.82/mo vs $400.00 budget
+   1. NW-PCI-003  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day
+                  PCI floor
+      fix → set spec.parameters.backupRetentionDays&gt;=30
+   2. NW-FIN-001  payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $560.82
+      fix → right-size the largest line item or request a budget increase from the cost-center
+            owner
+   3. NW-FIN-003  payments-ledger/prod: resource &quot;payments-ledger-postgres&quot; is $820.67/mo — 85% of
+                  the whole service budget
+      fix → single line items over 70% need an explicit exception annotation from the cost-center
+            owner
 
-    <span style="font-weight:600"></span><span style="color:#a78bfa;font-weight:600">agent →</span> <span style="color:#8b949e">2 input change(s), then re-render from source</span>
-      <span style="color:#6e7681">·</span> <span style="color:#e6edf3">db_backup_retention_days</span> <span style="color:#f87171">7</span> <span style="color:#6e7681">→</span> <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">30</span>
-        <span style="color:#6e7681">PCI requires a 30-day minimum recovery window</span>
-      <span style="color:#6e7681">·</span> <span style="color:#e6edf3">db_instance_class</span> <span style="color:#f87171">db.r6g.xlarge</span> <span style="color:#6e7681">→</span> <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">db.t4g.large</span>
-        <span style="color:#6e7681">largest reducible line item; db.r6g.xlarge -&gt; db.t4g.large stays inside the cost-centre</span>
-        <span style="color:#6e7681">envelope</span>
+    agent → 2 input change(s), then re-render from source
+      · db_backup_retention_days 7 → 30
+        PCI requires a 30-day minimum recovery window
+      · db_instance_class db.r6g.xlarge → db.t4g.large
+        largest reducible line item; db.r6g.xlarge -&gt; db.t4g.large stays inside the cost-centre
+        envelope
 
-  <span style="color:#f0abfc">▍</span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">ITERATION 2</span>   <span style="color:#6e7681">$463.15/mo vs $400.00 budget</span>
-  <span style="color:#6e7681"> 1.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-FIN-001</span>  <span style="color:#e6edf3">payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of</span>
-                  <span style="color:#e6edf3">$400.00/mo by $63.15</span>
-      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">right-size the largest line item or request a budget increase from the cost-center</span>
-            <span style="color:#fbbf24">owner</span>
+  ▍ ITERATION 2   $463.15/mo vs $400.00 budget
+   1. NW-FIN-001  payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of
+                  $400.00/mo by $63.15
+      fix → right-size the largest line item or request a budget increase from the cost-center
+            owner
 
-    <span style="font-weight:600"></span><span style="color:#a78bfa;font-weight:600">agent →</span> <span style="color:#8b949e">1 input change(s), then re-render from source</span>
-      <span style="color:#6e7681">·</span> <span style="color:#e6edf3">db_instance_class</span> <span style="color:#f87171">db.t4g.large</span> <span style="color:#6e7681">→</span> <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">db.t4g.medium</span>
-        <span style="color:#6e7681">largest reducible line item; db.t4g.large -&gt; db.t4g.medium stays inside the cost-centre</span>
-        <span style="color:#6e7681">envelope</span>
+    agent → 1 input change(s), then re-render from source
+      · db_instance_class db.t4g.large → db.t4g.medium
+        largest reducible line item; db.t4g.large -&gt; db.t4g.medium stays inside the cost-centre
+        envelope
 
-  <span style="color:#f0abfc">▍</span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">ITERATION 3</span>   <span style="color:#6e7681">$359.15/mo vs $400.00 budget</span>
-    <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">✔ 0 denials across 4 gates</span>
-
-
-  <span style="background:#052e16"></span><span style="background:#052e16;font-weight:600"></span><span style="color:#e6edf3;background:#052e16;font-weight:600">  PASSED — 0 denials  </span>  <span style="color:#8b949e">converged in 3 iterations</span>
+  ▍ ITERATION 3   $359.15/mo vs $400.00 budget
+    ✔ 0 denials across 4 gates
 
 
-  <span style="color:#8b949e">Note what the agent never did: it never edited a rendered manifest</span>
-  <span style="color:#8b949e">to make a check go green. Every fix changed an input and the whole</span>
-  <span style="color:#8b949e">artefact was regenerated. Patch the output instead and the finding</span>
-  <span style="color:#8b949e">comes back silently on the next render — that is how automated</span>
-  <span style="color:#8b949e">remediation becomes worse than none.</span></pre>
+    PASSED — 0 denials    converged in 3 iterations
+
+
+  Note what the agent never did: it never edited a rendered manifest
+  to make a check go green. Every fix changed an input and the whole
+  artefact was regenerated. Patch the output instead and the finding
+  comes back silently on the next render — that is how automated
+  remediation becomes worse than none.</pre>
   </div>
 
   <ul class="why">
@@ -1639,7 +2028,6 @@ try {
 }
 applyLang(initial);
 </script>
-
 <!-- ==================== POLICY GATE PANEL — Touchpoint 3 (PRD §5) ==================== -->
 <div class="pg-overlay" id="pg-overlay" aria-hidden="true"></div>
 <aside class="pg-panel" id="pg-panel" role="dialog" aria-labelledby="pg-title" aria-hidden="true">
@@ -2028,6 +2416,5 @@ applyLang(initial);
     observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
   })();
 </script>
-
 </body>
 </html>
