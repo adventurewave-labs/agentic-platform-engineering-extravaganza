@@ -538,8 +538,29 @@ def build_evaluate_response(
     template = next((t for t in TEMPLATES if t["id"] == (template_id or "payments-ledger")), TEMPLATES[0])
 
     # Resolve manifest + cached flag.
-    # - If user provided a manifest, run the Python analyzers (engine=python-faithful-reimpl).
-    # - If user picked a template default, use the cached conftest output (engine=conftest-cached).
+    # - If user provided a manifest THAT DIFFERS from the template default,
+    #   run the Python analyzers (engine=python-faithful-reimpl).
+    # - If user provided the template default unchanged (i.e. the auto-load
+    #   from /outputs/unguided-manifests.yaml), OR provided no manifest at all,
+    #   use the cached conftest output (engine=conftest-cached). This is the
+    #   canonical 42-denial (raw) / 0-denial (golden_path) response that the
+    #   real conftest binary produces.
+    if manifest_yaml and manifest_yaml.strip():
+        # Check if the user's manifest matches the template default for the
+        # selected scenario. If yes, treat as "no manifest provided" and use
+        # the cached canonical output instead of the Python reimplementation.
+        default_path = (
+            template["golden_manifest_path"] if scenario == "golden_path"
+            else template["raw_manifest_path"]
+        )
+        try:
+            with open(default_path) as f:
+                default_yaml = f.read()
+            if manifest_yaml.strip() == default_yaml.strip():
+                manifest_yaml = None  # use cached path below
+        except Exception:
+            pass  # if we can't read the default, fall through to Python reimpl
+
     if manifest_yaml and manifest_yaml.strip():
         # User-provided YAML → Python re-implementation.
         try:
