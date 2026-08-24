@@ -111,8 +111,6 @@ jobs:
           if ! git diff --quiet -- index.html; then
             echo "::error::index.html is stale against its template. Run 'make site-build'."
             git --no-pager diff --stat -- index.html
-            echo "---DEBUG: first 100 lines of diff---"
-            git --no-pager diff -- index.html | head -100
             exit 1
           fi
           echo "en + es agree, and index.html is current"
