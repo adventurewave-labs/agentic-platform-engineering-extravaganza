@@ -1264,59 +1264,59 @@ footer a{color:var(--muted)}
     <div class="term-bar"><div class="dots"><i></i><i></i><i></i></div>
       <span class="t">./run.sh act 5</span><span data-i18n="t087" class="badge-real">REAL OUTPUT</span></div>
     <pre>
-╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL                                                  │
-│ one request · eight acts · every verdict from a real OPA evaluation                              │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+<span style="color:#a78bfa">╭──────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span style="color:#a78bfa">│ </span><span style="font-weight:600"></span><span style="color:#a78bfa;font-weight:600">AGENTIC PLATFORM ENGINEERING — NORTHWIND RETAIL</span>                                                 <span style="color:#a78bfa"> │</span>
+<span style="color:#a78bfa">│ </span><span style="color:#8b949e">one request · eight acts · every verdict from a real OPA evaluation</span>                             <span style="color:#a78bfa"> │</span>
+<span style="color:#a78bfa">╰──────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
 
-━━━ ACT V  The gate: what the platform cannot decide for you ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span style="color:#f0abfc">━━━</span><span style="background:#082f49"></span><span style="background:#082f49;font-weight:600"></span><span style="color:#e6edf3;background:#082f49;font-weight:600"> ACT V </span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">The gate: what the platform cannot decide for you</span> <span style="color:#6e7681">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
 
-  reasoner: deterministic reasoner (no model, fully reproducible)
-  engine:   conftest 0.69.0  ·  real Rego, real evaluation
+  <span style="color:#6e7681">reasoner:</span> <span style="color:#8b949e">deterministic reasoner (no model, fully reproducible)</span>
+  <span style="color:#6e7681">engine:  </span> <span style="color:#8b949e">conftest 0.69.0  ·  real Rego, real evaluation</span>
 
-  ▍ ITERATION 1   $960.82/mo vs $400.00 budget
-   1. NW-PCI-003  SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day
-                  PCI floor
-      fix → set spec.parameters.backupRetentionDays&gt;=30
-   2. NW-FIN-001  payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of
-                  $400.00/mo by $560.82
-      fix → right-size the largest line item or request a budget increase from the cost-center
-            owner
-   3. NW-FIN-003  payments-ledger/prod: resource &quot;payments-ledger-postgres&quot; is $820.67/mo — 85% of
-                  the whole service budget
-      fix → single line items over 70% need an explicit exception annotation from the cost-center
-            owner
+  <span style="color:#f0abfc">▍</span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">ITERATION 1</span>   <span style="color:#6e7681">$960.82/mo vs $400.00 budget</span>
+  <span style="color:#6e7681"> 1.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-PCI-003</span>  <span style="color:#e6edf3">SQLInstance/nw-payments-ledger-prod: backupRetentionDays=7 is below the 30-day</span>
+                  <span style="color:#e6edf3">PCI floor</span>
+      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">set spec.parameters.backupRetentionDays&gt;=30</span>
+  <span style="color:#6e7681"> 2.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-FIN-001</span>  <span style="color:#e6edf3">payments-ledger/prod: estimated $960.82/mo exceeds the CC-4471 budget of</span>
+                  <span style="color:#e6edf3">$400.00/mo by $560.82</span>
+      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">right-size the largest line item or request a budget increase from the cost-center</span>
+            <span style="color:#fbbf24">owner</span>
+  <span style="color:#6e7681"> 3.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-FIN-003</span>  <span style="color:#e6edf3">payments-ledger/prod: resource &quot;payments-ledger-postgres&quot; is $820.67/mo — 85% of</span>
+                  <span style="color:#e6edf3">the whole service budget</span>
+      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">single line items over 70% need an explicit exception annotation from the cost-center</span>
+            <span style="color:#fbbf24">owner</span>
 
-    agent → 2 input change(s), then re-render from source
-      · db_backup_retention_days 7 → 30
-        PCI requires a 30-day minimum recovery window
-      · db_instance_class db.r6g.xlarge → db.t4g.large
-        largest reducible line item; db.r6g.xlarge -&gt; db.t4g.large stays inside the cost-centre
-        envelope
+    <span style="font-weight:600"></span><span style="color:#a78bfa;font-weight:600">agent →</span> <span style="color:#8b949e">2 input change(s), then re-render from source</span>
+      <span style="color:#6e7681">·</span> <span style="color:#e6edf3">db_backup_retention_days</span> <span style="color:#f87171">7</span> <span style="color:#6e7681">→</span> <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">30</span>
+        <span style="color:#6e7681">PCI requires a 30-day minimum recovery window</span>
+      <span style="color:#6e7681">·</span> <span style="color:#e6edf3">db_instance_class</span> <span style="color:#f87171">db.r6g.xlarge</span> <span style="color:#6e7681">→</span> <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">db.t4g.large</span>
+        <span style="color:#6e7681">largest reducible line item; db.r6g.xlarge -&gt; db.t4g.large stays inside the cost-centre</span>
+        <span style="color:#6e7681">envelope</span>
 
-  ▍ ITERATION 2   $463.15/mo vs $400.00 budget
-   1. NW-FIN-001  payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of
-                  $400.00/mo by $63.15
-      fix → right-size the largest line item or request a budget increase from the cost-center
-            owner
+  <span style="color:#f0abfc">▍</span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">ITERATION 2</span>   <span style="color:#6e7681">$463.15/mo vs $400.00 budget</span>
+  <span style="color:#6e7681"> 1.</span> <span style="font-weight:600"></span><span style="color:#f87171;font-weight:600">NW-FIN-001</span>  <span style="color:#e6edf3">payments-ledger/prod: estimated $463.15/mo exceeds the CC-4471 budget of</span>
+                  <span style="color:#e6edf3">$400.00/mo by $63.15</span>
+      <span style="color:#6e7681">fix → </span><span style="color:#fbbf24">right-size the largest line item or request a budget increase from the cost-center</span>
+            <span style="color:#fbbf24">owner</span>
 
-    agent → 1 input change(s), then re-render from source
-      · db_instance_class db.t4g.large → db.t4g.medium
-        largest reducible line item; db.t4g.large -&gt; db.t4g.medium stays inside the cost-centre
-        envelope
+    <span style="font-weight:600"></span><span style="color:#a78bfa;font-weight:600">agent →</span> <span style="color:#8b949e">1 input change(s), then re-render from source</span>
+      <span style="color:#6e7681">·</span> <span style="color:#e6edf3">db_instance_class</span> <span style="color:#f87171">db.t4g.large</span> <span style="color:#6e7681">→</span> <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">db.t4g.medium</span>
+        <span style="color:#6e7681">largest reducible line item; db.t4g.large -&gt; db.t4g.medium stays inside the cost-centre</span>
+        <span style="color:#6e7681">envelope</span>
 
-  ▍ ITERATION 3   $359.15/mo vs $400.00 budget
-    ✔ 0 denials across 4 gates
-
-
-    PASSED — 0 denials    converged in 3 iterations
+  <span style="color:#f0abfc">▍</span> <span style="font-weight:600"></span><span style="color:#f0abfc;font-weight:600">ITERATION 3</span>   <span style="color:#6e7681">$359.15/mo vs $400.00 budget</span>
+    <span style="font-weight:600"></span><span style="color:#4ade80;font-weight:600">✔ 0 denials across 4 gates</span>
 
 
-  Note what the agent never did: it never edited a rendered manifest
-  to make a check go green. Every fix changed an input and the whole
-  artefact was regenerated. Patch the output instead and the finding
-  comes back silently on the next render — that is how automated
-  remediation becomes worse than none.</pre>
+  <span style="background:#052e16"></span><span style="background:#052e16;font-weight:600"></span><span style="color:#e6edf3;background:#052e16;font-weight:600">  PASSED — 0 denials  </span>  <span style="color:#8b949e">converged in 3 iterations</span>
+
+
+  <span style="color:#8b949e">Note what the agent never did: it never edited a rendered manifest</span>
+  <span style="color:#8b949e">to make a check go green. Every fix changed an input and the whole</span>
+  <span style="color:#8b949e">artefact was regenerated. Patch the output instead and the finding</span>
+  <span style="color:#8b949e">comes back silently on the next render — that is how automated</span>
+  <span style="color:#8b949e">remediation becomes worse than none.</span></pre>
   </div>
 
   <ul class="why">
