@@ -58,9 +58,9 @@ Three numbers frame it:
 
 | | |
 |---|---|
-| **68% / 50%** | of developers save 10+ hours a week with AI — and lose 10+ hours a week to organisational inefficiency. Developers spend **16%** of their time writing code. <br><sub>Atlassian, *State of DevEx 2025*, n=3,500, fielded March 2025</sub> |
-| **"negligible"** | DORA's 2025 finding on what AI does for organisational performance **when platform quality is low**. Platform engineering is the moderator, not a nice-to-have. <br><sub>DORA, *State of AI-assisted Software Development 2025*, ~5,000 respondents</sub> |
-| **57% / 61%** | of engineers still wait on a human or a ticket to get an environment; 61% call environment provisioning a major roadblock. <br><sub>Rafay-commissioned survey, 500+ practitioners, 2023</sub> |
+| **68% / 50%** | of developers save 10+ hours a week with AI — and lose 10+ hours a week to organisational inefficiency. Developers spend **16%** of their time writing code. <br><sub>[Atlassian, *State of DevEx 2025*](https://www.atlassian.com/teams/software-development/state-of-developer-experience-2025), n=3,500, fielded March 2025</sub> |
+| **"negligible"** | DORA's 2025 finding on what AI does for organisational performance **when platform quality is low**. Platform engineering is the moderator, not a nice-to-have. <br><sub>[DORA, *State of AI-assisted Software Development 2025*](https://dora.dev/dora-report-2025/), ~5,000 respondents</sub> |
+| **57% / 61%** | of engineers still wait on a human or a ticket to get an environment; 61% call environment provisioning a major roadblock. <br><sub>[Rafay-commissioned survey](https://rafay.co/press-release/new-research-uncovers-a-developer-experience-gap-for-provisioning-environments-resulting-in-modern-application-deployment-delays), 500+ practitioners, 2023</sub> |
 
 The bottleneck moved to exactly where platform engineers already live. That is the opportunity —
 and the risk, because an agent inherits whatever the platform gives it. A golden path makes an
