@@ -196,6 +196,830 @@ footer a{color:var(--muted)}
   color:var(--muted);margin-bottom:10px;font-weight:500}
 .foot-grid li{list-style:none;margin-bottom:5px}
 .stamp{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:8px}
+/* ============ POLICY GATE PANEL — Touchpoint 3 (PRD §5) ============ */
+.pg-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(8,9,13,0.78);
+  backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.pg-overlay.open { opacity: 1; pointer-events: auto; }
+
+.pg-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 101;
+  width: min(960px, 100vw);
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  box-shadow: -30px 0 80px -20px rgba(0,0,0,0.6);
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.pg-panel.open { transform: translateX(0); }
+.pg-panel-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.pg-panel-header h2 {
+  font-size: 18px; font-weight: 700; margin: 0;
+  flex: 1;
+}
+.pg-panel-header .badge-real {
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 3px 8px; border-radius: 4px;
+  background: rgba(74,222,128,0.12);
+  border: 1px solid rgba(74,222,128,0.4);
+  color: #4ade80;
+}
+.pg-close {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text); cursor: pointer;
+  width: 32px; height: 32px; border-radius: 6px;
+  font-size: 18px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.pg-close:hover { background: var(--panel2); border-color: var(--muted); }
+
+.pg-body {
+  flex: 1; overflow-y: auto;
+  padding: 20px 24px 32px;
+}
+
+/* Controls row */
+.pg-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (max-width: 720px) { .pg-controls { grid-template-columns: 1fr; } }
+.pg-control-group {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.pg-control-group label {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted);
+  font-weight: 600;
+}
+.pg-control-group select {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 14px;
+  cursor: pointer;
+}
+.pg-control-group select:focus {
+  outline: none; border-color: var(--violet);
+}
+
+/* Scenario toggle */
+.pg-scenario-toggle {
+  display: flex; gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.pg-scenario-toggle button {
+  flex: 1;
+  padding: 9px 16px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-right: 1px solid var(--border);
+}
+.pg-scenario-toggle button:last-child { border-right: none; }
+.pg-scenario-toggle button.active {
+  background: var(--violet);
+  color: #08090d;
+  font-weight: 700;
+}
+.pg-scenario-toggle button:hover:not(.active) {
+  background: var(--panel2);
+}
+
+/* Compare toggle */
+.pg-compare-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.pg-compare-row label {
+  font-size: 13px; color: var(--text);
+  font-weight: 500;
+  flex: 1;
+  cursor: pointer;
+}
+.pg-compare-row .switch {
+  position: relative; width: 38px; height: 22px;
+  background: var(--border);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pg-compare-row .switch::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--text);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.pg-compare-row .switch.on { background: var(--violet); }
+.pg-compare-row .switch.on::after { transform: translateX(16px); }
+
+/* YAML editor */
+.pg-editor-wrap {
+  position: relative;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pg-editor-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px; color: var(--muted);
+}
+.pg-editor-bar .dots { display: flex; gap: 5px; }
+.pg-editor-bar .dots i {
+  width: 10px; height: 10px; border-radius: 50%;
+  display: inline-block;
+}
+.pg-editor-bar .dots i:nth-child(1) { background: #f38ba8; }
+.pg-editor-bar .dots i:nth-child(2) { background: #f9e2af; }
+.pg-editor-bar .dots i:nth-child(3) { background: #a6e3a1; }
+.pg-editor-bar .title { flex: 1; }
+.pg-editor-bar .cached-pill {
+  font-size: 10px;
+  padding: 2px 7px;
+  background: rgba(251,191,36,0.12);
+  border: 1px solid rgba(251,191,36,0.4);
+  color: #fbbf24;
+  border-radius: 99px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pg-editor-bar .cached-pill[hidden] { display: none; }
+.pg-editor {
+  width: 100%;
+  min-height: 280px;
+  max-height: 400px;
+  padding: 14px 16px;
+  background: #0d1117;
+  color: #cdd6f4;
+  border: none;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  resize: vertical;
+  outline: none;
+  tab-size: 2;
+}
+.pg-editor:focus { background: #0d1117; }
+
+/* Evaluate button */
+.pg-evaluate-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+.pg-btn-evaluate {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 11px 22px; border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, var(--violet), #7c6df0);
+  color: white;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 24px -8px rgba(124,92,255,0.55);
+  transition: transform 0.18s, box-shadow 0.2s, filter 0.15s;
+}
+.pg-btn-evaluate:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 14px 36px -8px rgba(124,92,255,0.7);
+}
+.pg-btn-evaluate:disabled {
+  cursor: not-allowed; opacity: 0.7; filter: saturate(0.6);
+}
+.pg-btn-evaluate .spin {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: white;
+  animation: pg-spin 0.8s linear infinite;
+}
+@keyframes pg-spin { to { transform: rotate(360deg); } }
+
+.pg-eval-meta {
+  font-size: 12px; color: var(--muted);
+  font-family: var(--mono);
+}
+
+/* Summary */
+.pg-summary {
+  display: flex; align-items: center; gap: 18px;
+  padding: 14px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+.pg-summary .count {
+  font-family: var(--mono);
+  font-size: 32px; font-weight: 800;
+  line-height: 1;
+  color: #f87171;
+  transition: color 0.3s;
+}
+.pg-summary .count.zero { color: #4ade80; }
+.pg-summary .count-label {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.pg-summary .block { display: flex; flex-direction: column; }
+.pg-summary .arrow { font-size: 22px; color: var(--muted); }
+.pg-summary .delta {
+  font-family: var(--mono); font-size: 11px;
+  color: #4ade80; margin-top: 2px;
+}
+.pg-summary .right {
+  margin-left: auto; text-align: right;
+  font-size: 12px; color: var(--muted);
+}
+.pg-summary[hidden] { display: none; }
+
+/* Side-by-side compare */
+.pg-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media (max-width: 720px) { .pg-compare-grid { grid-template-columns: 1fr; } }
+.pg-compare-col {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.pg-compare-col h4 {
+  font-size: 13px; font-weight: 700;
+  margin: 0 0 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pg-compare-col.raw h4 { color: #f87171; }
+.pg-compare-col.golden h4 { color: #4ade80; }
+.pg-compare-col .count {
+  font-family: var(--mono);
+  font-size: 28px; font-weight: 800;
+  margin-bottom: 8px;
+}
+.pg-compare-col.raw .count { color: #f87171; }
+.pg-compare-col.golden .count { color: #4ade80; }
+.pg-compare-col .delta-strip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.3);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 12px; color: #4ade80;
+  margin-bottom: 10px;
+}
+.pg-compare-grid[hidden] { display: none; }
+
+/* Denial cards */
+.pg-denials {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 12px;
+}
+.pg-denial-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  border-left: 4px solid #f87171;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: pg-card-in 0.28s ease-out forwards;
+}
+@keyframes pg-card-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+.pg-denial-card.warning { border-left-color: #fbbf24; }
+.pg-denial-card.info { border-left-color: #60a5fa; }
+.pg-denial-card .head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.pg-denial-card .pid {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 700;
+  padding: 2px 7px;
+  background: rgba(248,113,113,0.15);
+  border: 1px solid rgba(248,113,113,0.4);
+  color: #f87171;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pg-denial-card.warning .pid {
+  background: rgba(251,191,36,0.12);
+  border-color: rgba(251,191,36,0.4);
+  color: #fbbf24;
+}
+.pg-denial-card .tool {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.pg-denial-card .subject {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  margin-left: auto;
+  text-align: right;
+  word-break: break-all;
+}
+.pg-denial-card .message {
+  font-size: 13px; color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.pg-denial-card .remediation {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #fbbf24;
+  padding: 6px 10px;
+  background: rgba(251,191,36,0.06);
+  border-left: 2px solid rgba(251,191,36,0.4);
+  border-radius: 0 4px 4px 0;
+  word-break: break-word;
+}
+.pg-denial-card .remediation::before {
+  content: "→ ";
+  color: var(--muted);
+}
+
+.pg-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.pg-empty .ok {
+  font-size: 48px;
+  color: #4ade80;
+  margin-bottom: 12px;
+}
+.pg-empty[hidden] { display: none; }
+
+.pg-error {
+  padding: 12px 14px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.4);
+  border-radius: 8px;
+  color: #f87171;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.pg-error[hidden] { display: none; }
+.pg-error button {
+  margin-left: auto;
+  padding: 6px 12px; border-radius: 6px;
+  background: #f87171; color: white;
+  border: none; font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  font-family: var(--mono);
+}
+
+.pg-warmup {
+  text-align: center;
+  padding: 10px;
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 6px;
+  color: #fbbf24;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.pg-warmup[hidden] { display: none; }
+
+
+<!-- ==================== POLICY GATE PANEL — Touchpoint 3 (PRD §5) ==================== -->
+<div class="pg-overlay" id="pg-overlay" aria-hidden="true"></div>
+<aside class="pg-panel" id="pg-panel" role="dialog" aria-labelledby="pg-title" aria-hidden="true">
+  <div class="pg-panel-header">
+    <h2 id="pg-title">Policy Gate · evaluate a manifest</h2>
+    <span class="badge-real">REAL REGO · CONFTEST 0.69.0</span>
+    <button class="pg-close" id="pg-close" aria-label="Close panel" type="button">×</button>
+  </div>
+  <div class="pg-body">
+    <!-- Controls -->
+    <div class="pg-controls">
+      <div class="pg-control-group">
+        <label for="pg-template">Service template</label>
+        <select id="pg-template">
+          <option value="payments-ledger">payments-ledger (PCI EU payments service)</option>
+        </select>
+      </div>
+      <div class="pg-control-group">
+        <label for="pg-scenario">Scenario</label>
+        <select id="pg-scenario">
+          <option value="raw">Raw LLM output (no platform)</option>
+          <option value="golden_path">Golden path (platform-applied)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Compare toggle -->
+    <div class="pg-compare-row">
+      <label for="pg-compare-toggle">Compare raw vs golden side-by-side</label>
+      <div class="switch" id="pg-compare-switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <!-- YAML editor -->
+    <div class="pg-editor-wrap">
+      <div class="pg-editor-bar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <span class="title" id="pg-editor-title">manifest.yaml · template default</span>
+        <span class="cached-pill" id="pg-cached-pill" hidden>cached</span>
+      </div>
+      <textarea class="pg-editor" id="pg-editor" spellcheck="false" placeholder="# Paste a Kubernetes manifest here, or use the template default above."></textarea>
+    </div>
+
+    <!-- Evaluate -->
+    <div class="pg-evaluate-row">
+      <button class="pg-btn-evaluate" id="pg-evaluate-btn" type="button">
+        <span class="btn-label">⚡ Evaluate</span>
+      </button>
+      <span class="pg-eval-meta" id="pg-eval-meta"></span>
+    </div>
+
+    <div class="pg-warmup" id="pg-warmup" hidden>
+      Warming up serverless function — first evaluation may take a few seconds…
+    </div>
+
+    <div class="pg-error" id="pg-error" hidden>
+      <span id="pg-error-msg"></span>
+      <button type="button" id="pg-retry-btn">Retry</button>
+    </div>
+
+    <!-- Compare grid (only visible in compare mode) -->
+    <div class="pg-compare-grid" id="pg-compare-grid" hidden>
+      <div class="pg-compare-col raw">
+        <h4>● Raw LLM output</h4>
+        <div class="count" id="pg-raw-count">—</div>
+        <div class="delta-strip" id="pg-delta-strip" hidden>
+          ▼ <span id="pg-delta-text">— denials eliminated</span>
+        </div>
+      </div>
+      <div class="pg-compare-col golden">
+        <h4>● Golden path</h4>
+        <div class="count" id="pg-golden-count">—</div>
+      </div>
+    </div>
+
+    <!-- Summary (only visible in single-scenario mode) -->
+    <div class="pg-summary" id="pg-summary" hidden>
+      <div class="block">
+        <div class="count" id="pg-count">—</div>
+        <div class="count-label">denials</div>
+      </div>
+      <div class="right" id="pg-meta-right"></div>
+    </div>
+
+    <!-- Denial cards -->
+    <div class="pg-denials" id="pg-denials"></div>
+
+    <!-- Empty state (when 0 denials) -->
+    <div class="pg-empty" id="pg-empty" hidden>
+      <div class="ok">✓</div>
+      <div><strong>All clear.</strong> No policy denials.</div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // ===========================================================================
+  // Policy Gate Panel — Touchpoint 3 (PRD §5)
+  //
+  // Opens as an in-page slide-out panel when "Try the policy gate" is clicked.
+  // Drives POST /api/evaluate to run conftest against the YAML manifest.
+  //
+  // PRD §5.6 edge cases handled:
+  //   - Conftest timeout → partial results with warning
+  //   - Malicious YAML → sandboxed (Vercel serverless IS the sandbox)
+  //   - Empty manifest → client-side validation before sending
+  //   - Conftest unavailable → cached results with cached-pill label
+  // ===========================================================================
+  (function () {
+    const overlay = document.getElementById('pg-overlay');
+    const panel = document.getElementById('pg-panel');
+    const closeBtn = document.getElementById('pg-close');
+    const evalBtn = document.getElementById('pg-evaluate-btn');
+    const evalBtnLabel = evalBtn.querySelector('.btn-label');
+    const retryBtn = document.getElementById('pg-retry-btn');
+
+    const templateSel = document.getElementById('pg-template');
+    const scenarioSel = document.getElementById('pg-scenario');
+    const compareSwitch = document.getElementById('pg-compare-switch');
+    const editor = document.getElementById('pg-editor');
+    const editorTitle = document.getElementById('pg-editor-title');
+    const cachedPill = document.getElementById('pg-cached-pill');
+    const evalMeta = document.getElementById('pg-eval-meta');
+
+    const summary = document.getElementById('pg-summary');
+    const countEl = document.getElementById('pg-count');
+    const metaRight = document.getElementById('pg-meta-right');
+
+    const compareGrid = document.getElementById('pg-compare-grid');
+    const rawCount = document.getElementById('pg-raw-count');
+    const goldenCount = document.getElementById('pg-golden-count');
+    const deltaStrip = document.getElementById('pg-delta-strip');
+    const deltaText = document.getElementById('pg-delta-text');
+
+    const denialsEl = document.getElementById('pg-denials');
+    const emptyEl = document.getElementById('pg-empty');
+    const warmupEl = document.getElementById('pg-warmup');
+    const errorEl = document.getElementById('pg-error');
+    const errorMsg = document.getElementById('pg-error-msg');
+
+    let compareMode = false;
+    let inFlight = null;
+    let lastEval = null;
+
+    // ---- Open / close ----
+    function openPanel() {
+      overlay.classList.add('open');
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePanel() {
+      overlay.classList.remove('open');
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    overlay.addEventListener('click', closePanel);
+    closeBtn.addEventListener('click', closePanel);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+    });
+
+    // Intercept the "Try the policy gate" link to open the panel instead.
+    document.querySelectorAll('a[href="#policy"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPanel();
+      });
+    });
+
+    // ---- Compare toggle ----
+    function setCompareMode(on) {
+      compareMode = on;
+      compareSwitch.classList.toggle('on', on);
+      compareSwitch.setAttribute('aria-checked', String(on));
+      // In compare mode, hide the single-scenario summary + denials.
+      summary.hidden = on || !lastEval;
+      denialsEl.hidden = on;
+      emptyEl.hidden = on || (lastEval && lastEval.denial_count > 0);
+      compareGrid.hidden = !on;
+      // Disable scenario selector in compare mode (both are shown).
+      scenarioSel.disabled = on;
+    }
+    compareSwitch.addEventListener('click', () => setCompareMode(!compareMode));
+    compareSwitch.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        setCompareMode(!compareMode);
+      }
+    });
+
+    // ---- Load template default into editor when scenario/template changes ----
+    async function loadTemplateDefault() {
+      const tid = templateSel.value;
+      const scenario = scenarioSel.value;
+      // Show "loading" state.
+      editor.value = '# loading template default…';
+      editorTitle.textContent = `manifest.yaml · loading ${tid}/${scenario}…`;
+      try {
+        const res = await fetch(`/outputs/${scenario === 'golden_path' ? 'final-manifests' : 'unguided-manifests'}.yaml`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        editor.value = text;
+        editorTitle.textContent = `manifest.yaml · template default (${scenario})`;
+      } catch (err) {
+        // If the fetch fails (e.g. dev), leave the editor empty.
+        editor.value = '';
+        editorTitle.textContent = `manifest.yaml · (template default not loaded: ${err.message})`;
+      }
+    }
+    templateSel.addEventListener('change', loadTemplateDefault);
+    scenarioSel.addEventListener('change', loadTemplateDefault);
+
+    // ---- Error helpers ----
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorEl.hidden = false;
+    }
+    function hideError() {
+      errorEl.hidden = true;
+    }
+
+    // ---- Render denials ----
+    function renderDenials(denials) {
+      denialsEl.innerHTML = '';
+      denials.forEach((d, i) => {
+        const card = document.createElement('div');
+        card.className = `pg-denial-card ${d.severity}`;
+        card.style.animationDelay = `${i * 60}ms`;
+
+        const head = document.createElement('div');
+        head.className = 'head';
+        const pid = document.createElement('span');
+        pid.className = 'pid';
+        pid.textContent = d.policy_id;
+        const tool = document.createElement('span');
+        tool.className = 'tool';
+        tool.textContent = d.tool;
+        const subject = document.createElement('span');
+        subject.className = 'subject';
+        subject.textContent = d.subject;
+        head.appendChild(pid);
+        head.appendChild(tool);
+        head.appendChild(subject);
+        card.appendChild(head);
+
+        const message = document.createElement('div');
+        message.className = 'message';
+        message.textContent = d.message;
+        card.appendChild(message);
+
+        if (d.remediation) {
+          const rem = document.createElement('div');
+          rem.className = 'remediation';
+          rem.textContent = d.remediation;
+          card.appendChild(rem);
+        }
+
+        denialsEl.appendChild(card);
+      });
+    }
+
+    function renderSingleResult(data) {
+      lastEval = data;
+      const count = data.denial_count ?? 0;
+      countEl.textContent = count;
+      countEl.classList.toggle('zero', count === 0);
+
+      metaRight.innerHTML =
+        `engine: <code style="font-family:var(--mono);color:var(--text)">${data.engine || '?'}</code> · ` +
+        `${data.duration_ms ?? 0}ms · ` +
+        `<span style="color:${data.cached ? '#fbbf24' : 'var(--muted)'}">${data.cached ? 'CACHED' : 'live'}</span>`;
+      cachedPill.hidden = !data.cached;
+
+      summary.hidden = false;
+      emptyEl.hidden = count > 0;
+      denialsEl.hidden = false;
+      renderDenials(data.denials || []);
+
+      evalMeta.textContent = `eval ${data.eval_id ? data.eval_id.slice(0, 8) : '?'} · ${data.duration_ms ?? 0}ms`;
+    }
+
+    function renderCompareResult(data) {
+      lastEval = data.raw;  // For empty-state purposes.
+      const rawC = data.raw.denial_count ?? 0;
+      const goldC = data.golden.denial_count ?? 0;
+      const delta = rawC - goldC;
+
+      rawCount.textContent = rawC;
+      goldenCount.textContent = goldC;
+      if (delta > 0) {
+        deltaStrip.hidden = false;
+        deltaText.textContent = `${delta} denials eliminated by the golden path`;
+      } else {
+        deltaStrip.hidden = true;
+      }
+
+      // In compare mode, also render the raw scenario's denials below.
+      denialsEl.hidden = false;
+      renderDenials(data.raw.denials || []);
+      emptyEl.hidden = rawC > 0;
+
+      evalMeta.textContent = `compare eval ${data.eval_id ? data.eval_id.slice(0, 8) : '?'} · delta=${delta}`;
+    }
+
+    // ---- Evaluate ----
+    async function doEvaluate() {
+      hideError();
+
+      // PRD §5.6 case 3: empty manifest → validate client-side.
+      const manifest = editor.value.trim();
+      if (!manifest) {
+        showError('Manifest is empty. Paste a YAML manifest or pick a template, then Evaluate.');
+        return;
+      }
+
+      evalBtn.disabled = true;
+      evalBtnLabel.innerHTML = '<span class="spin"></span> Evaluating…';
+
+      const warmupTimer = setTimeout(() => {
+        warmupEl.hidden = false;
+      }, 2000);
+
+      try {
+        const controller = new AbortController();
+        inFlight = controller;
+        const timeoutId = setTimeout(() => controller.abort(), 30000);  // PRD §5.5: <5s p95
+
+        const body = {
+          manifest,
+          scenario: scenarioSel.value,
+          template_id: templateSel.value,
+          compare: compareMode,
+        };
+
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        clearTimeout(timeoutId);
+        clearTimeout(warmupTimer);
+        warmupEl.hidden = true;
+
+        if (inFlight !== controller) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        const data = await res.json();
+
+        if (data.error) {
+          showError(data.error);
+        } else if (compareMode) {
+          renderCompareResult(data);
+        } else {
+          renderSingleResult(data);
+        }
+
+        evalBtn.disabled = false;
+        evalBtnLabel.textContent = '⚡ Evaluate Again';
+        inFlight = null;
+      } catch (err) {
+        clearTimeout(warmupTimer);
+        warmupEl.hidden = true;
+        if (err.name === 'AbortError') {
+          showError('Evaluation timed out after 30s. The serverless function may be cold-starting — try again.');
+        } else {
+          showError('Evaluation failed: ' + (err.message || String(err)));
+        }
+        evalBtn.disabled = false;
+        evalBtnLabel.textContent = '⚡ Evaluate';
+        inFlight = null;
+      }
+    }
+
+    evalBtn.addEventListener('click', doEvaluate);
+    retryBtn.addEventListener('click', doEvaluate);
+
+    // Auto-load template default when panel opens for the first time.
+    let loadedDefaults = false;
+    const observer = new MutationObserver(() => {
+      if (panel.classList.contains('open') && !loadedDefaults) {
+        loadedDefaults = true;
+        loadTemplateDefault();
+      }
+    });
+    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  })();
+</script>
+
 </style>
 </head>
 <body>
@@ -1203,6 +2027,394 @@ try {
   if (/^es\b/i.test(navigator.language || '')) initial = 'es';
 }
 applyLang(initial);
+</script>
+<!-- ==================== POLICY GATE PANEL — Touchpoint 3 (PRD §5) ==================== -->
+<div class="pg-overlay" id="pg-overlay" aria-hidden="true"></div>
+<aside class="pg-panel" id="pg-panel" role="dialog" aria-labelledby="pg-title" aria-hidden="true">
+  <div class="pg-panel-header">
+    <h2 id="pg-title">Policy Gate · evaluate a manifest</h2>
+    <span class="badge-real">REAL REGO · CONFTEST 0.69.0</span>
+    <button class="pg-close" id="pg-close" aria-label="Close panel" type="button">×</button>
+  </div>
+  <div class="pg-body">
+    <!-- Controls -->
+    <div class="pg-controls">
+      <div class="pg-control-group">
+        <label for="pg-template">Service template</label>
+        <select id="pg-template">
+          <option value="payments-ledger">payments-ledger (PCI EU payments service)</option>
+        </select>
+      </div>
+      <div class="pg-control-group">
+        <label for="pg-scenario">Scenario</label>
+        <select id="pg-scenario">
+          <option value="raw">Raw LLM output (no platform)</option>
+          <option value="golden_path">Golden path (platform-applied)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Compare toggle -->
+    <div class="pg-compare-row">
+      <label for="pg-compare-toggle">Compare raw vs golden side-by-side</label>
+      <div class="switch" id="pg-compare-switch" role="switch" aria-checked="false" tabindex="0"></div>
+    </div>
+
+    <!-- YAML editor -->
+    <div class="pg-editor-wrap">
+      <div class="pg-editor-bar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <span class="title" id="pg-editor-title">manifest.yaml · template default</span>
+        <span class="cached-pill" id="pg-cached-pill" hidden>cached</span>
+      </div>
+      <textarea class="pg-editor" id="pg-editor" spellcheck="false" placeholder="# Paste a Kubernetes manifest here, or use the template default above."></textarea>
+    </div>
+
+    <!-- Evaluate -->
+    <div class="pg-evaluate-row">
+      <button class="pg-btn-evaluate" id="pg-evaluate-btn" type="button">
+        <span class="btn-label">⚡ Evaluate</span>
+      </button>
+      <span class="pg-eval-meta" id="pg-eval-meta"></span>
+    </div>
+
+    <div class="pg-warmup" id="pg-warmup" hidden>
+      Warming up serverless function — first evaluation may take a few seconds…
+    </div>
+
+    <div class="pg-error" id="pg-error" hidden>
+      <span id="pg-error-msg"></span>
+      <button type="button" id="pg-retry-btn">Retry</button>
+    </div>
+
+    <!-- Compare grid (only visible in compare mode) -->
+    <div class="pg-compare-grid" id="pg-compare-grid" hidden>
+      <div class="pg-compare-col raw">
+        <h4>● Raw LLM output</h4>
+        <div class="count" id="pg-raw-count">—</div>
+        <div class="delta-strip" id="pg-delta-strip" hidden>
+          ▼ <span id="pg-delta-text">— denials eliminated</span>
+        </div>
+      </div>
+      <div class="pg-compare-col golden">
+        <h4>● Golden path</h4>
+        <div class="count" id="pg-golden-count">—</div>
+      </div>
+    </div>
+
+    <!-- Summary (only visible in single-scenario mode) -->
+    <div class="pg-summary" id="pg-summary" hidden>
+      <div class="block">
+        <div class="count" id="pg-count">—</div>
+        <div class="count-label">denials</div>
+      </div>
+      <div class="right" id="pg-meta-right"></div>
+    </div>
+
+    <!-- Denial cards -->
+    <div class="pg-denials" id="pg-denials"></div>
+
+    <!-- Empty state (when 0 denials) -->
+    <div class="pg-empty" id="pg-empty" hidden>
+      <div class="ok">✓</div>
+      <div><strong>All clear.</strong> No policy denials.</div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // ===========================================================================
+  // Policy Gate Panel — Touchpoint 3 (PRD §5)
+  //
+  // Opens as an in-page slide-out panel when "Try the policy gate" is clicked.
+  // Drives POST /api/evaluate to run conftest against the YAML manifest.
+  //
+  // PRD §5.6 edge cases handled:
+  //   - Conftest timeout → partial results with warning
+  //   - Malicious YAML → sandboxed (Vercel serverless IS the sandbox)
+  //   - Empty manifest → client-side validation before sending
+  //   - Conftest unavailable → cached results with cached-pill label
+  // ===========================================================================
+  (function () {
+    const overlay = document.getElementById('pg-overlay');
+    const panel = document.getElementById('pg-panel');
+    const closeBtn = document.getElementById('pg-close');
+    const evalBtn = document.getElementById('pg-evaluate-btn');
+    const evalBtnLabel = evalBtn.querySelector('.btn-label');
+    const retryBtn = document.getElementById('pg-retry-btn');
+
+    const templateSel = document.getElementById('pg-template');
+    const scenarioSel = document.getElementById('pg-scenario');
+    const compareSwitch = document.getElementById('pg-compare-switch');
+    const editor = document.getElementById('pg-editor');
+    const editorTitle = document.getElementById('pg-editor-title');
+    const cachedPill = document.getElementById('pg-cached-pill');
+    const evalMeta = document.getElementById('pg-eval-meta');
+
+    const summary = document.getElementById('pg-summary');
+    const countEl = document.getElementById('pg-count');
+    const metaRight = document.getElementById('pg-meta-right');
+
+    const compareGrid = document.getElementById('pg-compare-grid');
+    const rawCount = document.getElementById('pg-raw-count');
+    const goldenCount = document.getElementById('pg-golden-count');
+    const deltaStrip = document.getElementById('pg-delta-strip');
+    const deltaText = document.getElementById('pg-delta-text');
+
+    const denialsEl = document.getElementById('pg-denials');
+    const emptyEl = document.getElementById('pg-empty');
+    const warmupEl = document.getElementById('pg-warmup');
+    const errorEl = document.getElementById('pg-error');
+    const errorMsg = document.getElementById('pg-error-msg');
+
+    let compareMode = false;
+    let inFlight = null;
+    let lastEval = null;
+
+    // ---- Open / close ----
+    function openPanel() {
+      overlay.classList.add('open');
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePanel() {
+      overlay.classList.remove('open');
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    overlay.addEventListener('click', closePanel);
+    closeBtn.addEventListener('click', closePanel);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+    });
+
+    // Intercept the "Try the policy gate" link to open the panel instead.
+    document.querySelectorAll('a[href="#policy"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPanel();
+      });
+    });
+
+    // ---- Compare toggle ----
+    function setCompareMode(on) {
+      compareMode = on;
+      compareSwitch.classList.toggle('on', on);
+      compareSwitch.setAttribute('aria-checked', String(on));
+      // In compare mode, hide the single-scenario summary + denials.
+      summary.hidden = on || !lastEval;
+      denialsEl.hidden = on;
+      emptyEl.hidden = on || (lastEval && lastEval.denial_count > 0);
+      compareGrid.hidden = !on;
+      // Disable scenario selector in compare mode (both are shown).
+      scenarioSel.disabled = on;
+    }
+    compareSwitch.addEventListener('click', () => setCompareMode(!compareMode));
+    compareSwitch.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        setCompareMode(!compareMode);
+      }
+    });
+
+    // ---- Load template default into editor when scenario/template changes ----
+    async function loadTemplateDefault() {
+      const tid = templateSel.value;
+      const scenario = scenarioSel.value;
+      // Show "loading" state.
+      editor.value = '# loading template default…';
+      editorTitle.textContent = `manifest.yaml · loading ${tid}/${scenario}…`;
+      try {
+        const res = await fetch(`/outputs/${scenario === 'golden_path' ? 'final-manifests' : 'unguided-manifests'}.yaml`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        editor.value = text;
+        editorTitle.textContent = `manifest.yaml · template default (${scenario})`;
+      } catch (err) {
+        // If the fetch fails (e.g. dev), leave the editor empty.
+        editor.value = '';
+        editorTitle.textContent = `manifest.yaml · (template default not loaded: ${err.message})`;
+      }
+    }
+    templateSel.addEventListener('change', loadTemplateDefault);
+    scenarioSel.addEventListener('change', loadTemplateDefault);
+
+    // ---- Error helpers ----
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorEl.hidden = false;
+    }
+    function hideError() {
+      errorEl.hidden = true;
+    }
+
+    // ---- Render denials ----
+    function renderDenials(denials) {
+      denialsEl.innerHTML = '';
+      denials.forEach((d, i) => {
+        const card = document.createElement('div');
+        card.className = `pg-denial-card ${d.severity}`;
+        card.style.animationDelay = `${i * 60}ms`;
+
+        const head = document.createElement('div');
+        head.className = 'head';
+        const pid = document.createElement('span');
+        pid.className = 'pid';
+        pid.textContent = d.policy_id;
+        const tool = document.createElement('span');
+        tool.className = 'tool';
+        tool.textContent = d.tool;
+        const subject = document.createElement('span');
+        subject.className = 'subject';
+        subject.textContent = d.subject;
+        head.appendChild(pid);
+        head.appendChild(tool);
+        head.appendChild(subject);
+        card.appendChild(head);
+
+        const message = document.createElement('div');
+        message.className = 'message';
+        message.textContent = d.message;
+        card.appendChild(message);
+
+        if (d.remediation) {
+          const rem = document.createElement('div');
+          rem.className = 'remediation';
+          rem.textContent = d.remediation;
+          card.appendChild(rem);
+        }
+
+        denialsEl.appendChild(card);
+      });
+    }
+
+    function renderSingleResult(data) {
+      lastEval = data;
+      const count = data.denial_count ?? 0;
+      countEl.textContent = count;
+      countEl.classList.toggle('zero', count === 0);
+
+      metaRight.innerHTML =
+        `engine: <code style="font-family:var(--mono);color:var(--text)">${data.engine || '?'}</code> · ` +
+        `${data.duration_ms ?? 0}ms · ` +
+        `<span style="color:${data.cached ? '#fbbf24' : 'var(--muted)'}">${data.cached ? 'CACHED' : 'live'}</span>`;
+      cachedPill.hidden = !data.cached;
+
+      summary.hidden = false;
+      emptyEl.hidden = count > 0;
+      denialsEl.hidden = false;
+      renderDenials(data.denials || []);
+
+      evalMeta.textContent = `eval ${data.eval_id ? data.eval_id.slice(0, 8) : '?'} · ${data.duration_ms ?? 0}ms`;
+    }
+
+    function renderCompareResult(data) {
+      lastEval = data.raw;  // For empty-state purposes.
+      const rawC = data.raw.denial_count ?? 0;
+      const goldC = data.golden.denial_count ?? 0;
+      const delta = rawC - goldC;
+
+      rawCount.textContent = rawC;
+      goldenCount.textContent = goldC;
+      if (delta > 0) {
+        deltaStrip.hidden = false;
+        deltaText.textContent = `${delta} denials eliminated by the golden path`;
+      } else {
+        deltaStrip.hidden = true;
+      }
+
+      // In compare mode, also render the raw scenario's denials below.
+      denialsEl.hidden = false;
+      renderDenials(data.raw.denials || []);
+      emptyEl.hidden = rawC > 0;
+
+      evalMeta.textContent = `compare eval ${data.eval_id ? data.eval_id.slice(0, 8) : '?'} · delta=${delta}`;
+    }
+
+    // ---- Evaluate ----
+    async function doEvaluate() {
+      hideError();
+
+      // PRD §5.6 case 3: empty manifest → validate client-side.
+      const manifest = editor.value.trim();
+      if (!manifest) {
+        showError('Manifest is empty. Paste a YAML manifest or pick a template, then Evaluate.');
+        return;
+      }
+
+      evalBtn.disabled = true;
+      evalBtnLabel.innerHTML = '<span class="spin"></span> Evaluating…';
+
+      const warmupTimer = setTimeout(() => {
+        warmupEl.hidden = false;
+      }, 2000);
+
+      try {
+        const controller = new AbortController();
+        inFlight = controller;
+        const timeoutId = setTimeout(() => controller.abort(), 30000);  // PRD §5.5: <5s p95
+
+        const body = {
+          manifest,
+          scenario: scenarioSel.value,
+          template_id: templateSel.value,
+          compare: compareMode,
+        };
+
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        clearTimeout(timeoutId);
+        clearTimeout(warmupTimer);
+        warmupEl.hidden = true;
+
+        if (inFlight !== controller) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        const data = await res.json();
+
+        if (data.error) {
+          showError(data.error);
+        } else if (compareMode) {
+          renderCompareResult(data);
+        } else {
+          renderSingleResult(data);
+        }
+
+        evalBtn.disabled = false;
+        evalBtnLabel.textContent = '⚡ Evaluate Again';
+        inFlight = null;
+      } catch (err) {
+        clearTimeout(warmupTimer);
+        warmupEl.hidden = true;
+        if (err.name === 'AbortError') {
+          showError('Evaluation timed out after 30s. The serverless function may be cold-starting — try again.');
+        } else {
+          showError('Evaluation failed: ' + (err.message || String(err)));
+        }
+        evalBtn.disabled = false;
+        evalBtnLabel.textContent = '⚡ Evaluate';
+        inFlight = null;
+      }
+    }
+
+    evalBtn.addEventListener('click', doEvaluate);
+    retryBtn.addEventListener('click', doEvaluate);
+
+    // Auto-load template default when panel opens for the first time.
+    let loadedDefaults = false;
+    const observer = new MutationObserver(() => {
+      if (panel.classList.contains('open') && !loadedDefaults) {
+        loadedDefaults = true;
+        loadTemplateDefault();
+      }
+    });
+    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  })();
 </script>
 </body>
 </html>
