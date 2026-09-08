@@ -4,6 +4,7 @@
 bin/*
 !bin/setup.sh
 !bin/.gitkeep
+!bin/conftest
 
 # Scratch space the renderer and scaffolder write into.
 workspace/
