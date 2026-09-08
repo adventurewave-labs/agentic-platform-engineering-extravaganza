@@ -196,6 +196,135 @@ footer a{color:var(--muted)}
   color:var(--muted);margin-bottom:10px;font-weight:500}
 .foot-grid li{list-style:none;margin-bottom:5px}
 .stamp{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:8px}
+
+/* ---------- Policy Gate Playground Modal ---------- */
+.pg-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s ease}
+.pg-overlay.open{opacity:1;pointer-events:auto}
+.pg-modal{background:var(--bg2);border:1px solid var(--line2);border-radius:18px;
+  width:min(96vw,1080px);max-height:92vh;display:flex;flex-direction:column;
+  transform:translateY(24px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.55)}
+.pg-overlay.open .pg-modal{transform:none}
+.pg-modal-head{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--line);flex-shrink:0}
+.pg-modal-head h3{font-size:18px;font-weight:700;letter-spacing:-.02em;margin:0}
+.pg-modal-close{width:36px;height:36px;border-radius:8px;border:1px solid var(--line2);
+  background:var(--panel);color:var(--muted);font-size:18px;cursor:pointer;
+  display:grid;place-items:center;transition:border-color .15s,color .15s}
+.pg-modal-close:hover{border-color:var(--violet);color:var(--text)}
+.pg-modal-body{padding:24px;overflow-y:auto;flex:1}
+
+/* Controls */
+.pg-controls{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;align-items:flex-end}
+.pg-ctrl-group{display:flex;flex-direction:column;gap:6px}
+.pg-ctrl-group label{font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--dim)}
+.pg-ctrl-group select,.pg-ctrl-group button{font-family:var(--sans);font-size:14px;
+  border-radius:9px;padding:10px 16px;border:1px solid var(--line2);background:var(--panel);
+  color:var(--text);cursor:pointer;transition:border-color .15s,background .15s}
+.pg-ctrl-group select:hover,.pg-ctrl-group button:hover{border-color:var(--violet);background:var(--panel2)}
+.pg-ctrl-group select:focus,.pg-ctrl-group button:focus{outline:2px solid var(--violet);outline-offset:2px}
+.pg-eval-btn{background:linear-gradient(100deg,var(--violet),#7c6df0)!important;
+  border-color:transparent!important;color:#08090d!important;font-weight:600!important;
+  padding:10px 24px!important;white-space:nowrap}
+.pg-eval-btn:hover{filter:brightness(1.1)}
+.pg-eval-btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.pg-compare-toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);
+  cursor:pointer;user-select:none;margin-left:auto;padding-top:22px}
+.pg-compare-toggle input[type=checkbox]{accent-color:var(--violet);width:16px;height:16px;cursor:pointer}
+
+/* Results area */
+.pg-results-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.pg-denial-count{font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:-.03em;
+  line-height:1;transition:color .3s}
+.pg-denial-count.zero{color:var(--green)}
+.pg-denial-count.nonzero{color:var(--red)}
+.pg-denial-label{font-size:13px;color:var(--muted)}
+.pg-duration{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto}
+
+/* Denial cards */
+.pg-denial-cards{display:flex;flex-direction:column;gap:10px}
+.pg-denial-card{background:var(--panel);border:1px solid var(--line);border-radius:11px;
+  padding:14px 18px;opacity:0;transform:translateY(8px);
+  transition:opacity .22s ease,transform .22s ease,border-color .15s}
+.pg-denial-card.visible{opacity:1;transform:none}
+.pg-denial-card:hover{border-color:var(--line2)}
+.pg-denial-card-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pg-severity-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pg-severity-dot.critical{background:var(--red)}
+.pg-severity-dot.warning{background:var(--amber)}
+.pg-severity-dot.info{background:var(--dim)}
+.pg-denial-id{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--violet)}
+.pg-denial-sev-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;padding:2px 7px;border-radius:4px}
+.pg-denial-sev-label.critical{color:var(--red);background:rgba(248,113,113,.12);
+  border:1px solid rgba(248,113,113,.25)}
+.pg-denial-sev-label.warning{color:var(--amber);background:rgba(251,191,36,.12);
+  border:1px solid rgba(251,191,36,.25)}
+.pg-denial-sev-label.info{color:var(--dim);background:rgba(90,99,122,.12);
+  border:1px solid rgba(90,99,122,.25)}
+.pg-denial-msg{font-size:13.5px;color:var(--text);line-height:1.55;margin-bottom:6px}
+.pg-denial-remediation{font-size:12.5px;color:var(--amber);line-height:1.5;
+  padding-left:14px;border-left:2px solid var(--amber)}
+.pg-denial-remediation::before{content:"→ ";color:var(--amber)}
+
+/* Show more */
+.pg-show-more{margin-top:14px;text-align:center}
+.pg-show-more button{font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;padding:8px 20px;border-radius:8px;border:1px solid var(--line2);
+  background:var(--panel);color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s}
+.pg-show-more button:hover{border-color:var(--violet);color:var(--text)}
+
+/* Empty / golden state */
+.pg-empty-state{text-align:center;padding:48px 20px}
+.pg-empty-state .big{font-size:48px;color:var(--green);margin-bottom:12px}
+.pg-empty-state .zero-text{font-size:20px;font-weight:700;color:var(--green);margin-bottom:8px}
+.pg-empty-state .blurb{font-size:14px;color:var(--muted);max-width:48ch;margin:0 auto}
+
+/* Compare mode */
+.pg-compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}
+@media(max-width:680px){.pg-compare{grid-template-columns:1fr}}
+.pg-compare-panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;display:flex;flex-direction:column}
+.pg-compare-panel-head{padding:12px 16px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;background:var(--panel2)}
+.pg-compare-panel-head .panel-label{font-size:13px;font-weight:600}
+.pg-compare-panel-head .panel-count{font-family:var(--mono);font-size:12px;
+  margin-left:auto;padding:3px 8px;border-radius:5px}
+.pg-compare-panel-head .panel-count.zero{color:var(--green);background:rgba(74,222,128,.12);
+  border:1px solid rgba(74,222,128,.25)}
+.pg-compare-panel-head .panel-count.nonzero{color:var(--red);background:rgba(248,113,113,.12);
+  border:1px solid rgba(248,113,113,.25)}
+.pg-compare-body{padding:14px 16px;overflow-y:auto;max-height:380px;font-size:12.5px;line-height:1.6}
+
+/* Delta summary bar */
+.pg-delta-bar{background:linear-gradient(90deg,rgba(248,113,113,.08),rgba(74,222,128,.08));
+  border:1px solid var(--line);border-radius:10px;padding:16px 20px;text-align:center;
+  margin-top:18px}
+.pg-delta-number{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1}
+.pg-delta-number .from{color:var(--red)}
+.pg-delta-number .arrow{color:var(--muted);margin:0 10px;font-size:20px}
+.pg-delta-number .to{color:var(--green)}
+.pg-delta-text{font-size:13.5px;color:var(--muted);margin-top:8px}
+
+/* Loading spinner */
+.pg-loading{display:flex;align-items:center;justify-content:center;padding:48px;gap:10px}
+.pg-loading .dot{width:8px;height:8px;border-radius:50%;background:var(--violet);
+  animation:pg-bounce .6s ease infinite}
+.pg-loading .dot:nth-child(2){animation-delay:.1s}
+.pg-loading .dot:nth-child(3){animation-delay:.2s}
+@keyframes pg-bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+
+/* Mobile */
+@media(max-width:480px){
+  .pg-modal{border-radius:12px;width:100vw;max-height:100vh}
+  .pg-modal-body{padding:16px}
+  .pg-controls{flex-direction:column;align-items:stretch}
+  .pg-compare-toggle{margin-left:0;padding-top:0}
+  .pg-denial-count{font-size:26px}
+}
 </style>
 </head>
 <body>
@@ -1203,6 +1332,376 @@ try {
   if (/^es\b/i.test(navigator.language || '')) initial = 'es';
 }
 applyLang(initial);
+</script>
+
+<!-- ======== Policy Gate Playground Modal ======== -->
+<div class="pg-overlay" id="pgOverlay">
+  <div class="pg-modal" role="dialog" aria-modal="true" aria-label="Policy Gate Playground">
+    <div class="pg-modal-head">
+      <h3>Policy Gate Playground</h3>
+      <button class="pg-modal-close" id="pgModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="pg-modal-body" id="pgModalBody">
+      <div class="pg-controls">
+        <div class="pg-ctrl-group">
+          <label for="pgScenario">Scenario</label>
+          <select id="pgScenario">
+            <option value="raw">Skip the platform (raw LLM)</option>
+            <option value="golden_path">Use the golden path</option>
+          </select>
+        </div>
+        <div class="pg-ctrl-group">
+          <label for="pgTemplate">Service template</label>
+          <select id="pgTemplate">
+            <option value="web-api">Web API</option>
+            <option value="database">Database</option>
+            <option value="ai-inference">AI Inference</option>
+          </select>
+        </div>
+        <div class="pg-ctrl-group">
+          <label>&nbsp;</label>
+          <button class="pg-eval-btn" id="pgEvalBtn">Evaluate</button>
+        </div>
+        <label class="pg-compare-toggle">
+          <input type="checkbox" id="pgCompareCheck">
+          Compare both scenarios
+        </label>
+      </div>
+
+      <!-- Single-scenario results -->
+      <div id="pgSingleResults" style="display:none">
+        <div class="pg-results-header">
+          <div class="pg-denial-count" id="pgDenialCount">0</div>
+          <div class="pg-denial-label" id="pgDenialLabel">violations</div>
+          <div class="pg-duration" id="pgDuration"></div>
+        </div>
+        <div class="pg-denial-cards" id="pgDenialCards"></div>
+        <div class="pg-show-more" id="pgShowMore" style="display:none">
+          <button id="pgShowMoreBtn">Show all</button>
+        </div>
+      </div>
+
+      <!-- Compare mode results -->
+      <div id="pgCompareResults" style="display:none">
+        <div class="pg-delta-bar">
+          <div class="pg-delta-number">
+            <span class="from" id="pgDeltaFrom">42</span>
+            <span class="arrow">&rarr;</span>
+            <span class="to" id="pgDeltaTo">0</span>
+          </div>
+          <div class="pg-delta-text" id="pgDeltaText">42 violations eliminated by the platform golden path</div>
+        </div>
+        <div class="pg-compare">
+          <div class="pg-compare-panel">
+            <div class="pg-compare-panel-head">
+              <span class="panel-label">Raw LLM output</span>
+              <span class="panel-count nonzero" id="pgCompareRawCount">42 violations</span>
+            </div>
+            <div class="pg-compare-body" id="pgCompareRawBody"></div>
+          </div>
+          <div class="pg-compare-panel">
+            <div class="pg-compare-panel-head">
+              <span class="panel-label">Golden path</span>
+              <span class="panel-count zero" id="pgCompareGoldenCount">0 violations</span>
+            </div>
+            <div class="pg-compare-body" id="pgCompareGoldenBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="pg-loading" id="pgLoading" style="display:none">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========================================================
+   Policy Gate Playground — modal controller
+   ======================================================== */
+(function () {
+  var overlay = document.getElementById('pgOverlay');
+  var closeBtn = document.getElementById('pgModalClose');
+  var evalBtn = document.getElementById('pgEvalBtn');
+  var scenarioEl = document.getElementById('pgScenario');
+  var templateEl = document.getElementById('pgTemplate');
+  var compareCheck = document.getElementById('pgCompareCheck');
+  var singleResults = document.getElementById('pgSingleResults');
+  var compareResults = document.getElementById('pgCompareResults');
+  var loadingEl = document.getElementById('pgLoading');
+  var denialCountEl = document.getElementById('pgDenialCount');
+  var denialLabelEl = document.getElementById('pgDenialLabel');
+  var durationEl = document.getElementById('pgDuration');
+  var denialCardsEl = document.getElementById('pgDenialCards');
+  var showMoreEl = document.getElementById('pgShowMore');
+  var showMoreBtn = document.getElementById('pgShowMoreBtn');
+  var VISIBLE_LIMIT = 10;
+  var allDenials = [];
+  var showingAll = false;
+
+  /* --- Open / Close --- */
+  function openModal(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+
+  /* Wire up the hero "Try the policy gate" link */
+  var tryLink = document.querySelector('.cta .btn[href="#policy"]');
+  if (tryLink) {
+    tryLink.removeAttribute('href');
+    tryLink.addEventListener('click', openModal);
+  }
+
+  /* Also add a small button at the end of the #policy section */
+  var policySection = document.getElementById('policy');
+  if (policySection) {
+    var openBtn = document.createElement('button');
+    openBtn.className = 'btn p';
+    openBtn.style.marginTop = '24px';
+    openBtn.textContent = 'Open the policy gate playground \u2192';
+    openBtn.addEventListener('click', openModal);
+    policySection.querySelector('.wrap').appendChild(openBtn);
+  }
+
+  /* --- Animated counter --- */
+  function animateCounter(el, from, to, duration) {
+    var start = performance.now();
+    function tick(now) {
+      var t = Math.min((now - start) / duration, 1);
+      /* ease-out cubic */
+      t = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(from + (to - from) * t);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* --- Severity helpers --- */
+  function sevEmoji(s) {
+    if (s === 'critical') return '\uD83D\uDD34';      // 🔴
+    if (s === 'warning')  return '\uD83D\uDFE1';      // 🟡
+    return '\u26AA';                                     // ⚪
+  }
+
+  /* --- Render denial cards --- */
+  function renderCards(denials, container, limit) {
+    container.innerHTML = '';
+    var count = limit ? Math.min(limit, denials.length) : denials.length;
+    for (var i = 0; i < count; i++) {
+      var d = denials[i];
+      var card = document.createElement('div');
+      card.className = 'pg-denial-card';
+
+      var head = document.createElement('div');
+      head.className = 'pg-denial-card-head';
+
+      var dot = document.createElement('span');
+      dot.className = 'pg-severity-dot ' + (d.severity || 'critical');
+
+      var idSpan = document.createElement('span');
+      idSpan.className = 'pg-denial-id';
+      idSpan.textContent = d.policy_id;
+
+      var sevLabel = document.createElement('span');
+      sevLabel.className = 'pg-denial-sev-label ' + (d.severity || 'critical');
+      sevLabel.textContent = d.severity || 'critical';
+
+      head.appendChild(dot);
+      head.appendChild(idSpan);
+      head.appendChild(sevLabel);
+
+      var msg = document.createElement('div');
+      msg.className = 'pg-denial-msg';
+      msg.textContent = d.message;
+
+      card.appendChild(head);
+      card.appendChild(msg);
+
+      if (d.remediation) {
+        var rem = document.createElement('div');
+        rem.className = 'pg-denial-remediation';
+        rem.textContent = d.remediation;
+        card.appendChild(rem);
+      }
+
+      container.appendChild(card);
+
+      /* Staggered animation */
+      (function (c, idx) {
+        setTimeout(function () { c.classList.add('visible'); }, 50 * idx);
+      })(card, i);
+    }
+  }
+
+  /* --- Compact list for compare panels --- */
+  function renderCompactList(denials, container) {
+    container.innerHTML = '';
+    if (!denials.length) {
+      container.innerHTML = '<div class="pg-empty-state"><div class="big">\u2713</div>' +
+        '<div class="zero-text">0 denials</div>' +
+        '<div class="blurb">The golden path renders compliant manifests by default.</div></div>';
+      return;
+    }
+    for (var i = 0; i < denials.length; i++) {
+      var d = denials[i];
+      var row = document.createElement('div');
+      row.style.cssText = 'padding:5px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start;';
+      var idSpan = document.createElement('span');
+      idSpan.style.cssText = 'font-family:var(--mono);font-size:11px;font-weight:700;color:' +
+        (d.severity === 'critical' ? 'var(--red)' : d.severity === 'warning' ? 'var(--amber)' : 'var(--dim)') +
+        ';flex:none;width:100px;';
+      idSpan.textContent = d.policy_id;
+      var msgSpan = document.createElement('span');
+      msgSpan.style.cssText = 'color:var(--muted);word-break:break-word;';
+      msgSpan.textContent = d.message;
+      row.appendChild(idSpan);
+      row.appendChild(msgSpan);
+      container.appendChild(row);
+    }
+  }
+
+  /* --- Evaluate --- */
+  evalBtn.addEventListener('click', function () {
+    var scenario = scenarioEl.value;
+    var template = templateEl.value;
+    var compareMode = compareCheck.checked;
+
+    evalBtn.disabled = true;
+    singleResults.style.display = 'none';
+    compareResults.style.display = 'none';
+    loadingEl.style.display = 'flex';
+    showMoreEl.style.display = 'none';
+    showingAll = false;
+
+    fetch('/api/evaluate-policy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario: scenario, template: template })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      loadingEl.style.display = 'none';
+      evalBtn.disabled = false;
+      allDenials = data.denials || [];
+
+      if (compareMode) {
+        /* Need both scenarios */
+        loadingEl.style.display = 'flex';
+        var otherScenario = scenario === 'raw' ? 'golden_path' : 'raw';
+        fetch('/api/evaluate-policy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scenario: otherScenario, template: template })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (otherData) {
+          loadingEl.style.display = 'none';
+          var rawDenials = scenario === 'raw' ? data : otherData;
+          var goldenDenials = scenario === 'golden_path' ? data : otherData;
+
+          compareResults.style.display = 'block';
+
+          /* Delta bar */
+          var fromCount = rawDenials.denial_count;
+          var toCount = goldenDenials.denial_count;
+          document.getElementById('pgDeltaFrom').textContent = fromCount;
+          document.getElementById('pgDeltaTo').textContent = toCount;
+          document.getElementById('pgDeltaText').textContent =
+            fromCount + ' violations eliminated by the platform golden path';
+
+          /* Animate the from→to counter */
+          var fromEl = document.getElementById('pgDeltaFrom');
+          animateCounter(fromEl, 0, fromCount, 600);
+
+          /* Raw panel */
+          document.getElementById('pgCompareRawCount').textContent = fromCount + ' violation' + (fromCount !== 1 ? 's' : '');
+          document.getElementById('pgCompareRawCount').className = 'panel-count ' + (fromCount === 0 ? 'zero' : 'nonzero');
+          renderCompactList(rawDenials.denials || [], document.getElementById('pgCompareRawBody'));
+
+          /* Golden panel */
+          document.getElementById('pgCompareGoldenCount').textContent = toCount + ' violation' + (toCount !== 1 ? 's' : '');
+          document.getElementById('pgCompareGoldenCount').className = 'panel-count ' + (toCount === 0 ? 'zero' : 'nonzero');
+          renderCompactList(goldenDenials.denials || [], document.getElementById('pgCompareGoldenBody'));
+        })
+        .catch(function () {
+          loadingEl.style.display = 'none';
+          compareResults.style.display = 'block';
+          document.getElementById('pgCompareRawBody').textContent = 'Failed to load comparison data.';
+        });
+      } else {
+        /* Single scenario */
+        singleResults.style.display = 'block';
+        var count = data.denial_count;
+
+        /* Animated counter */
+        denialCountEl.className = 'pg-denial-count ' + (count === 0 ? 'zero' : 'nonzero');
+        animateCounter(denialCountEl, 0, count, 500);
+
+        denialLabelEl.textContent = count === 1 ? 'violation' : 'violations';
+        durationEl.textContent = 'evaluated in ' + data.duration_ms + 'ms';
+
+        if (count === 0) {
+          /* Golden/empty state */
+          denialCardsEl.innerHTML = '<div class="pg-empty-state"><div class="big">\u2713</div>' +
+            '<div class="zero-text">0 denials</div>' +
+            '<div class="blurb">The platform golden path renders fully compliant manifests. ' +
+            'No human had to remember to tick any boxes.</div></div>';
+          showMoreEl.style.display = 'none';
+        } else {
+          renderCards(allDenials, denialCardsEl, VISIBLE_LIMIT);
+          if (count > VISIBLE_LIMIT) {
+            showMoreEl.style.display = 'block';
+            showMoreBtn.textContent = 'Show all ' + count;
+          }
+        }
+      }
+    })
+    .catch(function (err) {
+      loadingEl.style.display = 'none';
+      evalBtn.disabled = false;
+      singleResults.style.display = 'block';
+      denialCountEl.textContent = '?';
+      denialCountEl.className = 'pg-denial-count nonzero';
+      denialLabelEl.textContent = 'error fetching results';
+      denialCardsEl.innerHTML = '<div style="color:var(--red);padding:20px">Request failed: ' + err.message + '</div>';
+    });
+  });
+
+  /* Show more button */
+  showMoreBtn.addEventListener('click', function () {
+    if (!showingAll) {
+      renderCards(allDenials, denialCardsEl, null);
+      showingAll = true;
+      showMoreBtn.textContent = 'Show first ' + VISIBLE_LIMIT;
+    } else {
+      renderCards(allDenials, denialCardsEl, VISIBLE_LIMIT);
+      showingAll = false;
+      showMoreBtn.textContent = 'Show all ' + allDenials.length;
+    }
+  });
+
+  /* Reset view when compare toggle changes */
+  compareCheck.addEventListener('change', function () {
+    singleResults.style.display = 'none';
+    compareResults.style.display = 'none';
+  });
+
+})();
 </script>
 </body>
 </html>
