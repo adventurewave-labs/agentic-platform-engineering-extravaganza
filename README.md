@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.svg" alt="agentic-platform-engineering-extravaganza — animated banner" width="100%"></p>
+
 # Agentic Platform Engineering Extravaganza
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-a78bfa.svg)](LICENSE)

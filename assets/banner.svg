@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="agentic-platform-engineering-extravaganza — agentic-platform-engineering-extravaganza">
+<title>agentic-platform-engineering-extravaganza</title>
+<defs>
+<radialGradient id="aur1"><stop offset="0" stop-color="#ec4899" stop-opacity="0.50"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></radialGradient>
+<radialGradient id="aur2"><stop offset="0" stop-color="#f97316" stop-opacity="0.45"/><stop offset="1" stop-color="#f97316" stop-opacity="0"/></radialGradient>
+<radialGradient id="orb"><stop offset="0" stop-color="#f472b6" stop-opacity="0.9"/><stop offset="0.55" stop-color="#f472b6" stop-opacity="0.25"/><stop offset="1" stop-color="#f472b6" stop-opacity="0"/></radialGradient>
+<linearGradient id="tgrad" x1="0" x2="1"><stop offset="0" stop-color="#d2a8ff"/><stop offset="0.6" stop-color="#ffffff"/><stop offset="1" stop-color="#d2a8ff"/></linearGradient>
+<linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0.45"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+<linearGradient id="hglow" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d2a8ff" stop-opacity="0.30"/><stop offset="1" stop-color="#d2a8ff" stop-opacity="0"/></linearGradient>
+<filter id="soft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="30"/></filter>
+<filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="5"/></filter>
+<filter id="glow2" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>
+<rect width="1200" height="400" fill="#04060c"/>
+<ellipse cx="250" cy="120" rx="360" ry="190" fill="url(#aur1)" filter="url(#soft)">
+<animateTransform attributeName="transform" type="translate" values="0 0; 70 24; -40 12; 0 0" dur="26s" repeatCount="indefinite"/>
+</ellipse>
+<ellipse cx="960" cy="150" rx="400" ry="210" fill="url(#aur2)" filter="url(#soft)">
+<animateTransform attributeName="transform" type="translate" values="0 0; -60 18; 34 -12; 0 0" dur="32s" repeatCount="indefinite"/>
+</ellipse>
+<g><circle cx="1052" cy="206" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.53s" begin="-4.27s" repeatCount="indefinite"/></circle>
+<circle cx="624" cy="26" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="4.39s" begin="-0.55s" repeatCount="indefinite"/></circle>
+<circle cx="1084" cy="178" r="2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.90s" begin="-0.21s" repeatCount="indefinite"/></circle>
+<circle cx="176" cy="35" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.60s" begin="-0.38s" repeatCount="indefinite"/></circle>
+<circle cx="525" cy="191" r="2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.65s" begin="-2.10s" repeatCount="indefinite"/></circle>
+<circle cx="316" cy="98" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.07s" begin="-3.76s" repeatCount="indefinite"/></circle>
+<circle cx="510" cy="29" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.28s" begin="-0.75s" repeatCount="indefinite"/></circle>
+<circle cx="385" cy="88" r="1.2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="4.27s" begin="-3.25s" repeatCount="indefinite"/></circle>
+<circle cx="681" cy="201" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="4.48s" begin="-1.33s" repeatCount="indefinite"/></circle>
+<circle cx="871" cy="64" r="2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.33s" begin="-1.98s" repeatCount="indefinite"/></circle>
+<circle cx="390" cy="65" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.30s" begin="-0.68s" repeatCount="indefinite"/></circle>
+<circle cx="1079" cy="141" r="2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.57s" begin="-0.08s" repeatCount="indefinite"/></circle>
+<circle cx="615" cy="73" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.85s" begin="-2.24s" repeatCount="indefinite"/></circle>
+<circle cx="799" cy="154" r="1.2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="4.15s" begin="-3.36s" repeatCount="indefinite"/></circle>
+<circle cx="147" cy="47" r="2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.69s" begin="-2.16s" repeatCount="indefinite"/></circle>
+<circle cx="546" cy="104" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="4.52s" begin="-3.42s" repeatCount="indefinite"/></circle>
+<circle cx="979" cy="53" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.23s" begin="-3.36s" repeatCount="indefinite"/></circle>
+<circle cx="328" cy="45" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.54s" begin="-1.51s" repeatCount="indefinite"/></circle>
+<circle cx="464" cy="76" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.89s" begin="-1.81s" repeatCount="indefinite"/></circle>
+<circle cx="389" cy="189" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.77s" begin="-4.35s" repeatCount="indefinite"/></circle>
+<circle cx="217" cy="109" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.75s" begin="-1.31s" repeatCount="indefinite"/></circle>
+<circle cx="704" cy="159" r="1" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.82s" begin="-4.31s" repeatCount="indefinite"/></circle>
+<circle cx="57" cy="120" r="1.2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="4.27s" begin="-3.79s" repeatCount="indefinite"/></circle>
+<circle cx="846" cy="25" r="1.2" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.01s" begin="-4.10s" repeatCount="indefinite"/></circle>
+<circle cx="421" cy="69" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="3.52s" begin="-2.63s" repeatCount="indefinite"/></circle>
+<circle cx="825" cy="133" r="1.6" fill="#dbe7ff"><animate attributeName="opacity" values="0.08;0.85;0.08" dur="2.89s" begin="-2.57s" repeatCount="indefinite"/></circle></g>
+<rect x="0" y="236" width="1200" height="130" fill="url(#hglow)">
+<animate attributeName="opacity" values="0.45;0.9;0.45" dur="7s" repeatCount="indefinite"/>
+</rect>
+<circle cx="600" cy="242" r="90" fill="url(#orb)">
+<animate attributeName="r" values="78;110;78" dur="6s" repeatCount="indefinite"/>
+</circle>
+<path d="M600 240 L-150 400 M600 240 L0 400 M600 240 L150 400 M600 240 L300 400 M600 240 L450 400 M600 240 L600 400 M600 240 L750 400 M600 240 L900 400 M600 240 L1050 400 M600 240 L1200 400 M600 240 L1350 400" stroke="#9d174d" stroke-width="1.3" opacity="0.55" fill="none" stroke-dasharray="12 16">
+<animate attributeName="stroke-dashoffset" values="0;-56" dur="0.9s" repeatCount="indefinite"/>
+</path>
+<path d="M0 252 H1200 M0 268 H1200 M0 290 H1200 M0 318 H1200 M0 352 H1200 M0 392 H1200" stroke="#9d174d" stroke-width="1" opacity="0.35" fill="none"/>
+<circle cx="600" cy="241" r="4" fill="#d2a8ff" filter="url(#glow2)">
+<animate attributeName="opacity" values="0.6;1;0.6" dur="2.6s" repeatCount="indefinite"/>
+</circle>
+<rect x="-260" y="-90" width="170" height="580" fill="url(#beam)" opacity="0.10" filter="url(#soft)" transform="rotate(14)">
+<animateTransform attributeName="transform" type="translate" additive="sum" values="-350 0;1750 0" dur="7s" repeatCount="indefinite"/>
+</rect>
+<rect x="-260" y="-90" width="170" height="580" fill="url(#beam)" opacity="0.07" filter="url(#soft)" transform="rotate(14)">
+<animateTransform attributeName="transform" type="translate" additive="sum" values="-350 0;1750 0" dur="7s" begin="-3.4s" repeatCount="indefinite"/>
+</rect>
+<text x="600" y="66" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" letter-spacing="6" fill="#d2a8ff" opacity="0.85">ADVENTUREWAVE-LABS · AGENTIC-PLATFORM-ENGINEERING-EXTRAVAGANZA</text>
+<text x="600" y="152" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="45" font-weight="800" letter-spacing="1" fill="#d2a8ff" opacity="0.55" filter="url(#glow2)">agentic-platform-engineering-extravaganza</text>
+<text x="600" y="152" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="45" font-weight="800" letter-spacing="1" fill="url(#tgrad)">agentic-platform-engineering-extravaganza</text>
+<text x="600" y="198" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="19" letter-spacing="0.4" fill="#a8b3c4">42→0: a real policy gate (OPA/Conftest) takes an AI agent's Kubernetes</text>
+<text x="600" y="224" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="19" letter-spacing="0.4" fill="#a8b3c4">manifests from 42 violations to zero. Golden paths, Crossplane, MCP.</text>
+
+<g transform="translate(600,308)">
+
+<g>
+<rect x="-460" y="-30" width="80" height="60" rx="8" fill="#12161f" stroke="#3a4250" stroke-width="2"/>
+<rect x="-460" y="-30" width="80" height="60" rx="8" fill="none" stroke="#3a4250" stroke-width="2" transform="translate(-30,0)" opacity="0.6"/>
+<rect x="-460" y="-30" width="80" height="60" rx="8" fill="none" stroke="#3a4250" stroke-width="2" transform="translate(-60,0)" opacity="0.3"/>
+<text x="-420" y="5" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" fill="#8b98a5" text-anchor="middle">manifests</text>
+<animateTransform attributeName="transform" type="translate" values="0 0;170 0;170 0" keyTimes="0;0.6;1" dur="4.5s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="1;1;0;1" keyTimes="0;0.6;0.7;1" dur="4.5s" repeatCount="indefinite"/>
+</g>
+<line x1="-330" y1="0" x2="-120" y2="0" stroke="#d2a8ff" stroke-width="2.5" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="0;-28" dur="0.7s" repeatCount="indefinite"/></line>
+<g>
+<rect x="-110" y="-66" width="20" height="132" rx="4" fill="#171126" stroke="#d2a8ff" stroke-width="2.5"/>
+<rect x="90" y="-66" width="20" height="132" rx="4" fill="#171126" stroke="#d2a8ff" stroke-width="2.5"/>
+<rect x="-130" y="-80" width="260" height="20" rx="4" fill="#171126" stroke="#d2a8ff" stroke-width="2.5" filter="url(#glow)"/>
+<text x="0" y="-14" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="15" fill="#d2a8ff" text-anchor="middle">OPA</text>
+<text x="0" y="10" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" fill="#8b98a5" text-anchor="middle">conftest</text>
+</g>
+<g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="22" text-anchor="middle">
+<text x="290" y="-6" fill="#f85149">42<animate attributeName="opacity" calcMode="discrete" values="1;0;0;0" keyTimes="0;0.4;0.7;0.95" dur="4.5s" repeatCount="indefinite"/></text>
+<text x="290" y="-6" fill="#e3b341" opacity="0">12<animate attributeName="opacity" calcMode="discrete" values="0;1;0;0" keyTimes="0;0.4;0.7;0.95" dur="4.5s" repeatCount="indefinite"/></text>
+<text x="290" y="-6" fill="#3fb950" opacity="0">0 ✓<animate attributeName="opacity" calcMode="discrete" values="0;0;1;0" keyTimes="0;0.4;0.7;0.95" dur="4.5s" repeatCount="indefinite"/></text>
+</g>
+<text x="290" y="24" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="11" fill="#7d8590" text-anchor="middle">violations</text>
+<text x="290" y="56" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12" fill="#7d8590" text-anchor="middle">crossplane · golden paths</text>
+
+</g>
+</svg>
