@@ -19,6 +19,10 @@
 > inside budget, with a human still holding the production approval.
 >
 > **The agent is not the platform.** This repository is that comparison, executable.
+>
+> **Agentic Platform Engineering** is the discipline of designing software platforms in which autonomous agents can perceive operational state, reason over goals and constraints, and take governed action through platform capabilities — while remaining bounded by policy, identity, observability, and human authority.
+>
+> The full open guide — definition, reference architecture, patterns, maturity model: **[agenticplatformengineering.com](https://www.agenticplatformengineering.com/)**.
 
 ![The argument in four acts](gifs/highlight.gif)
 
