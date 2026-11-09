@@ -1,0 +1,10 @@
+# agentic-platform-engineering-extravaganza
+
+> 42→0: a real policy gate (OPA/Conftest) takes an AI agent's Kubernetes manifests from 42 violations to zero. Golden paths, Crossplane, an authz-gated MCP server.
+
+agentic-platform-engineering-extravaganza is maintained by Adventure Wave Labs (The lab for agentic developer tooling).
+
+## Links
+
+- [Landing page](https://adventurewave-labs.github.io/agentic-platform-engineering-extravaganza/): overview, features, FAQ
+- [Source code](https://github.com/adventurewave-labs/agentic-platform-engineering-extravaganza): README, issues, releases
